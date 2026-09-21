@@ -1,0 +1,25 @@
+**Mục tiêu:**
+Xây dựng ứng dụng Web Quản lý Thư viện (LibMan) hoàn chỉnh dựa trên ảnh mockup đính kèm và file tài liệu đặc tả (SRS). Giao diện phải chuẩn pixel-perfect theo phong cách Spotify Dark Mode và đầy đủ logic nghiệp vụ.
+
+**Tech Stack đề xuất:**
+- Frontend: React / Next.js (Tailwind CSS, Lucide Icons).
+- State / Data: LocalStorage, Redux/Zustand hoặc SQLite/Prisma (Mock API đầy đủ).
+
+**1. Yêu cầu Giao diện (UI/UX - Theo ảnh tham chiếu):**
+- **Tone màu:** Spotify Dark Theme (Nền: `#121212` / `#181818`, Điểm nhấn: `#1DB954` Spotify Green, Chữ: `#FFFFFF` và `#B3B3B3`).
+- **Sidebar (Trái):** 
+  - Logo "LibMan" icon sách xanh neon.
+  - Menu phân cấp: Trang chủ (Home - active), Tìm kiếm (Search), Quản lý sách (Add Book, Inventory), Quản lý độc giả (Members, Activities), Mượn - Trả (Mượn Trả, Phiếu Mượn), Thống kê (Statistics).
+- **Top Header:** Thanh tìm kiếm đa năng (sách, tác giả, độc giả), Notification icon, Chat icon, Profile chip ("Minh Trí - Thủ thư").
+- **Dashboard chính:**
+  - Lời chào: "Xin chào, Minh Trí! Chúc một ngày tốt lành."
+  - Grid sách nổi bật: Thẻ sách bo góc (ảnh bìa, Tựa đề, Tác giả, Thể loại, Badges: `Available`, `Borrowed`, `On Hold`).
+  - Bảng "Recent Borrowing Transactions": Bảng phiếu mượn gần đây (Transaction ID, Reader Name, Book Title, Date Borrowed, Due Date, Status Tag).
+
+**2. Yêu cầu Nghiệp vụ & Chức năng (Theo SRS):**
+- **Quản lý Sách:** CRUD thông tin sách (`MaSach`, `TenSach`, `MaLoai`, `TenTacGia`, `TinhTrang`).
+- **Quản lý Độc giả:** CRUD hồ sơ độc giả (`MaDG`, `HoTen`, `NgaySinh`, `DiaChi`, `CMND`).
+- **Mượn & Trả sách:** Lập phiếu (`MaPhieu`, `MaDG`, `MaSach`, `NgayMuon`, `NgayTra`); tự động chuyển trạng thái sách sang `Borrowed` khi mượn và cập nhật lại khi trả.
+- **Tìm kiếm:** Filter tức thì theo tên sách, tác giả hoặc độc giả ngay tại search bar.
+- **Thống kê:** Dashboard hiển thị số lượng sách đang mượn, quá hạn, và độc giả tích cực.
+- **Dữ liệu mẫu:** Khởi tạo sẵn danh sách sách và giao dịch mẫu đúng như hiển thị trên ảnh mockup.

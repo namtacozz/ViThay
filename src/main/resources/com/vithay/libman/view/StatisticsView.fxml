@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.vithay.libman.controller.StatisticsController"
+            fitToWidth="true" styleClass="bg-dark" stylesheets="@../css/style.css">
+
+    <VBox spacing="24" styleClass="bg-dark">
+        <padding>
+            <Insets top="24" right="32" bottom="32" left="32"/>
+        </padding>
+
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT">
+            <VBox spacing="2">
+                <Label text="Báo Cáo &amp; Thống Kê Thư Viện" styleClass="title-large"/>
+                <Label text="Tổng hợp chỉ số lưu hành, cơ cấu kho sách và tình hình độc giả" styleClass="text-muted"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Làm Mới Số Liệu" onAction="#loadStats" styleClass="btn-secondary"/>
+        </HBox>
+
+        <!-- Stat Cards Row -->
+        <HBox spacing="16">
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="4">
+                <Label text="TỔNG SÁCH TRONG KHO" styleClass="stat-label"/>
+                <Label fx:id="lblStatTotalBooks" text="0" styleClass="stat-value"/>
+                <Label text="Tất cả ấn phẩm đã biên mục" styleClass="text-muted"/>
+            </VBox>
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="4">
+                <Label text="ĐỘC GIẢ ĐÃ ĐĂNG KÝ" styleClass="stat-label"/>
+                <Label fx:id="lblStatTotalReaders" text="0" styleClass="stat-value" style="-fx-text-fill: #38BDF8;"/>
+                <Label text="Tài khoản hoạt động" styleClass="text-muted"/>
+            </VBox>
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="4">
+                <Label text="PHIẾU ĐANG MƯỢN" styleClass="stat-label"/>
+                <Label fx:id="lblStatActiveBorrows" text="0" styleClass="stat-value" style="-fx-text-fill: #F59E0B;"/>
+                <Label text="Đang trong hạn mượn" styleClass="text-muted"/>
+            </VBox>
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="4">
+                <Label text="SÁCH QUÁ HẠN" styleClass="stat-label"/>
+                <Label fx:id="lblStatOverdueBorrows" text="0" styleClass="stat-value" style="-fx-text-fill: #EF4444;"/>
+                <Label text="Cần gửi thông báo nhắc nhở" styleClass="text-muted"/>
+            </VBox>
+        </HBox>
+
+        <!-- Two Columns: Category Breakdown & Rules Summary -->
+        <HBox spacing="20">
+            <!-- Left: Table of Categories Breakdown -->
+            <VBox spacing="12" HBox.hgrow="ALWAYS" styleClass="bg-surface">
+                <padding>
+                    <Insets top="16" right="20" bottom="16" left="20"/>
+                </padding>
+                <Label text="Phân Bổ Thể Loại Sách" styleClass="title-medium"/>
+                <TableView fx:id="categoryTable" prefHeight="260">
+                    <columns>
+                        <TableColumn fx:id="colCategoryName" text="Thể Loại" prefWidth="200"/>
+                        <TableColumn fx:id="colCategoryCount" text="Số Lượng Đầu Sách" prefWidth="150"/>
+                        <TableColumn fx:id="colCategoryPercent" text="Tỷ Trọng (%)" prefWidth="120"/>
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                    </columnResizePolicy>
+                </TableView>
+            </VBox>
+
+            <!-- Right: Library Policy & Operational Standards -->
+            <VBox spacing="12" prefWidth="420" minWidth="380" styleClass="bg-surface">
+                <padding>
+                    <Insets top="16" right="20" bottom="16" left="20"/>
+                </padding>
+                <Label text="Quy Định &amp; Tiêu Chuẩn Vận Hành" styleClass="title-medium"/>
+                
+                <VBox spacing="8" styleClass="bg-card" style="-fx-padding: 12 16;">
+                    <Label text="1. Tiêu chuẩn RFID &amp; Biên Mục" style="-fx-font-weight: bold; -fx-text-fill: #1DB954;"/>
+                    <Label text="Hệ thống tuân thủ chuẩn TCVN 12844-1:2019 và mô hình phân loại thập phân Dewey (DDC) kết hợp mã vạch/RFID."
+                           wrapText="true" styleClass="subtitle-card"/>
+                </VBox>
+
+                <VBox spacing="8" styleClass="bg-card" style="-fx-padding: 12 16;">
+                    <Label text="2. Mức Phạt Quá Hạn" style="-fx-font-weight: bold; -fx-text-fill: #F59E0B;"/>
+                    <Label text="Phạt quá hạn tiêu chuẩn: 2.000 VNĐ / ngày / cuốn sách theo Điều lệ Thư viện đại học."
+                           wrapText="true" styleClass="subtitle-card"/>
+                </VBox>
+
+                <VBox spacing="8" styleClass="bg-card" style="-fx-padding: 12 16;">
+                    <Label text="3. Xử Lý Mất &amp; Hư Hỏng Sách" style="-fx-font-weight: bold; -fx-text-fill: #EF4444;"/>
+                    <Label text="Bồi hoàn sách cùng loại hoặc 200% giá trị sách theo hóa đơn + 20.000 VNĐ lệ phí xử lý kỹ thuật."
+                           wrapText="true" styleClass="subtitle-card"/>
+                </VBox>
+            </VBox>
+        </HBox>
+
+    </VBox>
+</ScrollPane>

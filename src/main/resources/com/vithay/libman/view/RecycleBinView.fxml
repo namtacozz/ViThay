@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vithay.libman.controller.RecycleBinController"
+      spacing="16" styleClass="bg-dark" stylesheets="@../css/style.css">
+    <padding>
+        <Insets top="24" right="32" bottom="32" left="32"/>
+    </padding>
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox spacing="2">
+            <Label text="Thùng Rác &amp; Phục Hồi Dữ Liệu" styleClass="title-large"/>
+            <Label text="Lưu trữ sách và độc giả đã xóa tạm thời. Cho phép phục hồi hoặc hủy vĩnh viễn (SRS Mục 6.2)" styleClass="text-muted"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Làm Mới Thùng Rác" onAction="#loadRecycleBinData" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- TabPane for Deleted Books and Deleted Readers -->
+    <TabPane VBox.vgrow="ALWAYS" styleClass="bg-surface" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+            <!-- TAB 1: SÁCH ĐÃ XÓA -->
+            <Tab text="Sách Đã Xóa Tạm">
+                <VBox spacing="12">
+                    <padding>
+                        <Insets top="16" right="16" bottom="16" left="16"/>
+                    </padding>
+                    <TableView fx:id="deletedBooksTable" VBox.vgrow="ALWAYS" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="colDelBookId" text="Mã Sách" prefWidth="90"/>
+                            <TableColumn fx:id="colDelBookTitle" text="Tên Sách" prefWidth="250"/>
+                            <TableColumn fx:id="colDelBookAuthor" text="Tác Giả" prefWidth="180"/>
+                            <TableColumn fx:id="colDelBookCategory" text="Thể Loại" prefWidth="140"/>
+                            <TableColumn fx:id="colDelBookPrice" text="Đơn Giá" prefWidth="110"/>
+                            <TableColumn fx:id="colDelBookActions" text="Thao Tác Phục Hồi / Hủy" prefWidth="200"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                    </TableView>
+                </VBox>
+            </Tab>
+
+            <!-- TAB 2: ĐỘC GIẢ ĐÃ XÓA -->
+            <Tab text="Độc Giả Đã Xóa Tạm">
+                <VBox spacing="12">
+                    <padding>
+                        <Insets top="16" right="16" bottom="16" left="16"/>
+                    </padding>
+                    <TableView fx:id="deletedReadersTable" VBox.vgrow="ALWAYS" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="colDelReaderId" text="Mã Độc Giả" prefWidth="100"/>
+                            <TableColumn fx:id="colDelReaderName" text="Họ Và Tên" prefWidth="200"/>
+                            <TableColumn fx:id="colDelReaderEmail" text="Email" prefWidth="200"/>
+                            <TableColumn fx:id="colDelReaderPhone" text="Số Điện Thoại" prefWidth="130"/>
+                            <TableColumn fx:id="colDelReaderIdCard" text="CCCD/CMND" prefWidth="130"/>
+                            <TableColumn fx:id="colDelReaderActions" text="Thao Tác Phục Hồi / Hủy" prefWidth="200"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                    </TableView>
+                </VBox>
+            </Tab>
+        </tabs>
+    </TabPane>
+
+</VBox>

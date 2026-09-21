@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="rootStackPane"
+           fx:controller="com.vithay.libman.controller.MainLayoutController"
+           stylesheets="@../css/style.css"
+           prefWidth="1320" prefHeight="820" styleClass="bg-dark">
+
+    <!-- LAYER 1: MAIN APPLICATION BORDERPANE -->
+    <BorderPane fx:id="mainContainer" styleClass="bg-dark">
+
+        <!-- TOP HEADER: LOGO ON TOP-LEFT, SEARCH AND ACTIONS ON RIGHT -->
+        <top>
+            <HBox alignment="CENTER_LEFT" spacing="0" styleClass="top-header">
+                <!-- Brand Logo: Positioned at top-left corner directly above sidebar -->
+                <HBox alignment="CENTER_LEFT" spacing="12" prefWidth="250" minWidth="250" maxWidth="250" style="-fx-padding: 0 0 0 16;">
+                    <ImageView fx:id="logoImageView" fitWidth="32" fitHeight="32" preserveRatio="true">
+                        <Image url="@../images/logo.png"/>
+                    </ImageView>
+                    <VBox spacing="1" alignment="CENTER_LEFT">
+                        <Label text="LibMan" styleClass="sidebar-logo-text"/>
+                        <Label text="Thư Viện Chuẩn Quốc Gia" style="-fx-font-size: 10px; -fx-text-fill: #727272;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Header Actions Area: Aligned straight above main content view -->
+                <HBox alignment="CENTER_LEFT" spacing="16" HBox.hgrow="ALWAYS" style="-fx-padding: 0 20 0 16;">
+                    <!-- Search Box: Starts at x = 250 + 16 = 266px, aligned straight with dropdown below -->
+                    <HBox alignment="CENTER_LEFT" spacing="8" styleClass="search-field" prefWidth="440">
+                        <Label text="🔍" style="-fx-text-fill: #727272; -fx-font-size: 13px;"/>
+                        <TextField fx:id="headerSearchField" promptText="Tìm kiếm sách, tác giả, thể loại, độc giả..."
+                                   style="-fx-background-color: transparent; -fx-text-fill: inherit; -fx-prompt-text-fill: #727272;"
+                                   HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <!-- Action Icons -->
+                    <Button fx:id="btnNotification" text="🔔" styleClass="btn-circle, btn-header-bell" onAction="#handleNotificationClick"/>
+                    <Button fx:id="btnHeaderSettings" text="⚙" styleClass="btn-circle, btn-header-gear" onAction="#handleHeaderSettingsClick"/>
+
+                    <!-- User Profile Chip (Click to open Account Settings or Login) -->
+                    <HBox fx:id="userProfileBox" alignment="CENTER_LEFT" spacing="10" styleClass="user-profile-chip" onMouseClicked="#handleProfileClick" style="-fx-cursor: hand;">
+                        <ImageView fx:id="userAvatarImageView" fitWidth="28" fitHeight="28" preserveRatio="true">
+                            <Image url="@../images/avatar_dark.png"/>
+                        </ImageView>
+                        <VBox alignment="CENTER_LEFT" spacing="1">
+                            <Label fx:id="lblHeaderUserName" text="Chưa đăng nhập" styleClass="header-user-name"/>
+                            <Label fx:id="lblHeaderUserRole" text="Nhấn để đăng nhập / đăng ký" styleClass="header-user-role"/>
+                        </VBox>
+                    </HBox>
+                </HBox>
+            </HBox>
+        </top>
+
+        <!-- LEFT SIDEBAR: MENU SHIFTED UP TO ELIMINATE EMPTY GAP -->
+        <left>
+            <VBox prefWidth="250" minWidth="250" maxWidth="250" styleClass="bg-sidebar" spacing="6">
+                <padding>
+                    <Insets top="12" right="12" bottom="16" left="12"/>
+                </padding>
+
+                <!-- Navigation Scroll Container -->
+                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                    <VBox spacing="4" style="-fx-background-color: transparent;">
+                        
+                        <!-- Section: Menu -->
+                        <Label text="MENU CHÍNH" styleClass="sidebar-category-label"/>
+                        <Button fx:id="btnNavHome" text="Trang chủ" onAction="#handleNavHome" maxWidth="Infinity" styleClass="nav-item, nav-item-active">
+                            <graphic>
+                                <Label text="●" styleClass="nav-dot"/>
+                            </graphic>
+                        </Button>
+
+                        <!-- Section: Quản lý sách -->
+                        <Label fx:id="lblSecBooks" text="KHO SÁCH" styleClass="sidebar-category-label"/>
+                        
+                        <!-- Kho Sách Parent Row with Expand/Collapse Chevron -->
+                        <HBox alignment="CENTER_LEFT" spacing="2" maxWidth="Infinity">
+                            <Button fx:id="btnNavBooks" text="Kho sách" onAction="#handleNavBooks" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="nav-item"/>
+                            <Button fx:id="btnToggleCategories" text="▾" onAction="#handleToggleCategories"
+                                    style="-fx-background-color: transparent; -fx-text-fill: #B3B3B3; -fx-font-size: 11px; -fx-padding: 6 8; -fx-cursor: hand;"/>
+                        </HBox>
+
+                        <!-- Collapsible Categories Sub-Menu with Theme-Aware Badges -->
+                        <VBox fx:id="categorySubmenuContainer" spacing="3" managed="true" visible="true">
+                            <Button text="Lý luận chính trị &amp; Triết học" onAction="#handleSubCategoryClick" maxWidth="Infinity" styleClass="subnav-item">
+                                <graphic><Label text="01" styleClass="cat-pill, cat-pill-dark"/></graphic>
+                            </Button>
+                            <Button text="Văn học kinh điển" onAction="#handleSubCategoryClick" maxWidth="Infinity" styleClass="subnav-item">
+                                <graphic><Label text="02" styleClass="cat-pill, cat-pill-dark"/></graphic>
+                            </Button>
+                            <Button text="Toán học &amp; Khoa học tự nhiên" onAction="#handleSubCategoryClick" maxWidth="Infinity" styleClass="subnav-item">
+                                <graphic><Label text="03" styleClass="cat-pill, cat-pill-dark"/></graphic>
+                            </Button>
+                            <Button text="Lịch sử &amp; Địa lý" onAction="#handleSubCategoryClick" maxWidth="Infinity" styleClass="subnav-item">
+                                <graphic><Label text="04" styleClass="cat-pill, cat-pill-dark"/></graphic>
+                            </Button>
+                            <Button text="Khoa học viễn tưởng" onAction="#handleSubCategoryClick" maxWidth="Infinity" styleClass="subnav-item">
+                                <graphic><Label text="05" styleClass="cat-pill, cat-pill-dark"/></graphic>
+                            </Button>
+                            <Button text="Kỹ năng sống &amp; Tâm lý" onAction="#handleSubCategoryClick" maxWidth="Infinity" styleClass="subnav-item">
+                                <graphic><Label text="06" styleClass="cat-pill, cat-pill-dark"/></graphic>
+                            </Button>
+                            <Button text="Hồi ký &amp; Tự truyện" onAction="#handleSubCategoryClick" maxWidth="Infinity" styleClass="subnav-item">
+                                <graphic><Label text="07" styleClass="cat-pill, cat-pill-dark"/></graphic>
+                            </Button>
+                            <Button text="Tiểu thuyết hiện đại" onAction="#handleSubCategoryClick" maxWidth="Infinity" styleClass="subnav-item">
+                                <graphic><Label text="08" styleClass="cat-pill, cat-pill-dark"/></graphic>
+                            </Button>
+                            <Button text="Công nghệ thông tin" onAction="#handleSubCategoryClick" maxWidth="Infinity" styleClass="subnav-item">
+                                <graphic><Label text="09" styleClass="cat-pill, cat-pill-dark"/></graphic>
+                            </Button>
+                            <Button text="Ngoại ngữ &amp; Từ điển" onAction="#handleSubCategoryClick" maxWidth="Infinity" styleClass="subnav-item">
+                                <graphic><Label text="10" styleClass="cat-pill, cat-pill-dark"/></graphic>
+                            </Button>
+                            <Button text="Truyện tranh &amp; Sách thiếu nhi" onAction="#handleSubCategoryClick" maxWidth="Infinity" styleClass="subnav-item">
+                                <graphic><Label text="11" styleClass="cat-pill, cat-pill-dark"/></graphic>
+                            </Button>
+                        </VBox>
+
+                        <Button fx:id="btnNavCategories" text="Quản lý thể loại (Mã loại)" onAction="#handleNavCategories" maxWidth="Infinity" styleClass="nav-item"/>
+
+                        <!-- Section: Quản lý độc giả -->
+                        <Label fx:id="lblSecReaders" text="QUẢN LÝ ĐỘC GIẢ" styleClass="sidebar-category-label"/>
+                        <Button fx:id="btnNavReaders" text="Hồ sơ độc giả &amp; Cấp thẻ" onAction="#handleNavReaders" maxWidth="Infinity" styleClass="nav-item"/>
+
+                        <!-- Section: Mượn & Trả -->
+                        <Label fx:id="lblSecBorrow" text="MƯỢN &amp; TRẢ SÁCH" styleClass="sidebar-category-label"/>
+                        <Button fx:id="btnNavBorrowReturn" text="Lưu hành Mượn - Trả" onAction="#handleNavBorrowReturn" maxWidth="Infinity" styleClass="nav-item"/>
+                        <Button fx:id="btnNavTransactions" text="Lịch sử phiếu mượn" onAction="#handleNavTransactions" maxWidth="Infinity" styleClass="nav-item"/>
+
+                        <!-- Section: Thống kê & Quản trị -->
+                        <Label fx:id="lblSecAdmin" text="BÁO CÁO &amp; HỆ THỐNG" styleClass="sidebar-category-label"/>
+                        <Button fx:id="btnNavStats" text="Thống kê thư viện" onAction="#handleNavStats" maxWidth="Infinity" styleClass="nav-item"/>
+                        <Button fx:id="btnNavRecycleBin" text="Thùng rác &amp; Khôi phục" onAction="#handleNavRecycleBin" maxWidth="Infinity" styleClass="nav-item"/>
+                        <Button fx:id="btnNavSettings" text="Cài đặt quy định (SRS)" onAction="#handleNavSettings" maxWidth="Infinity" styleClass="nav-item"/>
+                    </VBox>
+                </ScrollPane>
+
+                <!-- Bottom System Status & Help -->
+                <VBox spacing="6" style="-fx-padding: 8 4 0 4;">
+                    <Separator style="-fx-background-color: #222222;"/>
+                    <Button fx:id="btnHelp" text="❓ Hướng dẫn sử dụng (SRS)" onAction="#handleHelpClick" maxWidth="Infinity"
+                            styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 6 10;"/>
+                    <HBox alignment="CENTER_LEFT" spacing="6">
+                        <Label text="Vai trò:" styleClass="text-muted"/>
+                        <Label fx:id="lblCurrentRoleBadge" text="Chưa đăng nhập" style="-fx-text-fill: #F59E0B; -fx-font-weight: bold; -fx-font-size: 11px;"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </left>
+
+        <!-- CENTER CONTENT CONTAINER -->
+        <center>
+            <StackPane fx:id="contentArea" styleClass="bg-dark">
+                <!-- Dynamic view injected here -->
+            </StackPane>
+        </center>
+
+    </BorderPane>
+
+    <!-- LAYER 2: SPOTIFY-LIKE INSTANT SEARCH FLOATING DROPDOWN (STRAIGHT COLUMN ALIGNMENT) -->
+    <VBox fx:id="searchDropdownContainer" visible="false" managed="false"
+          alignment="TOP_LEFT" maxWidth="460" maxHeight="380"
+          styleClass="search-dropdown"
+          StackPane.alignment="TOP_LEFT">
+        <StackPane.margin>
+            <Insets top="56" left="266"/>
+        </StackPane.margin>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+            <VBox fx:id="searchDropdownList" spacing="2" style="-fx-background-color: transparent;">
+                <!-- Populated dynamically via controller -->
+            </VBox>
+        </ScrollPane>
+    </VBox>
+
+    <!-- LAYER 3: IN-WINDOW OVERLAY MODAL (DIMMED & BLURRED BACKDROP) -->
+    <StackPane fx:id="authOverlayPane" visible="false" managed="false" styleClass="auth-overlay">
+        <!-- Overlay backdrop click handler closes popup -->
+        <Pane onMouseClicked="#closeAuthPopup"/>
+
+        <!-- CARD 1: DYNAMIC AUTH MODAL (LOGIN & REGISTER) -->
+        <VBox fx:id="authModalBox" maxWidth="460" maxHeight="620" styleClass="auth-modal" spacing="16">
+            <!-- VIEW A: ĐĂNG NHẬP (DEFAULT) -->
+            <VBox fx:id="loginViewBox" spacing="16">
+                <!-- Header -->
+                <HBox alignment="CENTER_LEFT">
+                    <VBox spacing="2">
+                        <Label text="Đăng Nhập LibMan" styleClass="title-large"/>
+                        <Label text="Chào mừng bạn quay trở lại thư viện" styleClass="text-muted"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="✕" onAction="#closeAuthPopup" styleClass="btn-secondary" style="-fx-padding: 4 10; -fx-background-radius: 50%;"/>
+                </HBox>
+
+                <!-- Input Fields -->
+                <GridPane hgap="12" vgap="12">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="90"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="200"/>
+                    </columnConstraints>
+                    <Label text="Tài Khoản:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtLoginUsername" promptText="quantri / thuthu / docgia" styleClass="form-control" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                    <Label text="Mật Khẩu:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <PasswordField fx:id="txtLoginPassword" promptText="Nhập mật khẩu" styleClass="form-control" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                </GridPane>
+
+                <!-- Quick Selection Buttons -->
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Chọn nhanh:" style="-fx-text-fill: #727272; -fx-font-size: 11px;"/>
+                    <Button text="Quản Trị" onAction="#fillAdminLogin" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 3 8;"/>
+                    <Button text="Thủ Thư" onAction="#fillLibrarianLogin" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 3 8;"/>
+                    <Button text="Độc Giả" onAction="#fillReaderLogin" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 3 8;"/>
+                </HBox>
+
+                <Label fx:id="lblLoginError" text="" style="-fx-font-weight: bold;"/>
+
+                <!-- Switch to Register Link directly above Login Button -->
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Đăng ký nếu chưa có tài khoản." styleClass="auth-link" onMouseClicked="#switchToRegisterView"/>
+                </HBox>
+
+                <HBox spacing="12">
+                    <Button text="Đăng Nhập Ngay" onAction="#handleExecuteLogin" styleClass="btn-primary"/>
+                    <Button text="Đóng" onAction="#closeAuthPopup" styleClass="btn-secondary"/>
+                </HBox>
+            </VBox>
+
+            <!-- VIEW B: ĐĂNG KÝ (DYNAMIC TOGGLE) -->
+            <VBox fx:id="registerViewBox" spacing="14" visible="false" managed="false">
+                <!-- Header -->
+                <HBox alignment="CENTER_LEFT">
+                    <VBox spacing="2">
+                        <Label text="Đăng Ký Độc Giả Mới" styleClass="title-large"/>
+                        <Label text="Đăng ký tài khoản online (Thẻ kích hoạt tại quầy)" style="-fx-text-fill: #1DB954; -fx-font-size: 11px;"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="✕" onAction="#closeAuthPopup" styleClass="btn-secondary" style="-fx-padding: 4 10; -fx-background-radius: 50%;"/>
+                </HBox>
+
+                <!-- Form Scroll -->
+                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" maxHeight="340">
+                    <VBox spacing="10">
+                        <GridPane hgap="10" vgap="10">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="110"/>
+                                <ColumnConstraints hgrow="ALWAYS" minWidth="180"/>
+                            </columnConstraints>
+                            <Label text="Tên Tài Khoản:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <TextField fx:id="txtRegUsername" promptText="Tên đăng nhập" styleClass="form-control" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                            <Label text="Mật Khẩu:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <PasswordField fx:id="txtRegPassword" promptText="Mật khẩu" styleClass="form-control" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Họ Và Tên:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <TextField fx:id="txtRegFullName" promptText="Họ và tên đầy đủ" styleClass="form-control" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                            <Label text="CCCD/CMND:" styleClass="form-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                            <TextField fx:id="txtRegIdCard" promptText="Số căn cước công dân" styleClass="form-control" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                            <Label text="Số Điện Thoại:" styleClass="form-label" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                            <TextField fx:id="txtRegPhone" promptText="Số điện thoại liên hệ" styleClass="form-control" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                            <Label text="Email:" styleClass="form-label" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                            <TextField fx:id="txtRegEmail" promptText="Email" styleClass="form-control" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                            <Label text="Ngày Sinh:" styleClass="form-label" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                            <TextField fx:id="txtRegBirth" promptText="YYYY-MM-DD" text="2000-01-01" styleClass="form-control" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+                        </GridPane>
+                    </VBox>
+                </ScrollPane>
+
+                <Label fx:id="lblRegError" text="" style="-fx-font-weight: bold;"/>
+
+                <!-- Switch to Login Link directly above Register Button -->
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Đã có tài khoản? Đăng nhập ngay." styleClass="auth-link" onMouseClicked="#switchToLoginView"/>
+                </HBox>
+
+                <HBox spacing="12">
+                    <Button text="Hoàn Tất Đăng Ký" onAction="#handleExecuteRegister" styleClass="btn-primary"/>
+                    <Button text="Quay Lại" onAction="#switchToLoginView" styleClass="btn-secondary"/>
+                </HBox>
+            </VBox>
+        </VBox>
+
+        <!-- CARD 2: ACCOUNT SETTINGS / PROFILE MODAL (WHEN LOGGED IN) -->
+        <VBox fx:id="profileModalBox" maxWidth="480" maxHeight="620" styleClass="profile-modal" spacing="16" visible="false" managed="false">
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT">
+                <VBox spacing="2">
+                    <Label text="Hồ Sơ Tài Khoản" styleClass="title-large"/>
+                    <Label text="Tùy chỉnh thông tin cá nhân và bảo mật tài khoản" styleClass="text-muted"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="✕" onAction="#closeAuthPopup" styleClass="btn-secondary" style="-fx-padding: 4 10; -fx-background-radius: 50%;"/>
+            </HBox>
+
+            <!-- User Identity Card -->
+            <HBox alignment="CENTER_LEFT" spacing="14" style="-fx-background-color: #222222; -fx-padding: 12 16; -fx-background-radius: 8px;">
+                <ImageView fx:id="profileAvatarView" fitWidth="48" fitHeight="48" preserveRatio="true">
+                    <Image url="@../images/avatar.png"/>
+                </ImageView>
+                <VBox spacing="2">
+                    <Label fx:id="lblProfileFullName" text="Nguyễn Quản Trị" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label fx:id="lblProfileUsername" text="\@quantri" style="-fx-text-fill: #B3B3B3; -fx-font-size: 12px;"/>
+                        <Label fx:id="lblProfileRolePill" text="Quản Trị" styleClass="badge-available"/>
+                    </HBox>
+                </VBox>
+            </HBox>
+
+            <!-- Editable Fields -->
+            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" maxHeight="280">
+                <VBox spacing="12">
+                    <Label text="THÔNG TIN CÁ NHÂN" style="-fx-text-fill: #1DB954; -fx-font-weight: bold; -fx-font-size: 11px;"/>
+                    <GridPane hgap="10" vgap="10">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="110"/>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="180"/>
+                        </columnConstraints>
+                        <Label text="Họ Và Tên:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtProfileFullName" styleClass="form-control" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                        <Label text="Email:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtProfileEmail" styleClass="form-control" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                        <Label text="Số Điện Thoại:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtProfilePhone" styleClass="form-control" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                    </GridPane>
+
+                    <Separator style="-fx-background-color: #282828; -fx-padding: 4 0;"/>
+
+                    <Label text="ĐỔI MẬT KHẨU (Bỏ trống nếu không đổi)" style="-fx-text-fill: #B3B3B3; -fx-font-weight: bold; -fx-font-size: 11px;"/>
+                    <GridPane hgap="10" vgap="10">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="110"/>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="180"/>
+                        </columnConstraints>
+                        <Label text="Mật Khẩu Cũ:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <PasswordField fx:id="txtProfileOldPass" promptText="Mật khẩu hiện tại" styleClass="form-control" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                        <Label text="Mật Khẩu Mới:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <PasswordField fx:id="txtProfileNewPass" promptText="Mật khẩu mới" styleClass="form-control" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                        <Label text="Xác Nhận:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <PasswordField fx:id="txtProfileConfirmPass" promptText="Nhập lại mật khẩu mới" styleClass="form-control" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                    </GridPane>
+                </VBox>
+            </ScrollPane>
+
+            <Label fx:id="lblProfileMsg" text="" style="-fx-font-weight: bold;"/>
+
+            <!-- Action Buttons -->
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button text="💾 Lưu Thay Đổi" onAction="#handleSaveProfile" styleClass="btn-primary"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="🚪 Đăng Xuất" onAction="#handleExecuteLogout" styleClass="btn-danger"/>
+                <Button text="Đóng" onAction="#closeAuthPopup" styleClass="btn-secondary"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+
+</StackPane>

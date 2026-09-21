@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vithay.libman.controller.BorrowReturnController"
+      spacing="16" styleClass="bg-dark" stylesheets="@../css/style.css">
+    <padding>
+        <Insets top="24" right="32" bottom="32" left="32"/>
+    </padding>
+
+    <!-- Header -->
+    <VBox spacing="2">
+        <Label text="Lưu Hành Mượn &amp; Trả Sách" styleClass="title-large"/>
+        <Label text="Xử lý lập phiếu mượn (đọc tại chỗ / mang về), trả sách, bồi hoàn và in phiếu (SRS Mục 5.5)" styleClass="text-muted"/>
+    </VBox>
+
+    <!-- Main TabPane -->
+    <TabPane fx:id="borrowTabPane" VBox.vgrow="ALWAYS" styleClass="bg-surface" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+            <!-- TAB 1: LẬP PHIẾU MƯỢN -->
+            <Tab text="Lập Phiếu Mượn Mới">
+                <VBox spacing="20">
+                    <padding>
+                        <Insets top="24" right="32" bottom="24" left="32"/>
+                    </padding>
+
+                    <Label text="Thông Tin Phiếu Mượn Sách" styleClass="title-medium"/>
+
+                    <GridPane hgap="24" vgap="16">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="180" prefWidth="200"/>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="300"/>
+                        </columnConstraints>
+
+                        <!-- Chọn độc giả -->
+                        <Label text="Chọn Độc Giả:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <HBox spacing="8" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                            <ComboBox fx:id="comboBorrowReader" prefWidth="380" styleClass="form-control" promptText="-- Chọn hoặc tìm độc giả --"/>
+                            <Label fx:id="lblReaderStatusNote" text="" style="-fx-alignment: CENTER_LEFT; -fx-padding: 8 0 0 0;"/>
+                        </HBox>
+
+                        <!-- Chọn sách -->
+                        <Label text="Chọn Sách Cần Mượn:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <HBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                            <ComboBox fx:id="comboBorrowBook" prefWidth="380" styleClass="form-control" promptText="-- Chọn sách khả dụng --"/>
+                            <Label fx:id="lblBookAvailableNote" text="" style="-fx-alignment: CENTER_LEFT; -fx-padding: 8 0 0 0;"/>
+                        </HBox>
+
+                        <!-- Hình thức mượn (SRS trang 1 & 5.5) -->
+                        <Label text="Hình Thức Mượn Sách:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <ComboBox fx:id="comboBorrowType" prefWidth="380" styleClass="form-control" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                        <!-- Thời gian mượn -->
+                        <Label text="Thời Hạn Mượn (Ngày):" styleClass="form-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                        <HBox spacing="12" alignment="CENTER_LEFT" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                            <Spinner fx:id="spnBorrowDays" prefWidth="120" styleClass="form-control"/>
+                            <Label fx:id="lblBorrowDaysHint" text="(Mặc định 14 ngày, tại chỗ trong ngày)" styleClass="text-muted"/>
+                        </HBox>
+
+                        <!-- Ghi chú -->
+                        <Label text="Ghi Chú / Nơi Mượn:" styleClass="form-label" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtBorrowNotes" promptText="VD: Mượn phục vụ bài tập lớn / Nghiên cứu tài liệu..." prefWidth="400"
+                                   styleClass="form-control" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                    </GridPane>
+
+                    <!-- Alert message label -->
+                    <Label fx:id="lblBorrowMessage" text="" style="-fx-font-weight: bold;"/>
+
+                    <HBox spacing="16">
+                        <Button text="Xác Nhận Lập Phiếu Mượn" onAction="#handleConfirmBorrow" styleClass="btn-primary"/>
+                        <Button text="Đặt Lại" onAction="#handleResetBorrowForm" styleClass="btn-secondary"/>
+                    </HBox>
+                </VBox>
+            </Tab>
+
+            <!-- TAB 2: XỬ LÝ TRẢ SÁCH -->
+            <Tab text="Xử Lý Trả Sách &amp; Bồi Hoàn">
+                <VBox spacing="20">
+                    <padding>
+                        <Insets top="24" right="32" bottom="24" left="32"/>
+                    </padding>
+
+                    <Label text="Xác Nhận Trả Sách" styleClass="title-medium"/>
+
+                    <GridPane hgap="24" vgap="16">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="180" prefWidth="200"/>
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="300"/>
+                        </columnConstraints>
+
+                        <!-- Chọn giao dịch đang mượn -->
+                        <Label text="Chọn Phiếu Mượn Cần Trả:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <ComboBox fx:id="comboReturnTransaction" prefWidth="480" styleClass="form-control"
+                                  promptText="-- Chọn mã phiếu hoặc độc giả --" onAction="#handleSelectReturnTransaction"
+                                  GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                        <!-- Chi tiết giao dịch -->
+                        <Label text="Thông Tin Chi Tiết:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <VBox spacing="4" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="bg-card" style="-fx-padding: 12 16;">
+                            <Label fx:id="lblReturnDetailReader" text="Độc giả: --" styleClass="subtitle-card"/>
+                            <Label fx:id="lblReturnDetailBook" text="Sách: --" styleClass="subtitle-card"/>
+                            <Label fx:id="lblReturnDetailDates" text="Ngày mượn: -- | Hạn trả: --" styleClass="subtitle-card"/>
+                            <Label fx:id="lblReturnDetailType" text="Hình thức: --" styleClass="subtitle-card"/>
+                            <Label fx:id="lblReturnDetailFine" text="Phạt quá hạn dự kiến: 0 VNĐ" style="-fx-text-fill: #1DB954; -fx-font-weight: bold;"/>
+                        </VBox>
+
+                        <!-- Tình trạng sách khi trả -->
+                        <Label text="Tình Trạng Sách Khi Trả:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <VBox spacing="8" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                            <CheckBox fx:id="chkDamagedOrLost" text="Sách bị mất hoặc hư hỏng nặng (Áp dụng đền bù theo quy chế thư viện)"
+                                      style="-fx-text-fill: #FFFFFF;" onAction="#handleDamagedToggle"/>
+                            <Label fx:id="lblCompensationNote" text="" style="-fx-text-fill: #EF4444; -fx-font-weight: bold;"/>
+                        </VBox>
+                    </GridPane>
+
+                    <!-- Alert message label -->
+                    <Label fx:id="lblReturnMessage" text="" style="-fx-font-weight: bold;"/>
+
+                    <HBox spacing="16">
+                        <Button text="Xác Nhận Trả Sách" onAction="#handleConfirmReturn" styleClass="btn-primary"/>
+                        <Button text="Làm Mới" onAction="#loadActiveTransactionsForReturn" styleClass="btn-secondary"/>
+                    </HBox>
+                </VBox>
+            </Tab>
+
+            <!-- TAB 3: TẤT CẢ GIAO DỊCH -->
+            <Tab text="Lịch Sử Tất Cả Phiếu Mượn">
+                <VBox spacing="12">
+                    <padding>
+                        <Insets top="16" right="16" bottom="16" left="16"/>
+                    </padding>
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <TextField fx:id="txtSearchTx" promptText="Tìm theo mã phiếu, tên độc giả, tên sách, hình thức..." prefWidth="380"
+                                   styleClass="search-field" onKeyReleased="#handleSearchTx"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="In / Xem Phiếu Mượn" onAction="#handlePrintSelectedSlip" styleClass="btn-primary"/>
+                        <Button text="Làm Mới Danh Sách" onAction="#loadAllTransactions" styleClass="btn-secondary"/>
+                    </HBox>
+
+                    <TableView fx:id="allTransactionsTable" VBox.vgrow="ALWAYS" prefHeight="380">
+                        <columns>
+                            <TableColumn fx:id="colAllTxId" text="Mã Phiếu" prefWidth="105"/>
+                            <TableColumn fx:id="colAllReader" text="Độc Giả" prefWidth="150"/>
+                            <TableColumn fx:id="colAllBook" text="Tên Sách" prefWidth="220"/>
+                            <TableColumn fx:id="colAllBorrowType" text="Hình Thức" prefWidth="120"/>
+                            <TableColumn fx:id="colAllBorrowDate" text="Ngày Mượn" prefWidth="95"/>
+                            <TableColumn fx:id="colAllDueDate" text="Hạn Trả" prefWidth="95"/>
+                            <TableColumn fx:id="colAllReturnDate" text="Ngày Trả" prefWidth="95"/>
+                            <TableColumn fx:id="colAllFine" text="Tiền Phạt" prefWidth="95"/>
+                            <TableColumn fx:id="colAllStatus" text="Trạng Thái" prefWidth="105"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                    </TableView>
+                </VBox>
+            </Tab>
+        </tabs>
+    </TabPane>
+
+</VBox>

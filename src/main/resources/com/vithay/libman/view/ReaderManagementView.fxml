@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="readerRootPane"
+           fx:controller="com.vithay.libman.controller.ReaderManagementController"
+           stylesheets="@../css/style.css" styleClass="bg-dark">
+
+    <!-- MAIN VIEW CONTAINER -->
+    <VBox fx:id="readerMainContainer" spacing="16" styleClass="bg-dark">
+        <padding>
+            <Insets top="24" right="32" bottom="32" left="32"/>
+        </padding>
+
+        <!-- Header & Action Bar -->
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <VBox spacing="2">
+                <Label text="Quản Lý Độc Giả" styleClass="title-large"/>
+                <Label text="Hồ sơ độc giả, cấp thẻ, hạn hiệu lực và quản lý danh mục hội viên (SRS Mục 5.4)" styleClass="text-muted"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnScanExpired" text="⏰ Quét Thẻ Hết Hạn" onAction="#handleScanExpiredReaders" styleClass="btn-secondary"/>
+            <Button fx:id="btnExportReaders" text="📥 Xuất File CSV" onAction="#handleExportCsv" styleClass="btn-secondary"/>
+            <Button fx:id="btnAddReader" text="+ Thêm Độc Giả Mới" onAction="#handleOpenAddReader" styleClass="btn-primary"/>
+            <Button text="Làm Mới" onAction="#loadReaders" styleClass="btn-secondary"/>
+        </HBox>
+
+        <!-- Filter & Search Toolbar -->
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="bg-surface">
+            <padding>
+                <Insets top="12" right="16" bottom="12" left="16"/>
+            </padding>
+            <Label text="Trạng thái thẻ:" styleClass="form-label"/>
+            <ComboBox fx:id="readerStatusFilterCombo" prefWidth="160" styleClass="form-control" onAction="#handleStatusFilter"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <TextField fx:id="txtSearchReader" promptText="Tìm theo mã, họ tên, SĐT, CCCD, hạn thẻ..." prefWidth="300"
+                       styleClass="search-field" onKeyReleased="#handleSearchReader"/>
+        </HBox>
+
+        <!-- Readers Table -->
+        <TableView fx:id="readersTable" VBox.vgrow="ALWAYS" prefHeight="450">
+            <columns>
+                <TableColumn fx:id="colReaderId" text="Mã Độc Giả" prefWidth="95"/>
+                <TableColumn fx:id="colReaderName" text="Họ Và Tên" prefWidth="170"/>
+                <TableColumn fx:id="colReaderEmail" text="Email" prefWidth="160"/>
+                <TableColumn fx:id="colReaderPhone" text="Số Điện Thoại" prefWidth="120"/>
+                <TableColumn fx:id="colReaderIdCard" text="CCCD/CMND" prefWidth="120"/>
+                <TableColumn fx:id="colReaderAddress" text="Địa Chỉ" prefWidth="160"/>
+                <TableColumn fx:id="colReaderExpiry" text="Hạn Thẻ" prefWidth="105"/>
+                <TableColumn fx:id="colReaderStatus" text="Trạng Thái" prefWidth="105"/>
+                <TableColumn fx:id="colReaderActions" text="Thao Tác" prefWidth="140"/>
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
+    </VBox>
+
+    <!-- IN-WINDOW OVERLAY MODAL FOR ADD/EDIT READER -->
+    <StackPane fx:id="readerModalOverlay" visible="false" managed="false" styleClass="auth-overlay">
+        <Pane onMouseClicked="#closeReaderModal"/>
+        <VBox fx:id="readerModalBox" maxWidth="540" maxHeight="640" styleClass="auth-modal" spacing="14">
+            <HBox alignment="CENTER_LEFT">
+                <VBox spacing="2">
+                    <Label fx:id="lblReaderModalTitle" text="Thêm Độc Giả Mới" styleClass="title-large"/>
+                    <Label text="Hồ sơ độc giả và thông tin cấp thẻ theo chuẩn quốc gia (SRS Mục 5.4)" styleClass="text-muted"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="✕" onAction="#closeReaderModal" styleClass="btn-secondary" style="-fx-padding: 4 10; -fx-background-radius: 50%;"/>
+            </HBox>
+
+            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" maxHeight="420">
+                <GridPane hgap="12" vgap="10" style="-fx-padding: 4 6 4 2;">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="130" prefWidth="140"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="240"/>
+                    </columnConstraints>
+
+                    <Label text="Mã Độc Giả:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalReaderId" promptText="VD: DG007" styleClass="form-control" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                    <Label text="Họ Và Tên:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalReaderName" promptText="Nhập họ và tên đầy đủ" styleClass="form-control" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Label text="Email:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalReaderEmail" promptText="email@example.com" styleClass="form-control" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                    <Label text="Số Điện Thoại:" styleClass="form-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalReaderPhone" promptText="09..." styleClass="form-control" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                    <Label text="CCCD (12 số):" styleClass="form-label" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalReaderIdCard" promptText="048..." styleClass="form-control" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                    <Label text="Địa Chỉ (Đà Nẵng):" styleClass="form-label" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalReaderAddress" promptText="123 Nguyễn Văn Linh, Q. Hải Châu, TP. Đà Nẵng" styleClass="form-control" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                    <Label text="Ngày Sinh:" styleClass="form-label" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalReaderBirth" promptText="YYYY-MM-DD" styleClass="form-control" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                    <Label text="Ngày Cấp Thẻ:" styleClass="form-label" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalReaderIssueDate" promptText="YYYY-MM-DD" styleClass="form-control" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+
+                    <Label text="Hạn Hiệu Lực:" styleClass="form-label" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalReaderExpiryDate" promptText="YYYY-MM-DD" styleClass="form-control" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+
+                    <Label text="Trạng Thái Thẻ:" styleClass="form-label" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+                    <ComboBox fx:id="comboModalReaderStatus" maxWidth="Infinity" styleClass="form-control" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+                </GridPane>
+            </ScrollPane>
+
+            <Label fx:id="lblReaderModalError" text="" style="-fx-font-weight: bold;"/>
+
+            <HBox spacing="12" alignment="CENTER_RIGHT">
+                <Button text="Hủy Bỏ" onAction="#closeReaderModal" styleClass="btn-secondary"/>
+                <Button text="Lưu Độc Giả" onAction="#handleSaveReaderModal" styleClass="btn-primary"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+
+</StackPane>

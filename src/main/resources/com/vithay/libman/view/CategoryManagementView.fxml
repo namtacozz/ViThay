@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="categoryRootPane"
+           fx:controller="com.vithay.libman.controller.CategoryController"
+           stylesheets="@../css/style.css" styleClass="bg-dark">
+
+    <!-- MAIN VIEW CONTAINER -->
+    <VBox fx:id="categoryMainContainer" spacing="16" styleClass="bg-dark">
+        <padding>
+            <Insets top="24" right="32" bottom="32" left="32"/>
+        </padding>
+
+        <!-- Header & Action Bar -->
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <VBox spacing="2">
+                <Label text="Quản Lý Thể Loại Sách" styleClass="title-large"/>
+                <Label text="Quản lý danh mục mã loại (MaLoai) và tên thể loại sách theo chuẩn biên mục" styleClass="text-muted"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="+ Thêm Thể Loại Mới" onAction="#handleOpenAddCategory" styleClass="btn-primary"/>
+            <Button text="Làm Mới" onAction="#loadCategories" styleClass="btn-secondary"/>
+        </HBox>
+
+        <!-- Search Toolbar -->
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="bg-surface">
+            <padding>
+                <Insets top="12" right="16" bottom="12" left="16"/>
+            </padding>
+            <Label text="Tìm kiếm thể loại:" styleClass="form-label"/>
+            <TextField fx:id="txtSearchCategory" promptText="Tìm theo tên thể loại hoặc mô tả..." prefWidth="320"
+                       styleClass="search-field" onKeyReleased="#handleSearchCategory"/>
+        </HBox>
+
+        <!-- Table View -->
+        <TableView fx:id="categoryTable" VBox.vgrow="ALWAYS" prefHeight="450">
+            <columns>
+                <TableColumn fx:id="colCatId" text="Mã Loại (MaLoai)" prefWidth="120"/>
+                <TableColumn fx:id="colCatName" text="Tên Thể Loại" prefWidth="240"/>
+                <TableColumn fx:id="colCatDesc" text="Mô Tả Chi Tiết" prefWidth="400"/>
+                <TableColumn fx:id="colCatActions" text="Thao Tác" prefWidth="160"/>
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
+    </VBox>
+
+    <!-- IN-WINDOW OVERLAY MODAL FOR ADD/EDIT CATEGORY -->
+    <StackPane fx:id="categoryModalOverlay" visible="false" managed="false" styleClass="auth-overlay">
+        <Pane onMouseClicked="#closeCategoryModal"/>
+        <VBox fx:id="categoryModalBox" maxWidth="480" styleClass="auth-modal" spacing="14">
+            <HBox alignment="CENTER_LEFT">
+                <VBox spacing="2">
+                    <Label fx:id="lblCategoryModalTitle" text="Thêm Thể Loại Mới" styleClass="title-large"/>
+                    <Label text="Nhập thông tin phân loại sách theo chuẩn biên mục thư viện" styleClass="text-muted"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="✕" onAction="#closeCategoryModal" styleClass="btn-secondary" style="-fx-padding: 4 10; -fx-background-radius: 50%;"/>
+            </HBox>
+
+            <GridPane hgap="12" vgap="12" style="-fx-padding: 6 0 6 0;">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="110" prefWidth="120"/>
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="240"/>
+                </columnConstraints>
+
+                <Label text="Tên Thể Loại:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtModalCatName" promptText="VD: Khoa học viễn tưởng" styleClass="form-control" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Mô Tả Chi Tiết:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtModalCatDesc" promptText="Mô tả nhóm sách và nội dung bao quát" styleClass="form-control" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <Label fx:id="lblCategoryModalError" text="" style="-fx-font-weight: bold;"/>
+
+            <HBox spacing="12" alignment="CENTER_RIGHT">
+                <Button text="Hủy Bỏ" onAction="#closeCategoryModal" styleClass="btn-secondary"/>
+                <Button text="Lưu Thể Loại" onAction="#handleSaveCategoryModal" styleClass="btn-primary"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+
+</StackPane>

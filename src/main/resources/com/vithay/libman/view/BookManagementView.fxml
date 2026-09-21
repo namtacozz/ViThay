@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="bookRootPane"
+           fx:controller="com.vithay.libman.controller.BookManagementController"
+           stylesheets="@../css/style.css" styleClass="bg-dark">
+
+    <!-- MAIN VIEW CONTAINER -->
+    <VBox fx:id="bookMainContainer" spacing="16" styleClass="bg-dark">
+        <padding>
+            <Insets top="24" right="32" bottom="32" left="32"/>
+        </padding>
+
+        <!-- Header & Action Bar -->
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <VBox spacing="2">
+                <Label text="Quản Lý Kho Sách" styleClass="title-large"/>
+                <Label text="Quản lý toàn bộ danh mục sách, vị trí kệ, số lượng và tình trạng (SRS Mục 5.3)" styleClass="text-muted"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnExportBooks" text="📥 Xuất File CSV" onAction="#handleExportCsv" styleClass="btn-secondary"/>
+            <Button fx:id="btnAddBook" text="+ Thêm Sách Mới" onAction="#handleOpenAddDialog" styleClass="btn-primary"/>
+            <Button text="Làm Mới" onAction="#loadBooks" styleClass="btn-secondary"/>
+        </HBox>
+
+        <!-- Filter & Search Toolbar -->
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="bg-surface">
+            <padding>
+                <Insets top="12" right="16" bottom="12" left="16"/>
+            </padding>
+            <Label text="Lọc theo tác giả:" styleClass="form-label"/>
+            <ComboBox fx:id="authorFilterCombo" prefWidth="180" styleClass="form-control" onAction="#handleAuthorFilter"/>
+            <Label text="Trạng thái:" styleClass="form-label"/>
+            <ComboBox fx:id="statusFilterCombo" prefWidth="140" styleClass="form-control" onAction="#handleStatusFilter"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <TextField fx:id="txtSearchBook" promptText="Tìm theo mã, tên, tác giả, vị trí kệ..." prefWidth="280"
+                       styleClass="search-field" onKeyReleased="#handleSearchBook"/>
+        </HBox>
+
+        <!-- Books Table -->
+        <TableView fx:id="booksTable" VBox.vgrow="ALWAYS" prefHeight="450">
+            <columns>
+                <TableColumn fx:id="colBookId" text="Mã Sách" prefWidth="85"/>
+                <TableColumn fx:id="colBookTitle" text="Tên Sách" prefWidth="220"/>
+                <TableColumn fx:id="colBookAuthor" text="Tác Giả" prefWidth="150"/>
+                <TableColumn fx:id="colBookCategory" text="Thể Loại" prefWidth="130"/>
+                <TableColumn fx:id="colBookShelf" text="Vị Trí Kệ" prefWidth="110"/>
+                <TableColumn fx:id="colBookPrice" text="Giá (VNĐ)" prefWidth="95"/>
+                <TableColumn fx:id="colBookAvailable" text="Khả Dụng" prefWidth="75"/>
+                <TableColumn fx:id="colBookStatus" text="Trạng Thái" prefWidth="105"/>
+                <TableColumn fx:id="colBookActions" text="Thao Tác" prefWidth="130"/>
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
+    </VBox>
+
+    <!-- IN-WINDOW OVERLAY MODAL FOR ADD/EDIT BOOK -->
+    <StackPane fx:id="bookModalOverlay" visible="false" managed="false" styleClass="auth-overlay">
+        <Pane onMouseClicked="#closeBookModal"/>
+        <VBox fx:id="bookModalBox" maxWidth="540" maxHeight="640" styleClass="auth-modal" spacing="14">
+            <HBox alignment="CENTER_LEFT">
+                <VBox spacing="2">
+                    <Label fx:id="lblBookModalTitle" text="Thêm Sách Mới" styleClass="title-large"/>
+                    <Label text="Nhập thông tin chi tiết đầu sách theo chuẩn thư viện (SRS Mục 5.3)" styleClass="text-muted"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="✕" onAction="#closeBookModal" styleClass="btn-secondary" style="-fx-padding: 4 10; -fx-background-radius: 50%;"/>
+            </HBox>
+
+            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" maxHeight="420">
+                <GridPane hgap="12" vgap="10" style="-fx-padding: 4 6 4 2;">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="130" prefWidth="140"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="240"/>
+                    </columnConstraints>
+
+                    <Label text="Mã Sách:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalBookId" promptText="VD: BK037" styleClass="form-control" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                    <Label text="Tên Sách:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalBookTitle" promptText="Nhập tên sách" styleClass="form-control" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Label text="Tác Giả:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalBookAuthor" promptText="Tác giả / Dịch giả" styleClass="form-control" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                    <Label text="Thể Loại:" styleClass="form-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <ComboBox fx:id="comboModalBookCategory" maxWidth="Infinity" styleClass="form-control" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                    <Label text="Vị Trí Kệ Sách:" styleClass="form-label" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalBookShelf" promptText="VD: Khu TN - Kệ 01" styleClass="form-control" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                    <Label text="Mã ISBN:" styleClass="form-label" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalBookIsbn" promptText="978-..." styleClass="form-control" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                    <Label text="Đơn Giá (VNĐ):" styleClass="form-label" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalBookPrice" promptText="120000" styleClass="form-control" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                    <Label text="Tổng Bản Sách:" styleClass="form-label" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtModalBookCopies" promptText="5" styleClass="form-control" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+
+                    <Label text="Trạng Thái:" styleClass="form-label" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+                    <ComboBox fx:id="comboModalBookStatus" maxWidth="Infinity" styleClass="form-control" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+                </GridPane>
+            </ScrollPane>
+
+            <Label fx:id="lblBookModalError" text="" style="-fx-font-weight: bold;"/>
+
+            <HBox spacing="12" alignment="CENTER_RIGHT">
+                <Button text="Hủy Bỏ" onAction="#closeBookModal" styleClass="btn-secondary"/>
+                <Button text="Lưu Sách" onAction="#handleSaveBookModal" styleClass="btn-primary"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+
+</StackPane>
