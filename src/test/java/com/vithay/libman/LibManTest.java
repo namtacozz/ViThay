@@ -104,6 +104,12 @@ public class LibManTest {
         assertEquals("Active", activeReader.getStatus());
         assertEquals(today, activeReader.getCardIssueDate());
         assertEquals(expiry, activeReader.getCardExpiryDate());
+
+        // Revert reader status back for test repeatability
+        try (java.sql.Connection conn = DatabaseConfig.getConnection();
+             java.sql.Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("UPDATE readers SET card_issue_date = NULL, card_expiry_date = NULL, status = 'Chờ Cấp Thẻ' WHERE id = 'DG005'");
+        } catch (Exception ignored) {}
     }
 
     @Test

@@ -47,6 +47,12 @@ public class Book {
         this(id, title, author, category, 0, "Khu A - Kệ 01", isbn, price, publishYear, publisher, status, coverImage, totalCopies, availableCopies, false);
     }
 
+    public Book(String id, String title, String author, String category,
+                String shelfLocation, double price, int totalCopies, int availableCopies,
+                String status, String coverImage) {
+        this(id, title, author, category, 0, shelfLocation, "", price, 2024, "NXB", status, coverImage, totalCopies, availableCopies, false);
+    }
+
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -91,6 +97,17 @@ public class Book {
 
     public boolean isDeleted() { return isDeleted; }
     public void setDeleted(boolean deleted) { isDeleted = deleted; }
+
+    public String getMaSach() { return id; }
+    public String getTenSach() { return title; }
+    public String getTenTacGia() { return author; }
+    public int getSoLuongConLai() { return availableCopies; }
+    public String getImagePath() {
+        if (coverImage != null && coverImage.startsWith("/com/vithay/libman/images/")) {
+            return coverImage.substring("/com/vithay/libman/images/".length());
+        }
+        return coverImage;
+    }
 
     @Override
     public String toString() {

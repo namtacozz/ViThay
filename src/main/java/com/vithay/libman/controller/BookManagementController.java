@@ -7,6 +7,7 @@ import com.vithay.libman.service.BookService;
 import com.vithay.libman.service.CategoryService;
 import com.vithay.libman.service.ExportService;
 import com.vithay.libman.util.VietnameseUtils;
+import com.vithay.libman.view.component.BookCardView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -50,6 +51,14 @@ public class BookManagementController implements Initializable {
     @FXML private TableColumn<Book, String> colBookStatus;
     @FXML private TableColumn<Book, Void> colBookActions;
 
+    // Alternative Views (Table & Grid Card View)
+    @FXML private Button btnTableView;
+    @FXML private Button btnGridView;
+    @FXML private ScrollPane booksGridScrollPane;
+    @FXML private FlowPane booksGridPane;
+    private boolean isTableViewMode = true;
+    private ObservableList<Book> currentFilteredBooks = FXCollections.observableArrayList();
+
     // In-Window Modal Overlay Fields
     @FXML private StackPane bookModalOverlay;
     @FXML private VBox bookModalBox;
@@ -77,6 +86,7 @@ public class BookManagementController implements Initializable {
         setupFilters();
         setupTable();
         loadBooks();
+        switchView(true);
     }
 
     private void setupFilters() {
@@ -182,6 +192,12 @@ public class BookManagementController implements Initializable {
                 setGraphic(empty ? null : pane);
             }
         });
+
+        booksTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (!isTableViewMode && booksGridPane != null) {
+                renderGridView(currentFilteredBooks);
+            }
+        });
     }
 
     public void loadBooks() {
@@ -274,7 +290,75 @@ public class BookManagementController implements Initializable {
                 filtered.add(b);
             }
         }
-        booksTable.setItems(filtered);
+        this.currentFilteredBooks = filtered;
+        if (booksTable != null) {
+            booksTable.setItems(filtered);
+        }
+        if (booksGridPane != null) {
+            renderGridView(filtered);
+        }
+    }
+
+    public boolean isTableViewMode() {
+        return isTableViewMode;
+    }
+
+    public void setTableViewMode(boolean tableViewMode) {
+        switchView(tableViewMode);
+    }
+
+    @FXML
+    public void handleSwitchToTableView() {
+        switchView(true);
+    }
+
+    @FXML
+    public void handleSwitchToGridView() {
+        switchView(false);
+    }
+
+    public void switchView(boolean isTable) {
+        this.isTableViewMode = isTable;
+        if (btnTableView != null && btnGridView != null) {
+            if (isTable) {
+                if (!btnTableView.getStyleClass().contains("segmented-view-active")) {
+                    btnTableView.getStyleClass().add("segmented-view-active");
+                }
+                btnGridView.getStyleClass().remove("segmented-view-active");
+            } else {
+                if (!btnGridView.getStyleClass().contains("segmented-view-active")) {
+                    btnGridView.getStyleClass().add("segmented-view-active");
+                }
+                btnTableView.getStyleClass().remove("segmented-view-active");
+            }
+        }
+        if (booksTable != null) {
+            booksTable.setVisible(isTable);
+            booksTable.setManaged(isTable);
+        }
+        if (booksGridScrollPane != null) {
+            booksGridScrollPane.setVisible(!isTable);
+            booksGridScrollPane.setManaged(!isTable);
+        }
+        if (!isTable) {
+            renderGridView(currentFilteredBooks);
+        }
+    }
+
+    private void renderGridView(List<Book> books) {
+        if (booksGridPane == null) return;
+        booksGridPane.getChildren().clear();
+        Book selected = booksTable != null ? booksTable.getSelectionModel().getSelectedItem() : null;
+        for (Book b : books) {
+            boolean isSelected = selected != null && selected.getId().equals(b.getId());
+            VBox card = BookCardView.createCard(b, isSelected, clickedBook -> {
+                if (booksTable != null) {
+                    booksTable.getSelectionModel().select(clickedBook);
+                }
+                renderGridView(currentFilteredBooks);
+            });
+            booksGridPane.getChildren().add(card);
+        }
     }
 
     @FXML

@@ -37,27 +37,43 @@
             <Label text="Trạng thái:" styleClass="form-label"/>
             <ComboBox fx:id="statusFilterCombo" prefWidth="140" styleClass="form-control" onAction="#handleStatusFilter"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <TextField fx:id="txtSearchBook" promptText="Tìm theo mã, tên, tác giả, vị trí kệ..." prefWidth="280"
+            <TextField fx:id="txtSearchBook" promptText="Tìm theo mã, tên, tác giả, vị trí kệ..." prefWidth="260"
                        styleClass="search-field" onKeyReleased="#handleSearchBook"/>
+            <!-- Segmented View Toggle Buttons -->
+            <HBox styleClass="segmented-view-group" alignment="CENTER_LEFT" spacing="2">
+                <Button fx:id="btnTableView" text="☰ Bảng" onAction="#handleSwitchToTableView"
+                        styleClass="segmented-view-btn, segmented-view-active"/>
+                <Button fx:id="btnGridView" text="⊞ Lưới" onAction="#handleSwitchToGridView"
+                        styleClass="segmented-view-btn"/>
+            </HBox>
         </HBox>
 
-        <!-- Books Table -->
-        <TableView fx:id="booksTable" VBox.vgrow="ALWAYS" prefHeight="450">
-            <columns>
-                <TableColumn fx:id="colBookId" text="Mã Sách" prefWidth="85"/>
-                <TableColumn fx:id="colBookTitle" text="Tên Sách" prefWidth="220"/>
-                <TableColumn fx:id="colBookAuthor" text="Tác Giả" prefWidth="150"/>
-                <TableColumn fx:id="colBookCategory" text="Thể Loại" prefWidth="130"/>
-                <TableColumn fx:id="colBookShelf" text="Vị Trí Kệ" prefWidth="110"/>
-                <TableColumn fx:id="colBookPrice" text="Giá (VNĐ)" prefWidth="95"/>
-                <TableColumn fx:id="colBookAvailable" text="Khả Dụng" prefWidth="75"/>
-                <TableColumn fx:id="colBookStatus" text="Trạng Thái" prefWidth="105"/>
-                <TableColumn fx:id="colBookActions" text="Thao Tác" prefWidth="130"/>
-            </columns>
-            <columnResizePolicy>
-                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-            </columnResizePolicy>
-        </TableView>
+        <!-- Content Views Container (Table & Grid Card) -->
+        <StackPane VBox.vgrow="ALWAYS">
+            <!-- Books Table -->
+            <TableView fx:id="booksTable" VBox.vgrow="ALWAYS" prefHeight="450">
+                <columns>
+                    <TableColumn fx:id="colBookId" text="Mã Sách" prefWidth="85"/>
+                    <TableColumn fx:id="colBookTitle" text="Tên Sách" prefWidth="220"/>
+                    <TableColumn fx:id="colBookAuthor" text="Tác Giả" prefWidth="150"/>
+                    <TableColumn fx:id="colBookCategory" text="Thể Loại" prefWidth="130"/>
+                    <TableColumn fx:id="colBookShelf" text="Vị Trí Kệ" prefWidth="110"/>
+                    <TableColumn fx:id="colBookPrice" text="Giá (VNĐ)" prefWidth="95"/>
+                    <TableColumn fx:id="colBookAvailable" text="Khả Dụng" prefWidth="75"/>
+                    <TableColumn fx:id="colBookStatus" text="Trạng Thái" prefWidth="105"/>
+                    <TableColumn fx:id="colBookActions" text="Thao Tác" prefWidth="130"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                </columnResizePolicy>
+            </TableView>
+
+            <!-- Books Grid Card View -->
+            <ScrollPane fx:id="booksGridScrollPane" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;"
+                        visible="false" managed="false" VBox.vgrow="ALWAYS">
+                <FlowPane fx:id="booksGridPane" hgap="16" vgap="16" style="-fx-padding: 12;"/>
+            </ScrollPane>
+        </StackPane>
     </VBox>
 
     <!-- IN-WINDOW OVERLAY MODAL FOR ADD/EDIT BOOK -->
