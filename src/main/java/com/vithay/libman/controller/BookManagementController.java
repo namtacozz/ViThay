@@ -17,6 +17,9 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.effect.GaussianBlur;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
@@ -30,6 +33,7 @@ import java.util.ResourceBundle;
 
 public class BookManagementController implements Initializable {
     private static final Logger logger = LoggerFactory.getLogger(BookManagementController.class);
+    public static final double DIVIDER_RATIO = 0.68;
 
     @FXML private StackPane bookRootPane;
     @FXML private VBox bookMainContainer;
@@ -39,6 +43,29 @@ public class BookManagementController implements Initializable {
     @FXML private TextField txtSearchBook;
     @FXML private Button btnAddBook;
     @FXML private Button btnExportBooks;
+
+    // Two-Panel Selector: SplitPane & Master/Inspector Containers
+    @FXML private SplitPane bookSplitPane;
+    @FXML private StackPane bookMasterPane;
+    @FXML private VBox detailInspectorPane;
+
+    // Detail Inspector UI Controls
+    @FXML private ImageView imgInspectorCover;
+    @FXML private Label lblInspectorTitle;
+    @FXML private Label lblInspectorAuthor;
+    @FXML private Label lblInspectorCategory;
+    @FXML private Label lblInspectorStatus;
+    @FXML private Label lblInspectorShelf;
+    @FXML private Label lblInspectorIsbn;
+    @FXML private Label lblInspectorPrice;
+    @FXML private Label lblInspectorCopies;
+    @FXML private Button btnInspectorBorrow;
+    @FXML private Button btnInspectorEdit;
+    @FXML private Button btnInspectorDelete;
+    @FXML private VBox inspectorBranchesBox;
+
+    private Book currentSelectedBook = null;
+    private MainLayoutController mainController = null;
 
     @FXML private TableView<Book> booksTable;
     @FXML private TableColumn<Book, String> colBookId;
@@ -83,6 +110,9 @@ public class BookManagementController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        if (bookSplitPane != null) {
+            bookSplitPane.setDividerPositions(DIVIDER_RATIO);
+        }
         setupFilters();
         setupTable();
         loadBooks();
@@ -194,8 +224,18 @@ public class BookManagementController implements Initializable {
         });
 
         booksTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            showBookDetail(newVal);
             if (!isTableViewMode && booksGridPane != null) {
                 renderGridView(currentFilteredBooks);
+            }
+        });
+
+        booksTable.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.UP || event.getCode() == KeyCode.DOWN) {
+                Book selected = booksTable.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    showBookDetail(selected);
+                }
             }
         });
     }
@@ -220,6 +260,14 @@ public class BookManagementController implements Initializable {
         }
         if (colBookActions != null) {
             colBookActions.setVisible(canManage);
+        }
+        if (btnInspectorEdit != null) {
+            btnInspectorEdit.setVisible(canManage);
+            btnInspectorEdit.setManaged(canManage);
+        }
+        if (btnInspectorDelete != null) {
+            btnInspectorDelete.setVisible(canManage);
+            btnInspectorDelete.setManaged(canManage);
         }
     }
 
@@ -293,6 +341,25 @@ public class BookManagementController implements Initializable {
         this.currentFilteredBooks = filtered;
         if (booksTable != null) {
             booksTable.setItems(filtered);
+            Book toSelect = null;
+            if (currentSelectedBook != null) {
+                for (Book b : filtered) {
+                    if (java.util.Objects.equals(b.getId(), currentSelectedBook.getId())) {
+                        toSelect = b;
+                        break;
+                    }
+                }
+            }
+            if (toSelect == null && !filtered.isEmpty()) {
+                toSelect = filtered.get(0);
+            }
+            if (toSelect != null) {
+                booksTable.getSelectionModel().select(toSelect);
+                showBookDetail(toSelect);
+            } else {
+                booksTable.getSelectionModel().clearSelection();
+                showBookDetail(null);
+            }
         }
         if (!isTableViewMode && booksGridPane != null) {
             renderGridView(filtered);
@@ -501,6 +568,118 @@ public class BookManagementController implements Initializable {
             if (ok) {
                 loadBooks();
             }
+        }
+    }
+
+    public Book getCurrentSelectedBook() {
+        return currentSelectedBook;
+    }
+
+    public void setMainController(MainLayoutController mainController) {
+        this.mainController = mainController;
+    }
+
+    public void showBookDetail(Book book) {
+        this.currentSelectedBook = book;
+        if (detailInspectorPane == null) return;
+
+        if (book == null) {
+            detailInspectorPane.setVisible(false);
+            detailInspectorPane.setManaged(false);
+            return;
+        }
+
+        detailInspectorPane.setVisible(true);
+        detailInspectorPane.setManaged(true);
+
+        if (lblInspectorTitle != null) {
+            lblInspectorTitle.setText(book.getTitle() != null ? book.getTitle() : "Không có tiêu đề");
+        }
+        if (lblInspectorAuthor != null) {
+            lblInspectorAuthor.setText(book.getAuthor() != null ? book.getAuthor() : "Không rõ tác giả");
+        }
+        if (lblInspectorCategory != null) {
+            lblInspectorCategory.setText(book.getCategory() != null ? book.getCategory() : "Khác");
+        }
+        if (lblInspectorShelf != null) {
+            lblInspectorShelf.setText(book.getShelfLocation() != null ? book.getShelfLocation() : "Chưa xếp kệ");
+        }
+        if (lblInspectorIsbn != null) {
+            lblInspectorIsbn.setText(book.getIsbn() != null && !book.getIsbn().isBlank() ? book.getIsbn() : "Chưa có ISBN");
+        }
+        if (lblInspectorPrice != null) {
+            lblInspectorPrice.setText(String.format("%,.0f đ", book.getPrice()));
+        }
+        if (lblInspectorCopies != null) {
+            lblInspectorCopies.setText(book.getAvailableCopies() + " / " + book.getTotalCopies() + " bản");
+        }
+
+        // Status badge
+        if (lblInspectorStatus != null) {
+            String status = book.getStatus() != null ? book.getStatus() : "Available";
+            lblInspectorStatus.setText(status);
+            lblInspectorStatus.getStyleClass().removeAll("badge-available", "badge-borrowed", "badge-onhold", "badge-returned", "badge-overdue");
+            if ("Available".equalsIgnoreCase(status) || "KHA_DUNG".equalsIgnoreCase(status)) {
+                lblInspectorStatus.getStyleClass().add("badge-available");
+            } else if ("Borrowed".equalsIgnoreCase(status) || "DANG_MUON".equalsIgnoreCase(status)) {
+                lblInspectorStatus.getStyleClass().add("badge-borrowed");
+            } else if ("On Hold".equalsIgnoreCase(status) || "CHO_DUYET".equalsIgnoreCase(status)) {
+                lblInspectorStatus.getStyleClass().add("badge-onhold");
+            } else {
+                lblInspectorStatus.getStyleClass().add("badge-returned");
+            }
+        }
+
+        // Cover image loading with fallback
+        if (imgInspectorCover != null) {
+            String imageName = book.getImagePath();
+            if (imageName == null || imageName.isBlank()) {
+                imageName = "clean_code.jpg";
+            }
+            URL imgUrl = getClass().getResource("/com/vithay/libman/images/" + imageName);
+            if (imgUrl == null) {
+                imgUrl = getClass().getResource("/com/vithay/libman/images/clean_code.jpg");
+            }
+            if (imgUrl != null) {
+                imgInspectorCover.setImage(new Image(imgUrl.toExternalForm(), true));
+            }
+        }
+
+        // Quick borrow state
+        if (btnInspectorBorrow != null) {
+            btnInspectorBorrow.setDisable(book.getAvailableCopies() <= 0);
+        }
+        applySecurityPermissions();
+    }
+
+    @FXML
+    public void handleInspectorQuickBorrow() {
+        if (currentSelectedBook == null) return;
+        if (currentSelectedBook.getAvailableCopies() <= 0) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Sách '" + currentSelectedBook.getTitle() + "' hiện đã hết bản khả dụng trong kho!");
+            alert.showAndWait();
+            return;
+        }
+
+        if (mainController != null) {
+            mainController.showBorrowReturnView(0);
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Đã chọn sách '" + currentSelectedBook.getTitle() + "' để lập phiếu mượn.");
+            alert.showAndWait();
+        }
+    }
+
+    @FXML
+    public void handleInspectorEdit() {
+        if (currentSelectedBook != null) {
+            showBookFormModal(currentSelectedBook);
+        }
+    }
+
+    @FXML
+    public void handleInspectorDelete() {
+        if (currentSelectedBook != null) {
+            handleSoftDeleteBook(currentSelectedBook);
         }
     }
 }

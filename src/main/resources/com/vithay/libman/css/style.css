@@ -1064,12 +1064,59 @@
     -fx-border-color: #282828;
     -fx-border-radius: 8px;
     -fx-border-width: 1px;
-    -fx-padding: 16px;
+    -fx-padding: 8px;
+}
+.split-inspector-pane > .split-pane-divider {
+    -fx-background-color: #282828;
+    -fx-padding: 0 2px;
+}
+.inspector-header {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
 }
 .inspector-shelf-box {
     -fx-background-color: #222222;
     -fx-background-radius: 6px;
     -fx-padding: 10px 14px;
+}
+.inspector-shelf-location {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: #FFFFFF;
+}
+.inspector-meta-label {
+    -fx-text-fill: #727272;
+    -fx-font-size: 12px;
+}
+.inspector-meta-value {
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 12px;
+}
+
+/* Light Theme Overrides for Inspector */
+.theme-pink-light .split-inspector-pane {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #FECDD3;
+}
+.theme-pink-light .split-inspector-pane > .split-pane-divider {
+    -fx-background-color: #FECDD3;
+}
+.theme-pink-light .inspector-header {
+    -fx-text-fill: #1E1B1D;
+}
+.theme-pink-light .inspector-shelf-box {
+    -fx-background-color: #FFF1F2;
+}
+.theme-pink-light .inspector-shelf-location {
+    -fx-text-fill: #1E1B1D;
+}
+.theme-pink-light .inspector-meta-label {
+    -fx-text-fill: #9CA3AF;
+}
+.theme-pink-light .inspector-meta-value {
+    -fx-text-fill: #1E1B1D;
 }
 
 /* 5. Circulation Desk: Canvas Plus Palette */

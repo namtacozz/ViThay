@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
 <StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -48,32 +49,99 @@
             </HBox>
         </HBox>
 
-        <!-- Content Views Container (Table & Grid Card) -->
-        <StackPane VBox.vgrow="ALWAYS">
-            <!-- Books Table -->
-            <TableView fx:id="booksTable" VBox.vgrow="ALWAYS" prefHeight="450">
-                <columns>
-                    <TableColumn fx:id="colBookId" text="Mã Sách" prefWidth="85"/>
-                    <TableColumn fx:id="colBookTitle" text="Tên Sách" prefWidth="220"/>
-                    <TableColumn fx:id="colBookAuthor" text="Tác Giả" prefWidth="150"/>
-                    <TableColumn fx:id="colBookCategory" text="Thể Loại" prefWidth="130"/>
-                    <TableColumn fx:id="colBookShelf" text="Vị Trí Kệ" prefWidth="110"/>
-                    <TableColumn fx:id="colBookPrice" text="Giá (VNĐ)" prefWidth="95"/>
-                    <TableColumn fx:id="colBookAvailable" text="Khả Dụng" prefWidth="75"/>
-                    <TableColumn fx:id="colBookStatus" text="Trạng Thái" prefWidth="105"/>
-                    <TableColumn fx:id="colBookActions" text="Thao Tác" prefWidth="130"/>
-                </columns>
-                <columnResizePolicy>
-                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                </columnResizePolicy>
-            </TableView>
+        <!-- Two-Panel Selector: Master (Table/Grid) + Detail Inspector -->
+        <SplitPane fx:id="bookSplitPane" VBox.vgrow="ALWAYS" dividerPositions="0.68" styleClass="split-inspector-pane">
+            <items>
+                <!-- Master Area: Holds Table and Grid Views (68%) -->
+                <StackPane fx:id="bookMasterPane" minWidth="400">
+                    <!-- Books Table -->
+                    <TableView fx:id="booksTable" VBox.vgrow="ALWAYS" prefHeight="450">
+                        <columns>
+                            <TableColumn fx:id="colBookId" text="Mã Sách" prefWidth="80"/>
+                            <TableColumn fx:id="colBookTitle" text="Tên Sách" prefWidth="200"/>
+                            <TableColumn fx:id="colBookAuthor" text="Tác Giả" prefWidth="130"/>
+                            <TableColumn fx:id="colBookCategory" text="Thể Loại" prefWidth="110"/>
+                            <TableColumn fx:id="colBookShelf" text="Vị Trí Kệ" prefWidth="100"/>
+                            <TableColumn fx:id="colBookPrice" text="Giá (VNĐ)" prefWidth="85"/>
+                            <TableColumn fx:id="colBookAvailable" text="Khả Dụng" prefWidth="70"/>
+                            <TableColumn fx:id="colBookStatus" text="Trạng Thái" prefWidth="95"/>
+                            <TableColumn fx:id="colBookActions" text="Thao Tác" prefWidth="110"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                    </TableView>
 
-            <!-- Books Grid Card View -->
-            <ScrollPane fx:id="booksGridScrollPane" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;"
-                        visible="false" managed="false" VBox.vgrow="ALWAYS">
-                <FlowPane fx:id="booksGridPane" hgap="16" vgap="16" style="-fx-padding: 12;"/>
-            </ScrollPane>
-        </StackPane>
+                    <!-- Books Grid Card View -->
+                    <ScrollPane fx:id="booksGridScrollPane" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;"
+                                visible="false" managed="false" VBox.vgrow="ALWAYS">
+                        <FlowPane fx:id="booksGridPane" hgap="14" vgap="14" style="-fx-padding: 12;"/>
+                    </ScrollPane>
+                </StackPane>
+
+                <!-- Right Pane: Detail Inspector (32%) -->
+                <VBox fx:id="detailInspectorPane" minWidth="280" prefWidth="320" maxWidth="450" spacing="12"
+                      styleClass="bg-surface" style="-fx-background-radius: 8px;">
+                    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent;">
+                        <VBox spacing="14" style="-fx-padding: 16;">
+                            <!-- Header / Category & Status Badge -->
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <Label fx:id="lblInspectorCategory" text="Thể Loại" styleClass="cat-pill, cat-pill-dark"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="lblInspectorStatus" text="Available" styleClass="badge-available"/>
+                            </HBox>
+
+                            <!-- Large Cover Art -->
+                            <VBox alignment="CENTER" style="-fx-padding: 4 0;">
+                                <ImageView fx:id="imgInspectorCover" fitWidth="150" fitHeight="200" preserveRatio="false"
+                                           style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 12, 0, 0, 4);"/>
+                            </VBox>
+
+                            <!-- Title & Author -->
+                            <VBox spacing="4" alignment="CENTER">
+                                <Label fx:id="lblInspectorTitle" text="Tên Sách" styleClass="inspector-header" wrapText="true" textAlignment="CENTER"/>
+                                <Label fx:id="lblInspectorAuthor" text="Tác Giả" styleClass="text-muted" wrapText="true" textAlignment="CENTER"/>
+                            </VBox>
+
+                            <!-- Shelf Box -->
+                            <VBox styleClass="inspector-shelf-box" spacing="4">
+                                <Label text="VỊ TRÍ LƯU TRỮ TRÊN KỆ" styleClass="form-label" style="-fx-font-size: 10px; -fx-text-fill: #1DB954;"/>
+                                <Label fx:id="lblInspectorShelf" text="Khu A - Kệ 01" styleClass="inspector-shelf-location"/>
+                            </VBox>
+
+                            <!-- Details: ISBN, Price, Available Copies -->
+                            <GridPane hgap="8" vgap="8" styleClass="bg-dark" style="-fx-padding: 10 12; -fx-background-radius: 6px;">
+                                <columnConstraints>
+                                    <ColumnConstraints minWidth="90" prefWidth="95"/>
+                                    <ColumnConstraints hgrow="ALWAYS"/>
+                                </columnConstraints>
+
+                                <Label text="Mã ISBN:" styleClass="inspector-meta-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                <Label fx:id="lblInspectorIsbn" text="--" styleClass="inspector-meta-value" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                                <Label text="Đơn Giá:" styleClass="inspector-meta-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                <Label fx:id="lblInspectorPrice" text="-- đ" styleClass="inspector-meta-value" style="-fx-text-fill: #1DB954;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                                <Label text="Khả Dụng:" styleClass="inspector-meta-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                <Label fx:id="lblInspectorCopies" text="-- / -- bản" styleClass="inspector-meta-value" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                            </GridPane>
+
+                            <!-- Action Buttons -->
+                            <VBox spacing="8">
+                                <Button fx:id="btnInspectorBorrow" text="⚡ Lập Phiếu Mượn" maxWidth="Infinity" styleClass="btn-primary" onAction="#handleInspectorQuickBorrow"/>
+                                <HBox spacing="8">
+                                    <Button fx:id="btnInspectorEdit" text="✏ Chỉnh Sửa" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-secondary" onAction="#handleInspectorEdit"/>
+                                    <Button fx:id="btnInspectorDelete" text="🗑 Thùng Rác" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-danger" onAction="#handleInspectorDelete"/>
+                                </HBox>
+                            </VBox>
+
+                            <!-- Placeholder for Intriguing Branches (Task 4) -->
+                            <VBox fx:id="inspectorBranchesBox" spacing="8"/>
+                        </VBox>
+                    </ScrollPane>
+                </VBox>
+            </items>
+        </SplitPane>
     </VBox>
 
     <!-- IN-WINDOW OVERLAY MODAL FOR ADD/EDIT BOOK -->

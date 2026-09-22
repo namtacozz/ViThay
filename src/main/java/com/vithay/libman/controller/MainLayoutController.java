@@ -311,6 +311,7 @@ public class MainLayoutController implements Initializable {
             FXMLLoader bookLoader = new FXMLLoader(getClass().getResource("/com/vithay/libman/view/BookManagementView.fxml"));
             bookView = bookLoader.load();
             bookController = bookLoader.getController();
+            bookController.setMainController(this);
 
             FXMLLoader readerLoader = new FXMLLoader(getClass().getResource("/com/vithay/libman/view/ReaderManagementView.fxml"));
             readerView = readerLoader.load();
