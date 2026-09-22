@@ -6,13 +6,10 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
-import java.io.InputStream;
-import java.text.NumberFormat;
-import java.util.Locale;
+import java.net.URL;
 import java.util.function.Consumer;
 
 public class BookCardView {
-    private static final NumberFormat CURRENCY_FORMAT = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 
     public static VBox createCard(Book book, boolean isSelected, Consumer<Book> onSelect) {
         VBox card = new VBox(8);
@@ -35,14 +32,12 @@ public class BookCardView {
             imageName = "clean_code.jpg";
         }
         String resourcePath = imageName.startsWith("/") ? imageName : "/com/vithay/libman/images/" + imageName;
-        InputStream is = BookCardView.class.getResourceAsStream(resourcePath);
-        if (is != null) {
-            coverView.setImage(new Image(is));
-        } else {
-            InputStream fallback = BookCardView.class.getResourceAsStream("/com/vithay/libman/images/clean_code.jpg");
-            if (fallback != null) {
-                coverView.setImage(new Image(fallback));
-            }
+        URL imgUrl = BookCardView.class.getResource(resourcePath);
+        if (imgUrl == null) {
+            imgUrl = BookCardView.class.getResource("/com/vithay/libman/images/clean_code.jpg");
+        }
+        if (imgUrl != null) {
+            coverView.setImage(new Image(imgUrl.toExternalForm()));
         }
 
         // Title & Author

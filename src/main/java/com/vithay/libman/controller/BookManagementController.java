@@ -294,7 +294,7 @@ public class BookManagementController implements Initializable {
         if (booksTable != null) {
             booksTable.setItems(filtered);
         }
-        if (booksGridPane != null) {
+        if (!isTableViewMode && booksGridPane != null) {
             renderGridView(filtered);
         }
     }
@@ -350,12 +350,11 @@ public class BookManagementController implements Initializable {
         booksGridPane.getChildren().clear();
         Book selected = booksTable != null ? booksTable.getSelectionModel().getSelectedItem() : null;
         for (Book b : books) {
-            boolean isSelected = selected != null && selected.getId().equals(b.getId());
+            boolean isSelected = selected != null && java.util.Objects.equals(selected.getId(), b.getId());
             VBox card = BookCardView.createCard(b, isSelected, clickedBook -> {
                 if (booksTable != null) {
                     booksTable.getSelectionModel().select(clickedBook);
                 }
-                renderGridView(currentFilteredBooks);
             });
             booksGridPane.getChildren().add(card);
         }
