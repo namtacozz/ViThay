@@ -60,6 +60,23 @@ public class BorrowTransactionDao {
         return list;
     }
 
+    public List<BorrowTransaction> getTransactionsByBook(String bookId) {
+        List<BorrowTransaction> list = new ArrayList<>();
+        String sql = "SELECT * FROM borrow_transactions WHERE book_id = ? ORDER BY borrow_date DESC";
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, bookId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSet(rs));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error retrieving transactions for book: {}", bookId, e);
+        }
+        return list;
+    }
+
     public int getActiveBorrowCountForReader(String readerId) {
         String sql = "SELECT COUNT(*) FROM borrow_transactions WHERE reader_id = ? AND status = 'Đang Mượn'";
         try (Connection conn = DatabaseConfig.getConnection();

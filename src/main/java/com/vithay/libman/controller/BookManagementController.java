@@ -1,6 +1,8 @@
 package com.vithay.libman.controller;
 
+import com.vithay.libman.dao.BorrowTransactionDao;
 import com.vithay.libman.model.Book;
+import com.vithay.libman.model.BorrowTransaction;
 import com.vithay.libman.model.Category;
 import com.vithay.libman.service.AuthService;
 import com.vithay.libman.service.BookService;
@@ -37,12 +39,41 @@ public class BookManagementController implements Initializable {
 
     @FXML private StackPane bookRootPane;
     @FXML private VBox bookMainContainer;
+    @FXML private HBox breadcrumbContainer;
     @FXML private ComboBox<String> authorFilterCombo;
     @FXML private ComboBox<String> statusFilterCombo;
     private String currentCategoryFilter = "Tất cả";
+    private String drilldownAuthor = null;
+    private String drilldownShelf = null;
+
     @FXML private TextField txtSearchBook;
     @FXML private Button btnAddBook;
     @FXML private Button btnExportBooks;
+
+    // Extras on Demand (Advanced Filters)
+    @FXML private Button btnToggleAdvancedFilter;
+    @FXML private VBox advancedFilterPane;
+    @FXML private ComboBox<String> comboAdvCategory;
+    @FXML private ComboBox<String> comboAdvShelf;
+    @FXML private TextField txtAdvMinPrice;
+    @FXML private TextField txtAdvMaxPrice;
+    @FXML private ComboBox<String> comboAdvStockStatus;
+
+    // In-Place Circulation History View (One-Window Drilldown)
+    @FXML private VBox circulationHistoryPane;
+    @FXML private Label lblCirculationBookTitle;
+    @FXML private Label lblCirculationBookMeta;
+    @FXML private TableView<BorrowTransaction> circulationTable;
+    @FXML private TableColumn<BorrowTransaction, String> colTxId;
+    @FXML private TableColumn<BorrowTransaction, String> colTxReaderName;
+    @FXML private TableColumn<BorrowTransaction, String> colTxBorrowDate;
+    @FXML private TableColumn<BorrowTransaction, String> colTxDueDate;
+    @FXML private TableColumn<BorrowTransaction, String> colTxReturnDate;
+    @FXML private TableColumn<BorrowTransaction, String> colTxType;
+    @FXML private TableColumn<BorrowTransaction, String> colTxStatus;
+    @FXML private TableColumn<BorrowTransaction, Double> colTxFine;
+    private boolean isCirculationMode = false;
+    private Book circulationBook = null;
 
     // Two-Panel Selector: SplitPane & Master/Inspector Containers
     @FXML private SplitPane bookSplitPane;
@@ -105,6 +136,7 @@ public class BookManagementController implements Initializable {
     private final BookService bookService = new BookService();
     private final CategoryService categoryService = new CategoryService();
     private final ExportService exportService = new ExportService();
+    private final BorrowTransactionDao borrowTransactionDao = new BorrowTransactionDao();
 
     private final ObservableList<Book> bookMasterList = FXCollections.observableArrayList();
 
@@ -114,9 +146,12 @@ public class BookManagementController implements Initializable {
             bookSplitPane.setDividerPositions(DIVIDER_RATIO);
         }
         setupFilters();
+        setupAdvancedFilters();
+        setupCirculationTable();
         setupTable();
         loadBooks();
         switchView(true);
+        updateBreadcrumbs();
     }
 
     private void setupFilters() {
@@ -125,6 +160,103 @@ public class BookManagementController implements Initializable {
         ));
         statusFilterCombo.getSelectionModel().selectFirst();
         refreshAuthorFilterOptions();
+    }
+
+    private void setupAdvancedFilters() {
+        if (comboAdvStockStatus != null) {
+            comboAdvStockStatus.setItems(FXCollections.observableArrayList(
+                    "Tất cả", "Còn sách (In Stock)", "Hết sách (Out of Stock)"
+            ));
+            comboAdvStockStatus.getSelectionModel().selectFirst();
+        }
+        refreshAdvancedFilterOptions();
+    }
+
+    private void refreshAdvancedFilterOptions() {
+        if (comboAdvCategory != null) {
+            ObservableList<String> categories = FXCollections.observableArrayList("Tất cả");
+            for (Category c : categoryService.getAllCategories()) {
+                categories.add(c.getName());
+            }
+            comboAdvCategory.setItems(categories);
+            if (comboAdvCategory.getValue() == null) {
+                comboAdvCategory.getSelectionModel().selectFirst();
+            }
+        }
+
+        if (comboAdvShelf != null) {
+            ObservableList<String> shelves = FXCollections.observableArrayList("Tất cả");
+            java.util.Set<String> uniqueShelves = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+            for (Book b : bookMasterList) {
+                if (b.getShelfLocation() != null && !b.getShelfLocation().trim().isEmpty()) {
+                    uniqueShelves.add(b.getShelfLocation().trim());
+                }
+            }
+            shelves.addAll(uniqueShelves);
+            comboAdvShelf.setItems(shelves);
+            if (comboAdvShelf.getValue() == null) {
+                comboAdvShelf.getSelectionModel().selectFirst();
+            }
+        }
+    }
+
+    private void setupCirculationTable() {
+        if (circulationTable == null) return;
+        colTxId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colTxReaderName.setCellValueFactory(new PropertyValueFactory<>("readerName"));
+        colTxBorrowDate.setCellValueFactory(new PropertyValueFactory<>("borrowDate"));
+        colTxDueDate.setCellValueFactory(new PropertyValueFactory<>("dueDate"));
+        colTxReturnDate.setCellValueFactory(new PropertyValueFactory<>("returnDate"));
+        colTxReturnDate.setCellFactory(tc -> new TableCell<>() {
+            @Override
+            protected void updateItem(String date, boolean empty) {
+                super.updateItem(date, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(date != null && !date.isBlank() ? date : "— (Chưa trả)");
+                }
+            }
+        });
+        colTxType.setCellValueFactory(new PropertyValueFactory<>("borrowType"));
+        colTxStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        colTxStatus.setCellFactory(tc -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    Label badge = new Label(item);
+                    if ("Đã Trả".equalsIgnoreCase(item) || "Available".equalsIgnoreCase(item)) {
+                        badge.getStyleClass().add("badge-available");
+                    } else if ("Đang Mượn".equalsIgnoreCase(item) || "Borrowed".equalsIgnoreCase(item)) {
+                        badge.getStyleClass().add("badge-borrowed");
+                    } else if ("Quá Hạn".equalsIgnoreCase(item) || "Overdue".equalsIgnoreCase(item)) {
+                        badge.getStyleClass().add("badge-overdue");
+                    } else {
+                        badge.getStyleClass().add("badge-onhold");
+                    }
+                    HBox box = new HBox(badge);
+                    box.setAlignment(Pos.CENTER);
+                    setGraphic(box);
+                    setText(null);
+                }
+            }
+        });
+        colTxFine.setCellValueFactory(new PropertyValueFactory<>("fineAmount"));
+        colTxFine.setCellFactory(tc -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double fine, boolean empty) {
+                super.updateItem(fine, empty);
+                if (empty || fine == null) {
+                    setText(null);
+                } else {
+                    setText(fine > 0 ? String.format("%,.0f đ", fine) : "0 đ");
+                }
+            }
+        });
     }
 
     private void refreshAuthorFilterOptions() {
@@ -245,6 +377,7 @@ public class BookManagementController implements Initializable {
         List<Book> list = bookService.getAllBooks();
         bookMasterList.setAll(list);
         refreshAuthorFilterOptions();
+        refreshAdvancedFilterOptions();
         applyFilters();
     }
 
@@ -273,6 +406,7 @@ public class BookManagementController implements Initializable {
 
     @FXML
     public void handleAuthorFilter() {
+        this.drilldownAuthor = null;
         applyFilters();
     }
 
@@ -283,6 +417,37 @@ public class BookManagementController implements Initializable {
 
     @FXML
     public void handleSearchBook() {
+        if (isCirculationMode) {
+            exitCirculationMode();
+        }
+        applyFilters();
+    }
+
+    @FXML
+    public void handleToggleAdvancedFilter() {
+        if (advancedFilterPane == null) return;
+        boolean isVisible = !advancedFilterPane.isVisible();
+        advancedFilterPane.setVisible(isVisible);
+        advancedFilterPane.setManaged(isVisible);
+        if (btnToggleAdvancedFilter != null) {
+            btnToggleAdvancedFilter.setText(isVisible ? "Lọc nâng cao ▴" : "Lọc nâng cao ▾");
+        }
+    }
+
+    @FXML
+    public void handleAdvancedFilterChanged() {
+        applyFilters();
+    }
+
+    @FXML
+    public void handleResetAdvancedFilter() {
+        if (comboAdvCategory != null) comboAdvCategory.getSelectionModel().selectFirst();
+        if (comboAdvShelf != null) comboAdvShelf.setValue("Tất cả");
+        if (txtAdvMinPrice != null) txtAdvMinPrice.clear();
+        if (txtAdvMaxPrice != null) txtAdvMaxPrice.clear();
+        if (comboAdvStockStatus != null) comboAdvStockStatus.getSelectionModel().selectFirst();
+        this.drilldownAuthor = null;
+        this.drilldownShelf = null;
         applyFilters();
     }
 
@@ -299,6 +464,12 @@ public class BookManagementController implements Initializable {
         } else {
             this.currentCategoryFilter = categoryName.trim();
         }
+        if (comboAdvCategory != null && comboAdvCategory.getItems().contains(this.currentCategoryFilter)) {
+            comboAdvCategory.setValue(this.currentCategoryFilter);
+        }
+        if (isCirculationMode) {
+            exitCirculationMode();
+        }
         applyFilters();
     }
 
@@ -307,26 +478,74 @@ public class BookManagementController implements Initializable {
         String selectedStatus = statusFilterCombo != null ? statusFilterCombo.getValue() : "Tất cả";
         String search = txtSearchBook != null && txtSearchBook.getText() != null ? txtSearchBook.getText().trim() : "";
 
+        String advCategory = comboAdvCategory != null ? comboAdvCategory.getValue() : "Tất cả";
+        String advShelf = comboAdvShelf != null && comboAdvShelf.getValue() != null ? comboAdvShelf.getValue().trim() : "Tất cả";
+        String advStock = comboAdvStockStatus != null ? comboAdvStockStatus.getValue() : "Tất cả";
+
+        Double minPrice = null;
+        if (txtAdvMinPrice != null && !txtAdvMinPrice.getText().trim().isEmpty()) {
+            try {
+                minPrice = Double.parseDouble(txtAdvMinPrice.getText().trim());
+            } catch (NumberFormatException ignored) {}
+        }
+
+        Double maxPrice = null;
+        if (txtAdvMaxPrice != null && !txtAdvMaxPrice.getText().trim().isEmpty()) {
+            try {
+                maxPrice = Double.parseDouble(txtAdvMaxPrice.getText().trim());
+            } catch (NumberFormatException ignored) {}
+        }
+
         ObservableList<Book> filtered = FXCollections.observableArrayList();
         for (Book b : bookMasterList) {
-            // 1. Category Filter (triggered from sidebar subnav)
+            // 1. Category Filter
             boolean matchesCategory = true;
-            if (currentCategoryFilter != null && !"Tất cả".equalsIgnoreCase(currentCategoryFilter)) {
+            String activeCategory = (currentCategoryFilter != null && !"Tất cả".equalsIgnoreCase(currentCategoryFilter))
+                    ? currentCategoryFilter
+                    : (advCategory != null && !"Tất cả".equalsIgnoreCase(advCategory) ? advCategory : null);
+
+            if (activeCategory != null) {
                 String cat = b.getCategory() != null ? b.getCategory() : "";
-                matchesCategory = VietnameseUtils.matches(cat, currentCategoryFilter) ||
-                        VietnameseUtils.matches(currentCategoryFilter, cat) ||
-                        (currentCategoryFilter.toLowerCase().contains("toán") && cat.toLowerCase().contains("toán"));
+                matchesCategory = VietnameseUtils.matches(cat, activeCategory) ||
+                        VietnameseUtils.matches(activeCategory, cat) ||
+                        (activeCategory.toLowerCase().contains("toán") && cat.toLowerCase().contains("toán"));
             }
 
-            // 2. Author Filter (from ComboBox)
-            boolean matchesAuthor = selectedAuthor == null || "Tất cả".equalsIgnoreCase(selectedAuthor) ||
-                    (b.getAuthor() != null && VietnameseUtils.matches(b.getAuthor(), selectedAuthor));
+            // 2. Author Filter (from combo or drilldown)
+            boolean matchesAuthor = true;
+            if (drilldownAuthor != null && !drilldownAuthor.isBlank()) {
+                matchesAuthor = b.getAuthor() != null && VietnameseUtils.matches(b.getAuthor(), drilldownAuthor);
+            } else if (selectedAuthor != null && !"Tất cả".equalsIgnoreCase(selectedAuthor)) {
+                matchesAuthor = b.getAuthor() != null && VietnameseUtils.matches(b.getAuthor(), selectedAuthor);
+            }
 
-            // 3. Status Filter
+            // 3. Shelf Filter (from combo or drilldown)
+            boolean matchesShelf = true;
+            if (drilldownShelf != null && !drilldownShelf.isBlank()) {
+                matchesShelf = b.getShelfLocation() != null && VietnameseUtils.matches(b.getShelfLocation(), drilldownShelf);
+            } else if (advShelf != null && !"Tất cả".equalsIgnoreCase(advShelf) && !advShelf.isBlank()) {
+                matchesShelf = b.getShelfLocation() != null && VietnameseUtils.matches(b.getShelfLocation(), advShelf);
+            }
+
+            // 4. Status Filter
             boolean matchesStatus = selectedStatus == null || "Tất cả".equalsIgnoreCase(selectedStatus) ||
                     (b.getStatus() != null && selectedStatus.equalsIgnoreCase(b.getStatus()));
 
-            // 4. Search Keyword Filter
+            // 5. Price Range Filter
+            boolean matchesMinPrice = (minPrice == null) || (b.getPrice() >= minPrice);
+            boolean matchesMaxPrice = (maxPrice == null) || (b.getPrice() <= maxPrice);
+
+            // 6. Stock Status Filter
+            boolean matchesStock = true;
+            if (advStock != null) {
+                if (advStock.toLowerCase().contains("còn") || advStock.toLowerCase().contains("stock")) {
+                    matchesStock = b.getAvailableCopies() > 0;
+                } else if (advStock.toLowerCase().contains("hết") || advStock.toLowerCase().contains("out")) {
+                    matchesStock = b.getAvailableCopies() <= 0;
+                }
+            }
+
+            // 7. Search Keyword Filter
             boolean matchesSearch = search.isEmpty() ||
                     VietnameseUtils.matches(b.getId(), search) ||
                     VietnameseUtils.matches(b.getTitle(), search) ||
@@ -334,7 +553,8 @@ public class BookManagementController implements Initializable {
                     VietnameseUtils.matches(b.getShelfLocation(), search) ||
                     VietnameseUtils.matches(b.getIsbn(), search);
 
-            if (matchesCategory && matchesAuthor && matchesStatus && matchesSearch) {
+            if (matchesCategory && matchesAuthor && matchesShelf && matchesStatus &&
+                    matchesMinPrice && matchesMaxPrice && matchesStock && matchesSearch) {
                 filtered.add(b);
             }
         }
@@ -364,6 +584,7 @@ public class BookManagementController implements Initializable {
         if (!isTableViewMode && booksGridPane != null) {
             renderGridView(filtered);
         }
+        updateBreadcrumbs();
     }
 
     public boolean isTableViewMode() {
@@ -386,6 +607,9 @@ public class BookManagementController implements Initializable {
 
     public void switchView(boolean isTable) {
         this.isTableViewMode = isTable;
+        if (isCirculationMode) {
+            exitCirculationMode();
+        }
         if (btnTableView != null && btnGridView != null) {
             if (isTable) {
                 if (!btnTableView.getStyleClass().contains("segmented-view-active")) {
@@ -586,6 +810,10 @@ public class BookManagementController implements Initializable {
         if (book == null) {
             detailInspectorPane.setVisible(false);
             detailInspectorPane.setManaged(false);
+            if (inspectorBranchesBox != null) {
+                inspectorBranchesBox.getChildren().clear();
+            }
+            updateBreadcrumbs();
             return;
         }
 
@@ -597,12 +825,16 @@ public class BookManagementController implements Initializable {
         }
         if (lblInspectorAuthor != null) {
             lblInspectorAuthor.setText(book.getAuthor() != null ? book.getAuthor() : "Không rõ tác giả");
+            lblInspectorAuthor.setStyle("-fx-cursor: hand;");
+            lblInspectorAuthor.setOnMouseClicked(e -> drilldownByAuthor(book.getAuthor()));
         }
         if (lblInspectorCategory != null) {
             lblInspectorCategory.setText(book.getCategory() != null ? book.getCategory() : "Khác");
         }
         if (lblInspectorShelf != null) {
             lblInspectorShelf.setText(book.getShelfLocation() != null ? book.getShelfLocation() : "Chưa xếp kệ");
+            lblInspectorShelf.setStyle("-fx-cursor: hand;");
+            lblInspectorShelf.setOnMouseClicked(e -> drilldownByShelf(book.getShelfLocation()));
         }
         if (lblInspectorIsbn != null) {
             lblInspectorIsbn.setText(book.getIsbn() != null && !book.getIsbn().isBlank() ? book.getIsbn() : "Chưa có ISBN");
@@ -650,6 +882,331 @@ public class BookManagementController implements Initializable {
             btnInspectorBorrow.setDisable(book.getAvailableCopies() <= 0);
         }
         applySecurityPermissions();
+
+        // Intriguing branches & Breadcrumb sync
+        renderIntriguingBranches(book);
+        updateBreadcrumbs();
+    }
+
+    public void renderIntriguingBranches(Book book) {
+        if (inspectorBranchesBox == null) return;
+        inspectorBranchesBox.getChildren().clear();
+        if (book == null) return;
+
+        Label lblSection = new Label("NHÁNH LIÊN QUAN & GỢI Ý");
+        lblSection.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #1DB954; -fx-padding: 6 0 2 0;");
+        inspectorBranchesBox.getChildren().add(lblSection);
+
+        // 1. Same Shelf Branch
+        VBox shelfBox = new VBox(4);
+        HBox shelfHeader = new HBox(8);
+        shelfHeader.setAlignment(Pos.CENTER_LEFT);
+        Label lblShelf = new Label("📚 Cùng kệ: " + (book.getShelfLocation() != null ? book.getShelfLocation() : "Chưa xếp"));
+        lblShelf.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #E0E0E0;");
+        Region spacer1 = new Region();
+        HBox.setHgrow(spacer1, Priority.ALWAYS);
+        Label linkAllShelf = new Label("Xem tất cả ➔");
+        linkAllShelf.getStyleClass().add("branch-action-link");
+        linkAllShelf.setOnMouseClicked(e -> drilldownByShelf(book.getShelfLocation()));
+        shelfHeader.getChildren().addAll(lblShelf, spacer1, linkAllShelf);
+        shelfBox.getChildren().add(shelfHeader);
+
+        List<Book> sameShelfBooks = bookMasterList.stream()
+                .filter(b -> !b.getId().equals(book.getId()) &&
+                        book.getShelfLocation() != null &&
+                        book.getShelfLocation().equalsIgnoreCase(b.getShelfLocation()))
+                .limit(3)
+                .toList();
+
+        if (sameShelfBooks.isEmpty()) {
+            Label emptyLbl = new Label("(Không có sách khác trên kệ này)");
+            emptyLbl.getStyleClass().add("branch-subtitle");
+            emptyLbl.setStyle("-fx-font-style: italic;");
+            shelfBox.getChildren().add(emptyLbl);
+        } else {
+            for (Book b : sameShelfBooks) {
+                shelfBox.getChildren().add(createMiniBranchCard(b));
+            }
+        }
+        inspectorBranchesBox.getChildren().add(shelfBox);
+
+        // 2. Same Author Branch
+        VBox authorBox = new VBox(4);
+        HBox authorHeader = new HBox(8);
+        authorHeader.setAlignment(Pos.CENTER_LEFT);
+        Label lblAuthor = new Label("✍ Cùng tác giả: " + (book.getAuthor() != null ? book.getAuthor() : "Không rõ"));
+        lblAuthor.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #E0E0E0;");
+        Region spacer2 = new Region();
+        HBox.setHgrow(spacer2, Priority.ALWAYS);
+        Label linkAllAuthor = new Label("Xem tất cả ➔");
+        linkAllAuthor.getStyleClass().add("branch-action-link");
+        linkAllAuthor.setOnMouseClicked(e -> drilldownByAuthor(book.getAuthor()));
+        authorHeader.getChildren().addAll(lblAuthor, spacer2, linkAllAuthor);
+        authorBox.getChildren().add(authorHeader);
+
+        List<Book> sameAuthorBooks = bookMasterList.stream()
+                .filter(b -> !b.getId().equals(book.getId()) &&
+                        book.getAuthor() != null &&
+                        book.getAuthor().equalsIgnoreCase(b.getAuthor()))
+                .limit(3)
+                .toList();
+
+        if (sameAuthorBooks.isEmpty()) {
+            Label emptyLbl = new Label("(Chưa có sách khác cùng tác giả)");
+            emptyLbl.getStyleClass().add("branch-subtitle");
+            emptyLbl.setStyle("-fx-font-style: italic;");
+            authorBox.getChildren().add(emptyLbl);
+        } else {
+            for (Book b : sameAuthorBooks) {
+                authorBox.getChildren().add(createMiniBranchCard(b));
+            }
+        }
+        inspectorBranchesBox.getChildren().add(authorBox);
+
+        // 3. Circulation History Action
+        Button btnViewCirculation = new Button("📜 Xem Lịch Sử Lưu Hành Cuốn Này");
+        btnViewCirculation.setMaxWidth(Double.MAX_VALUE);
+        btnViewCirculation.getStyleClass().add("btn-secondary");
+        btnViewCirculation.setStyle("-fx-font-size: 11px; -fx-padding: 6 12;");
+        btnViewCirculation.setOnAction(e -> showCirculationHistory(book));
+        inspectorBranchesBox.getChildren().add(btnViewCirculation);
+    }
+
+    private HBox createMiniBranchCard(Book b) {
+        HBox card = new HBox(8);
+        card.setAlignment(Pos.CENTER_LEFT);
+        card.getStyleClass().add("branch-card");
+
+        Label iconLbl = new Label("📖");
+        iconLbl.setStyle("-fx-font-size: 13px;");
+
+        VBox info = new VBox(2);
+        Label titleLbl = new Label(b.getTitle());
+        titleLbl.getStyleClass().add("branch-title");
+        titleLbl.setMaxWidth(180);
+
+        Label subLbl = new Label(String.format("%,.0f đ | Còn %d/%d", b.getPrice(), b.getAvailableCopies(), b.getTotalCopies()));
+        subLbl.getStyleClass().add("branch-subtitle");
+
+        info.getChildren().addAll(titleLbl, subLbl);
+        HBox.setHgrow(info, Priority.ALWAYS);
+
+        card.getChildren().addAll(iconLbl, info);
+
+        card.setOnMouseClicked(e -> {
+            if (booksTable != null) {
+                booksTable.getSelectionModel().select(b);
+                booksTable.scrollTo(b);
+            }
+            showBookDetail(b);
+            if (!isTableViewMode && booksGridPane != null) {
+                renderGridView(currentFilteredBooks);
+            }
+        });
+
+        return card;
+    }
+
+    public void drilldownByShelf(String shelf) {
+        if (shelf == null || shelf.trim().isEmpty()) return;
+        this.drilldownShelf = shelf.trim();
+        this.drilldownAuthor = null;
+        if (comboAdvShelf != null) {
+            comboAdvShelf.setValue(this.drilldownShelf);
+        }
+        if (isCirculationMode) {
+            exitCirculationMode();
+        }
+        applyFilters();
+    }
+
+    public void drilldownByAuthor(String author) {
+        if (author == null || author.trim().isEmpty()) return;
+        this.drilldownAuthor = author.trim();
+        this.drilldownShelf = null;
+        if (authorFilterCombo != null && authorFilterCombo.getItems().contains(this.drilldownAuthor)) {
+            authorFilterCombo.setValue(this.drilldownAuthor);
+        }
+        if (isCirculationMode) {
+            exitCirculationMode();
+        }
+        applyFilters();
+    }
+
+    public void showCirculationHistory(Book book) {
+        if (book == null) return;
+        this.isCirculationMode = true;
+        this.circulationBook = book;
+
+        if (booksTable != null) {
+            booksTable.setVisible(false);
+            booksTable.setManaged(false);
+        }
+        if (booksGridScrollPane != null) {
+            booksGridScrollPane.setVisible(false);
+            booksGridScrollPane.setManaged(false);
+        }
+        if (circulationHistoryPane != null) {
+            circulationHistoryPane.setVisible(true);
+            circulationHistoryPane.setManaged(true);
+        }
+
+        if (lblCirculationBookTitle != null) {
+            lblCirculationBookTitle.setText("Lịch Sử Lưu Hành: " + book.getTitle());
+        }
+        if (lblCirculationBookMeta != null) {
+            lblCirculationBookMeta.setText("Mã sách: " + book.getId() + " | Tác giả: " + book.getAuthor() + " | Vị trí: " + book.getShelfLocation());
+        }
+
+        if (circulationTable != null) {
+            List<BorrowTransaction> txList = borrowTransactionDao.getTransactionsByBook(book.getId());
+            circulationTable.setItems(FXCollections.observableArrayList(txList));
+        }
+
+        updateBreadcrumbs();
+    }
+
+    public void exitCirculationMode() {
+        this.isCirculationMode = false;
+        if (circulationHistoryPane != null) {
+            circulationHistoryPane.setVisible(false);
+            circulationHistoryPane.setManaged(false);
+        }
+        if (isTableViewMode) {
+            if (booksTable != null) {
+                booksTable.setVisible(true);
+                booksTable.setManaged(true);
+            }
+        } else {
+            if (booksGridScrollPane != null) {
+                booksGridScrollPane.setVisible(true);
+                booksGridScrollPane.setManaged(true);
+            }
+        }
+    }
+
+    @FXML
+    public void handleBackFromCirculationHistory() {
+        exitCirculationMode();
+        updateBreadcrumbs();
+    }
+
+    public void resetAllDrilldownAndFilters() {
+        this.drilldownAuthor = null;
+        this.drilldownShelf = null;
+        this.currentCategoryFilter = "Tất cả";
+        if (authorFilterCombo != null) authorFilterCombo.getSelectionModel().selectFirst();
+        if (statusFilterCombo != null) statusFilterCombo.getSelectionModel().selectFirst();
+        if (comboAdvCategory != null) comboAdvCategory.getSelectionModel().selectFirst();
+        if (comboAdvShelf != null) comboAdvShelf.setValue("Tất cả");
+        if (txtAdvMinPrice != null) txtAdvMinPrice.clear();
+        if (txtAdvMaxPrice != null) txtAdvMaxPrice.clear();
+        if (comboAdvStockStatus != null) comboAdvStockStatus.getSelectionModel().selectFirst();
+        if (txtSearchBook != null) txtSearchBook.clear();
+        if (isCirculationMode) {
+            exitCirculationMode();
+        }
+        applyFilters();
+    }
+
+    public void updateBreadcrumbs() {
+        if (breadcrumbContainer == null) return;
+        breadcrumbContainer.getChildren().clear();
+
+        boolean hasFilter = (currentCategoryFilter != null && !"Tất cả".equalsIgnoreCase(currentCategoryFilter))
+                || (drilldownAuthor != null && !drilldownAuthor.isBlank())
+                || (drilldownShelf != null && !drilldownShelf.isBlank())
+                || (isCirculationMode)
+                || (currentSelectedBook != null);
+
+        Label rootChip = new Label("Kho Sách");
+        if (!hasFilter) {
+            rootChip.getStyleClass().add("breadcrumb-chip-active");
+            breadcrumbContainer.getChildren().add(rootChip);
+            return;
+        }
+
+        rootChip.getStyleClass().add("breadcrumb-chip");
+        rootChip.setOnMouseClicked(e -> resetAllDrilldownAndFilters());
+        breadcrumbContainer.getChildren().add(rootChip);
+
+        if (currentCategoryFilter != null && !"Tất cả".equalsIgnoreCase(currentCategoryFilter)) {
+            breadcrumbContainer.getChildren().add(createSeparator());
+            boolean isLeaf = (drilldownAuthor == null && drilldownShelf == null && !isCirculationMode && currentSelectedBook == null);
+            Label catChip = new Label("Thể loại: " + currentCategoryFilter);
+            if (isLeaf) {
+                catChip.getStyleClass().add("breadcrumb-chip-active");
+            } else {
+                catChip.getStyleClass().add("breadcrumb-chip");
+                catChip.setOnMouseClicked(e -> {
+                    drilldownAuthor = null;
+                    drilldownShelf = null;
+                    if (isCirculationMode) exitCirculationMode();
+                    applyFilters();
+                });
+            }
+            breadcrumbContainer.getChildren().add(catChip);
+        }
+
+        if (drilldownShelf != null && !drilldownShelf.isBlank()) {
+            breadcrumbContainer.getChildren().add(createSeparator());
+            boolean isLeaf = (!isCirculationMode && currentSelectedBook == null);
+            Label shelfChip = new Label("Kệ: " + drilldownShelf);
+            if (isLeaf) {
+                shelfChip.getStyleClass().add("breadcrumb-chip-active");
+            } else {
+                shelfChip.getStyleClass().add("breadcrumb-chip");
+                shelfChip.setOnMouseClicked(e -> {
+                    if (isCirculationMode) exitCirculationMode();
+                    applyFilters();
+                });
+            }
+            breadcrumbContainer.getChildren().add(shelfChip);
+        }
+
+        if (drilldownAuthor != null && !drilldownAuthor.isBlank()) {
+            breadcrumbContainer.getChildren().add(createSeparator());
+            boolean isLeaf = (!isCirculationMode && currentSelectedBook == null);
+            Label authorChip = new Label("Tác giả: " + drilldownAuthor);
+            if (isLeaf) {
+                authorChip.getStyleClass().add("breadcrumb-chip-active");
+            } else {
+                authorChip.getStyleClass().add("breadcrumb-chip");
+                authorChip.setOnMouseClicked(e -> {
+                    if (isCirculationMode) exitCirculationMode();
+                    applyFilters();
+                });
+            }
+            breadcrumbContainer.getChildren().add(authorChip);
+        }
+
+        if (currentSelectedBook != null) {
+            breadcrumbContainer.getChildren().add(createSeparator());
+            Label bookChip = new Label("Chi tiết: " + currentSelectedBook.getTitle());
+            if (!isCirculationMode) {
+                bookChip.getStyleClass().add("breadcrumb-chip-active");
+            } else {
+                bookChip.getStyleClass().add("breadcrumb-chip");
+                bookChip.setOnMouseClicked(e -> {
+                    exitCirculationMode();
+                    updateBreadcrumbs();
+                });
+            }
+            breadcrumbContainer.getChildren().add(bookChip);
+        }
+
+        if (isCirculationMode && circulationBook != null) {
+            breadcrumbContainer.getChildren().add(createSeparator());
+            Label circChip = new Label("Lịch sử lưu hành");
+            circChip.getStyleClass().add("breadcrumb-chip-active");
+            breadcrumbContainer.getChildren().add(circChip);
+        }
+    }
+
+    private Label createSeparator() {
+        Label sep = new Label("›");
+        sep.getStyleClass().add("breadcrumb-separator");
+        return sep;
     }
 
     @FXML

@@ -28,18 +28,23 @@
             <Button text="Làm Mới" onAction="#loadBooks" styleClass="btn-secondary"/>
         </HBox>
 
+        <!-- Breadcrumb Navigation (One-Window Drilldown) -->
+        <HBox fx:id="breadcrumbContainer" alignment="CENTER_LEFT" spacing="8" styleClass="breadcrumb-container"/>
+
         <!-- Filter & Search Toolbar -->
         <HBox alignment="CENTER_LEFT" spacing="12" styleClass="bg-surface">
             <padding>
                 <Insets top="12" right="16" bottom="12" left="16"/>
             </padding>
             <Label text="Lọc theo tác giả:" styleClass="form-label"/>
-            <ComboBox fx:id="authorFilterCombo" prefWidth="180" styleClass="form-control" onAction="#handleAuthorFilter"/>
+            <ComboBox fx:id="authorFilterCombo" prefWidth="170" styleClass="form-control" onAction="#handleAuthorFilter"/>
             <Label text="Trạng thái:" styleClass="form-label"/>
-            <ComboBox fx:id="statusFilterCombo" prefWidth="140" styleClass="form-control" onAction="#handleStatusFilter"/>
+            <ComboBox fx:id="statusFilterCombo" prefWidth="130" styleClass="form-control" onAction="#handleStatusFilter"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <TextField fx:id="txtSearchBook" promptText="Tìm theo mã, tên, tác giả, vị trí kệ..." prefWidth="260"
+            <TextField fx:id="txtSearchBook" promptText="Tìm theo mã, tên, tác giả, vị trí kệ..." prefWidth="240"
                        styleClass="search-field" onKeyReleased="#handleSearchBook"/>
+            <Button fx:id="btnToggleAdvancedFilter" text="Lọc nâng cao ▾" onAction="#handleToggleAdvancedFilter"
+                    styleClass="btn-secondary" style="-fx-font-size: 12px;"/>
             <!-- Segmented View Toggle Buttons -->
             <HBox styleClass="segmented-view-group" alignment="CENTER_LEFT" spacing="2">
                 <Button fx:id="btnTableView" text="☰ Bảng" onAction="#handleSwitchToTableView"
@@ -49,10 +54,42 @@
             </HBox>
         </HBox>
 
-        <!-- Two-Panel Selector: Master (Table/Grid) + Detail Inspector -->
+        <!-- Extras on Demand: Advanced Filter Pane -->
+        <VBox fx:id="advancedFilterPane" visible="false" managed="false" spacing="10" styleClass="bg-surface"
+              style="-fx-padding: 12 16; -fx-background-radius: 8px; -fx-border-color: #282828; -fx-border-radius: 8px; -fx-border-width: 1px;">
+            <HBox alignment="CENTER_LEFT" spacing="14">
+                <VBox spacing="4">
+                    <Label text="Thể loại:" styleClass="form-label"/>
+                    <ComboBox fx:id="comboAdvCategory" prefWidth="160" styleClass="form-control" onAction="#handleAdvancedFilterChanged"/>
+                </VBox>
+                <VBox spacing="4">
+                    <Label text="Vị trí kệ:" styleClass="form-label"/>
+                    <ComboBox fx:id="comboAdvShelf" prefWidth="160" styleClass="form-control" editable="true" onAction="#handleAdvancedFilterChanged"/>
+                </VBox>
+                <VBox spacing="4">
+                    <Label text="Khoảng giá (VNĐ):" styleClass="form-label"/>
+                    <HBox alignment="CENTER_LEFT" spacing="6">
+                        <TextField fx:id="txtAdvMinPrice" promptText="Từ" prefWidth="85" styleClass="form-control" onKeyReleased="#handleAdvancedFilterChanged"/>
+                        <Label text="-" styleClass="text-muted"/>
+                        <TextField fx:id="txtAdvMaxPrice" promptText="Đến" prefWidth="85" styleClass="form-control" onKeyReleased="#handleAdvancedFilterChanged"/>
+                    </HBox>
+                </VBox>
+                <VBox spacing="4">
+                    <Label text="Tồn kho:" styleClass="form-label"/>
+                    <ComboBox fx:id="comboAdvStockStatus" prefWidth="150" styleClass="form-control" onAction="#handleAdvancedFilterChanged"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <VBox alignment="BOTTOM_RIGHT" spacing="4">
+                    <Label text=""/>
+                    <Button text="✕ Đặt lại bộ lọc" onAction="#handleResetAdvancedFilter" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <!-- Two-Panel Selector: Master (Table/Grid/Circulation) + Detail Inspector -->
         <SplitPane fx:id="bookSplitPane" VBox.vgrow="ALWAYS" dividerPositions="0.68" styleClass="split-inspector-pane">
             <items>
-                <!-- Master Area: Holds Table and Grid Views (68%) -->
+                <!-- Master Area: Holds Table, Grid Views, and In-Place Circulation History (68%) -->
                 <StackPane fx:id="bookMasterPane" minWidth="400">
                     <!-- Books Table -->
                     <TableView fx:id="booksTable" VBox.vgrow="ALWAYS" prefHeight="450">
@@ -77,6 +114,33 @@
                                 visible="false" managed="false" VBox.vgrow="ALWAYS">
                         <FlowPane fx:id="booksGridPane" hgap="14" vgap="14" style="-fx-padding: 12;"/>
                     </ScrollPane>
+
+                    <!-- In-Place Circulation History View (One-Window Drilldown) -->
+                    <VBox fx:id="circulationHistoryPane" visible="false" managed="false" spacing="12" VBox.vgrow="ALWAYS"
+                          styleClass="bg-surface" style="-fx-padding: 16; -fx-background-radius: 8px;">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <Button text="← Quay lại danh sách sách" onAction="#handleBackFromCirculationHistory" styleClass="btn-secondary" style="-fx-font-size: 12px;"/>
+                            <VBox spacing="2">
+                                <Label fx:id="lblCirculationBookTitle" text="Lịch Sử Lưu Hành Sách" styleClass="title-large" style="-fx-font-size: 16px;"/>
+                                <Label fx:id="lblCirculationBookMeta" text="Lịch sử mượn trả và luân chuyển của cuốn sách trong hệ thống" styleClass="text-muted" style="-fx-font-size: 12px;"/>
+                            </VBox>
+                        </HBox>
+                        <TableView fx:id="circulationTable" VBox.vgrow="ALWAYS" prefHeight="400">
+                            <columns>
+                                <TableColumn fx:id="colTxId" text="Mã Phiếu" prefWidth="85"/>
+                                <TableColumn fx:id="colTxReaderName" text="Độc Giả" prefWidth="140"/>
+                                <TableColumn fx:id="colTxBorrowDate" text="Ngày Mượn" prefWidth="95"/>
+                                <TableColumn fx:id="colTxDueDate" text="Hạn Trả" prefWidth="95"/>
+                                <TableColumn fx:id="colTxReturnDate" text="Ngày Trả" prefWidth="95"/>
+                                <TableColumn fx:id="colTxType" text="Hình Thức" prefWidth="110"/>
+                                <TableColumn fx:id="colTxStatus" text="Trạng Thái" prefWidth="95"/>
+                                <TableColumn fx:id="colTxFine" text="Tiền Phạt" prefWidth="85"/>
+                            </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
+                        </TableView>
+                    </VBox>
                 </StackPane>
 
                 <!-- Right Pane: Detail Inspector (32%) -->

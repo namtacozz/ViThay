@@ -1027,6 +1027,68 @@
     -fx-text-fill: #727272;
     -fx-font-size: 11px;
 }
+.theme-pink-light .breadcrumb-container {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #FECDD3;
+}
+.theme-pink-light .breadcrumb-chip {
+    -fx-text-fill: #E11D48;
+}
+.theme-pink-light .breadcrumb-chip-active {
+    -fx-text-fill: #1E1B1D;
+}
+.theme-pink-light .breadcrumb-separator {
+    -fx-text-fill: #9CA3AF;
+}
+
+/* Branch Cards & Intriguing Links */
+.branch-card {
+    -fx-background-color: #222222;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px 10px;
+    -fx-cursor: hand;
+    -fx-border-color: #2F2F2F;
+    -fx-border-radius: 6px;
+}
+.branch-card:hover {
+    -fx-background-color: #282828;
+    -fx-border-color: #1DB954;
+}
+.theme-pink-light .branch-card {
+    -fx-background-color: #FFF1F2;
+    -fx-border-color: #FECDD3;
+}
+.theme-pink-light .branch-card:hover {
+    -fx-background-color: #FFE4E6;
+    -fx-border-color: #E11D48;
+}
+.branch-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+}
+.theme-pink-light .branch-title {
+    -fx-text-fill: #1E1B1D;
+}
+.branch-subtitle {
+    -fx-font-size: 11px;
+    -fx-text-fill: #A0A0A0;
+}
+.theme-pink-light .branch-subtitle {
+    -fx-text-fill: #6B7280;
+}
+.branch-action-link {
+    -fx-text-fill: #1DB954;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+.branch-action-link:hover {
+    -fx-underline: true;
+}
+.theme-pink-light .branch-action-link {
+    -fx-text-fill: #E11D48;
+}
 
 /* 3. Grid / Card View */
 .book-grid-card {
