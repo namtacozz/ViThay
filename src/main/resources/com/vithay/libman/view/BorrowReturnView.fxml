@@ -20,60 +20,88 @@
     <!-- Main TabPane -->
     <TabPane fx:id="borrowTabPane" VBox.vgrow="ALWAYS" styleClass="bg-surface" tabClosingPolicy="UNAVAILABLE">
         <tabs>
-            <!-- TAB 1: LẬP PHIẾU MƯỢN -->
-            <Tab text="Lập Phiếu Mượn Mới">
-                <VBox spacing="20">
-                    <padding>
-                        <Insets top="24" right="32" bottom="24" left="32"/>
-                    </padding>
+            <!-- TAB 1: BÀN LƯU HÀNH (CANVAS PLUS PALETTE) -->
+            <Tab text="Bàn Lưu Hành (Desk)">
+                <SplitPane fx:id="deskSplitPane" dividerPositions="0.32" VBox.vgrow="ALWAYS"
+                           style="-fx-background-color: transparent; -fx-box-border: transparent; -fx-padding: 12 16;">
+                    <!-- Cột Palette (30%): Tìm kiếm sách nhanh, danh sách sách khả dụng -->
+                    <VBox styleClass="desk-palette-box" spacing="12">
+                        <VBox spacing="4">
+                            <Label text="Bảng Sách Khả Dụng (Palette)" styleClass="title-medium" style="-fx-font-size: 15px;"/>
+                            <Label text="Tìm và bấm [+ Thêm] để xếp sách lên bàn lưu hành" styleClass="text-muted" style="-fx-font-size: 11px;"/>
+                        </VBox>
 
-                    <Label text="Thông Tin Phiếu Mượn Sách" styleClass="title-medium"/>
+                        <TextField fx:id="txtDeskBookSearch" promptText="Tìm theo tên sách, tác giả, mã..."
+                                   styleClass="search-field" onKeyReleased="#handleDeskBookSearch"/>
 
-                    <GridPane hgap="24" vgap="16">
-                        <columnConstraints>
-                            <ColumnConstraints minWidth="180" prefWidth="200"/>
-                            <ColumnConstraints hgrow="ALWAYS" minWidth="300"/>
-                        </columnConstraints>
+                        <ListView fx:id="listDeskAvailableBooks" VBox.vgrow="ALWAYS" styleClass="bg-card"/>
 
-                        <!-- Chọn độc giả -->
-                        <Label text="Chọn Độc Giả:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                        <HBox spacing="8" GridPane.rowIndex="0" GridPane.columnIndex="1">
-                            <ComboBox fx:id="comboBorrowReader" prefWidth="380" styleClass="form-control" promptText="-- Chọn hoặc tìm độc giả --"/>
-                            <Label fx:id="lblReaderStatusNote" text="" style="-fx-alignment: CENTER_LEFT; -fx-padding: 8 0 0 0;"/>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label fx:id="lblDeskAvailableCount" text="Khả dụng: 0 cuốn" styleClass="text-muted" style="-fx-font-size: 11px;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="btnAddSelectedToBasket" text="+ Thêm vào bàn" onAction="#handleDeskAddSelectedBook"
+                                    styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
                         </HBox>
+                    </VBox>
 
-                        <!-- Chọn sách -->
-                        <Label text="Chọn Sách Cần Mượn:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <HBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="1">
-                            <ComboBox fx:id="comboBorrowBook" prefWidth="380" styleClass="form-control" promptText="-- Chọn sách khả dụng --"/>
-                            <Label fx:id="lblBookAvailableNote" text="" style="-fx-alignment: CENTER_LEFT; -fx-padding: 8 0 0 0;"/>
+                    <!-- Cột Canvas (70%): Bàn làm việc mượn sách -->
+                    <VBox styleClass="desk-canvas-zone" spacing="14">
+                        <!-- Active Reader Header -->
+                        <VBox spacing="8" style="-fx-background-color: #1A1A1A; -fx-padding: 12 16; -fx-background-radius: 8px; -fx-border-color: #282828; -fx-border-radius: 8px;">
+                            <HBox alignment="CENTER_LEFT" spacing="12">
+                                <Label text="Chọn Độc Giả:" styleClass="form-label" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="comboDeskReader" prefWidth="300" styleClass="form-control"
+                                          promptText="-- Chọn hoặc tìm độc giả --" onAction="#handleSelectDeskReader"/>
+
+                                <!-- Profile Chip -->
+                                <HBox fx:id="deskReaderChip" alignment="CENTER_LEFT" spacing="10"
+                                      style="-fx-background-color: #222222; -fx-padding: 6 12; -fx-background-radius: 20px; -fx-border-color: #333333; -fx-border-radius: 20px;">
+                                    <Label fx:id="lblDeskReaderStatus" text="Trạng thái: --" styleClass="text-muted" style="-fx-font-size: 12px;"/>
+                                    <Label text="•" style="-fx-text-fill: #555555;"/>
+                                    <Label fx:id="lblDeskReaderBorrowing" text="Đang mượn: 0/5" styleClass="text-muted" style="-fx-font-size: 12px;"/>
+                                    <Label text="•" style="-fx-text-fill: #555555;"/>
+                                    <Label fx:id="lblDeskReaderQuota" text="Còn được mượn: 5" style="-fx-text-fill: #1DB954; -fx-font-weight: bold; -fx-font-size: 12px;"/>
+                                </HBox>
+                            </HBox>
+
+                            <Label fx:id="lblDeskReaderNote" text="Vui lòng chọn độc giả để bắt đầu phục vụ lưu hành." style="-fx-font-size: 12px; -fx-text-fill: #9CA3AF;"/>
+                        </VBox>
+
+                        <!-- Circulation Basket Canvas Area -->
+                        <VBox VBox.vgrow="ALWAYS" spacing="8">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Label text="Giỏ Sách Trên Bàn Lưu Hành (Circulation Basket)" styleClass="title-medium" style="-fx-font-size: 14px;"/>
+                                <Label fx:id="lblBasketCount" text="(0/5 cuốn)" styleClass="text-muted" style="-fx-font-size: 12px;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="✕ Xóa hết" onAction="#handleClearBasket" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
+                            </HBox>
+
+                            <!-- Scrollable Basket Workspace -->
+                            <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true"
+                                        style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: #262626; -fx-border-radius: 8px;">
+                                <VBox fx:id="basketCardsContainer" spacing="10" style="-fx-padding: 10;">
+                                    <!-- Dynamic .desk-basket-card elements -->
+                                </VBox>
+                            </ScrollPane>
+                        </VBox>
+
+                        <!-- Bottom Summary Bar -->
+                        <HBox alignment="CENTER_LEFT" spacing="14"
+                              style="-fx-background-color: #1A1A1A; -fx-padding: 12 16; -fx-background-radius: 8px; -fx-border-color: #282828; -fx-border-radius: 8px;">
+                            <VBox spacing="2">
+                                <Label fx:id="lblSummaryTotalBooks" text="Tổng trong giỏ: 0 cuốn" style="-fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
+                                <Label fx:id="lblSummaryQuotaStatus" text="Chưa chọn sách" styleClass="text-muted" style="-fx-font-size: 11px;"/>
+                            </VBox>
+
+                            <Region HBox.hgrow="ALWAYS"/>
+
+                            <TextField fx:id="txtDeskNotes" promptText="Ghi chú phiếu mượn..." prefWidth="260" styleClass="form-control"/>
+
+                            <Button fx:id="btnCompleteCheckout" text="⚡ Hoàn Tất &amp; In Phiếu" onAction="#handleCompleteDeskCheckout"
+                                    styleClass="btn-primary" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8 18;"/>
                         </HBox>
-
-                        <!-- Hình thức mượn (SRS trang 1 & 5.5) -->
-                        <Label text="Hình Thức Mượn Sách:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                        <ComboBox fx:id="comboBorrowType" prefWidth="380" styleClass="form-control" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-
-                        <!-- Thời gian mượn -->
-                        <Label text="Thời Hạn Mượn (Ngày):" styleClass="form-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                        <HBox spacing="12" alignment="CENTER_LEFT" GridPane.rowIndex="3" GridPane.columnIndex="1">
-                            <Spinner fx:id="spnBorrowDays" prefWidth="120" styleClass="form-control"/>
-                            <Label fx:id="lblBorrowDaysHint" text="(Mặc định 14 ngày, tại chỗ trong ngày)" styleClass="text-muted"/>
-                        </HBox>
-
-                        <!-- Ghi chú -->
-                        <Label text="Ghi Chú / Nơi Mượn:" styleClass="form-label" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtBorrowNotes" promptText="VD: Mượn phục vụ bài tập lớn / Nghiên cứu tài liệu..." prefWidth="400"
-                                   styleClass="form-control" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-                    </GridPane>
-
-                    <!-- Alert message label -->
-                    <Label fx:id="lblBorrowMessage" text="" style="-fx-font-weight: bold;"/>
-
-                    <HBox spacing="16">
-                        <Button text="Xác Nhận Lập Phiếu Mượn" onAction="#handleConfirmBorrow" styleClass="btn-primary"/>
-                        <Button text="Đặt Lại" onAction="#handleResetBorrowForm" styleClass="btn-secondary"/>
-                    </HBox>
-                </VBox>
+                    </VBox>
+                </SplitPane>
             </Tab>
 
             <!-- TAB 2: XỬ LÝ TRẢ SÁCH -->

@@ -101,8 +101,41 @@ public class ExportService {
         sb.append(" 2. Không làm rách, viết, bôi bẩn lên sách (Mất đền 200%).\n\n");
         sb.append("      ĐỘC GIẢ KÝ TÊN                  THỦ THƯ XÁC NHẬN  \n");
         sb.append("    (Ký và ghi rõ họ tên)           (Ký và ghi rõ họ tên)\n\n\n");
-        sb.append("   .........................       .........................\n");
         sb.append("========================================================\n");
+        return sb.toString();
+    }
+
+    public String generateBasketBorrowSlip(Reader reader, List<BorrowTransaction> transactions) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("======================================================================\n");
+        sb.append("                      THƯ VIỆN ĐẠI HỌC - LIBMAN                       \n");
+        sb.append("               PHIẾU MƯỢN SÁCH TỔNG HỢP (BÀN LƯU HÀNH)                \n");
+        sb.append("======================================================================\n\n");
+        sb.append("Thời gian lập:    ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n");
+        sb.append("Số lượng sách:    ").append(transactions.size()).append(" cuốn\n");
+        sb.append("----------------------------------------------------------------------\n");
+        sb.append("THÔNG TIN ĐỘC GIẢ:\n");
+        sb.append(" - Mã độc giả:    ").append(reader.getId()).append("\n");
+        sb.append(" - Họ và tên:     ").append(reader.getFullName()).append("\n");
+        sb.append(" - Email/SĐT:     ").append(reader.getEmail() != null ? reader.getEmail() : "").append(" / ")
+                .append(reader.getPhone() != null ? reader.getPhone() : "").append("\n");
+        sb.append("----------------------------------------------------------------------\n");
+        sb.append("DANH SÁCH TÁC PHẨM MƯỢN:\n");
+        int idx = 1;
+        for (BorrowTransaction tx : transactions) {
+            sb.append(String.format(" %d. [%s] %s\n", idx++, tx.getBookId(), tx.getBookTitle()));
+            sb.append(String.format("    - Mã phiếu: %s | Hình thức: %s\n", tx.getId(), tx.getBorrowType()));
+            sb.append(String.format("    - Ngày mượn: %s | HẠN TRẢ: %s\n", tx.getBorrowDate(), tx.getDueDate()));
+        }
+        sb.append("----------------------------------------------------------------------\n");
+        sb.append("QUY ĐỊNH BẢO QUẢN & CHẾ TÀI:\n");
+        sb.append(" 1. Trả sách đúng hạn quy định (Quá hạn phạt 2.000đ/ngày/cuốn).\n");
+        sb.append(" 2. Không làm rách, gạch xóa, hư hỏng hoặc làm mất sách.\n");
+        sb.append(" 3. Bồi hoàn sách mất: 200% giá gốc + 20.000đ lệ phí kỹ thuật.\n\n");
+        sb.append("         ĐỘC GIẢ KÝ TÊN                       THỦ THƯ XÁC NHẬN        \n");
+        sb.append("       (Ký và ghi rõ họ tên)                (Ký và ghi rõ họ tên)     \n\n\n");
+        sb.append("      .........................            .........................  \n");
+        sb.append("======================================================================\n");
         return sb.toString();
     }
 

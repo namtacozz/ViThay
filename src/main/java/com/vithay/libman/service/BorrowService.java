@@ -35,6 +35,14 @@ public class BorrowService {
         return transactionDao.searchTransactions(keyword.trim());
     }
 
+    public int getActiveBorrowCountForReader(String readerId) {
+        return transactionDao.getActiveBorrowCountForReader(readerId);
+    }
+
+    public String createBorrowTransaction(String readerId, String bookId, String borrowType, int borrowDays, String notes) {
+        return borrowBook(readerId, bookId, borrowType, borrowDays, notes);
+    }
+
     public String borrowBook(String readerId, String bookId, String borrowType, int borrowDays, String notes) {
         Reader reader = readerDao.getReaderById(readerId);
         if (reader == null) {
