@@ -804,6 +804,9 @@ public class BookManagementController implements Initializable {
     }
 
     public void showBookDetail(Book book) {
+        if (book != null && isCirculationMode && circulationBook != null && !java.util.Objects.equals(circulationBook.getId(), book.getId())) {
+            exitCirculationMode();
+        }
         this.currentSelectedBook = book;
         if (detailInspectorPane == null) return;
 
@@ -894,7 +897,7 @@ public class BookManagementController implements Initializable {
         if (book == null) return;
 
         Label lblSection = new Label("NHÁNH LIÊN QUAN & GỢI Ý");
-        lblSection.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #1DB954; -fx-padding: 6 0 2 0;");
+        lblSection.getStyleClass().add("branch-section-title");
         inspectorBranchesBox.getChildren().add(lblSection);
 
         // 1. Same Shelf Branch
@@ -902,7 +905,7 @@ public class BookManagementController implements Initializable {
         HBox shelfHeader = new HBox(8);
         shelfHeader.setAlignment(Pos.CENTER_LEFT);
         Label lblShelf = new Label("📚 Cùng kệ: " + (book.getShelfLocation() != null ? book.getShelfLocation() : "Chưa xếp"));
-        lblShelf.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #E0E0E0;");
+        lblShelf.getStyleClass().add("branch-header-label");
         Region spacer1 = new Region();
         HBox.setHgrow(spacer1, Priority.ALWAYS);
         Label linkAllShelf = new Label("Xem tất cả ➔");
@@ -935,7 +938,7 @@ public class BookManagementController implements Initializable {
         HBox authorHeader = new HBox(8);
         authorHeader.setAlignment(Pos.CENTER_LEFT);
         Label lblAuthor = new Label("✍ Cùng tác giả: " + (book.getAuthor() != null ? book.getAuthor() : "Không rõ"));
-        lblAuthor.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #E0E0E0;");
+        lblAuthor.getStyleClass().add("branch-header-label");
         Region spacer2 = new Region();
         HBox.setHgrow(spacer2, Priority.ALWAYS);
         Label linkAllAuthor = new Label("Xem tất cả ➔");
@@ -994,6 +997,9 @@ public class BookManagementController implements Initializable {
         card.getChildren().addAll(iconLbl, info);
 
         card.setOnMouseClicked(e -> {
+            if (isCirculationMode) {
+                exitCirculationMode();
+            }
             if (booksTable != null) {
                 booksTable.getSelectionModel().select(b);
                 booksTable.scrollTo(b);
@@ -1107,6 +1113,11 @@ public class BookManagementController implements Initializable {
             exitCirculationMode();
         }
         applyFilters();
+        this.currentSelectedBook = null;
+        if (booksTable != null) {
+            booksTable.getSelectionModel().clearSelection();
+        }
+        showBookDetail(null);
     }
 
     public void updateBreadcrumbs() {

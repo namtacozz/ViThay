@@ -1089,6 +1089,23 @@
 .theme-pink-light .branch-action-link {
     -fx-text-fill: #E11D48;
 }
+.branch-header-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #E0E0E0;
+}
+.theme-pink-light .branch-header-label {
+    -fx-text-fill: #374151;
+}
+.branch-section-title {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1DB954;
+    -fx-padding: 6px 0 2px 0;
+}
+.theme-pink-light .branch-section-title {
+    -fx-text-fill: #E11D48;
+}
 
 /* 3. Grid / Card View */
 .book-grid-card {
