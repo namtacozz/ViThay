@@ -2,7 +2,7 @@
 INSERT OR IGNORE INTO users (id, username, password, full_name, role, email, phone, avatar, created_date, expiry_date)
 VALUES 
 (1, 'quantri', 'admin123', 'Nguyễn Quản Trị', 'Quản Trị', 'admin@libman.edu.vn', '0901234567', '/com/vithay/libman/images/avatar.png', '2024-01-01', '2030-12-31'),
-(2, 'thuthu', '123456', 'Minh Trí', 'Thủ Thư', 'thuthu@libman.edu.vn', '0912345678', '/com/vithay/libman/images/avatar.png', '2024-01-01', '2030-12-31'),
+(2, 'thuthu', '123456', 'Nguyễn Minh Trí', 'Thủ Thư', 'thuthu@libman.edu.vn', '0912345678', '/com/vithay/libman/images/avatar.png', '2024-01-01', '2030-12-31'),
 (3, 'docgia', '123456', 'Trần Văn An', 'Độc Giả', 'an.tran@gmail.com', '0987654321', '/com/vithay/libman/images/avatar.png', '2024-01-01', '2025-12-31');
 
 -- Categories (Đầy đủ theo chuẩn biên mục thư viện)
@@ -24,10 +24,10 @@ VALUES
 INSERT OR IGNORE INTO readers (id, full_name, email, phone, address, id_card, birth_date, join_date, card_issue_date, card_expiry_date, status, is_deleted)
 VALUES 
 ('RD001', 'Lê Văn An', 'an.le@gmail.com', '0912345678', '123 Nguyễn Văn Linh, Q. Hải Châu, TP. Đà Nẵng', '048201012345', '2001-05-12', '2024-01-01', '2024-01-01', '2026-12-31', 'Active', 0),
-('RD002', 'Trần Thị Mai', 'mai.tran@gmail.com', '0987654321', '45 Lê Duẩn, Q. Hải Châu, TP. Đà Nẵng', '048202023456', '2002-08-20', '2024-01-01', '2024-01-01', '2026-12-31', 'Active', 0),
+('RD002', 'Trần Thị Mai Anh', 'mai.tran@gmail.com', '0987654321', '45 Lê Duẩn, Q. Hải Châu, TP. Đà Nẵng', '048202023456', '2002-08-20', '2024-01-01', '2024-01-01', '2026-12-31', 'Active', 0),
 ('DG001', 'Trần Văn An', 'an.tv@gmail.com', '0905123456', '88 Bạch Đằng, Q. Hải Châu, TP. Đà Nẵng', '048067001258', '1967-01-15', '2024-01-10', '2024-01-10', '2026-12-31', 'Active', 0),
 ('DG002', 'Nguyễn Văn Nhân', 'nhan.nv@gmail.com', '0905234567', '250 Võ Nguyên Giáp, Q. Sơn Trà, TP. Đà Nẵng', '048087001475', '1987-04-13', '2024-01-10', '2024-01-10', '2026-12-31', 'Active', 0),
-('DG003', 'Lê Thị Nhàn', 'nhan.lt@gmail.com', '0905345678', '12 Núi Thành, Q. Hải Châu, TP. Đà Nẵng', '048078001485', '1978-08-27', '2024-01-10', '2024-01-10', '2026-12-31', 'Active', 0),
+('DG003', 'Lê Thị Thu Nhàn', 'nhan.lt@gmail.com', '0905345678', '12 Núi Thành, Q. Hải Châu, TP. Đà Nẵng', '048078001485', '1978-08-27', '2024-01-10', '2024-01-10', '2026-12-31', 'Active', 0),
 ('DG004', 'Phùng Tuấn Kiệt', 'kiet.pt@gmail.com', '0905456789', '68 Điện Biên Phủ, Q. Thanh Khê, TP. Đà Nẵng', '048085001236', '1985-12-02', '2024-01-10', '2024-01-10', '2024-06-01', 'Expired', 0),
 ('DG005', 'Hoàng Minh Châu', 'chau.hm@gmail.com', '0918776655', '35 Ngô Quyền, Q. Sơn Trà, TP. Đà Nẵng', '048204056789', '2004-11-18', '2026-03-01', NULL, NULL, 'Chờ Cấp Thẻ', 0),
 ('DG006', 'Vũ Đức Thịnh', 'thinh.vd@gmail.com', '0977223344', '102 Tôn Đức Thắng, Q. Liên Chiểu, TP. Đà Nẵng', '048203098765', '2003-07-22', '2026-03-02', NULL, NULL, 'Chờ Cấp Thẻ', 0);
@@ -96,7 +96,17 @@ VALUES
 ('BK033', 'Totto-chan Bên Cửa Sổ', 'Tetsuko Kuroyanagi', 'Truyện tranh & Sách thiếu nhi', 11, 'Khu TN - Kệ 04', '978-604-56-3245-7', 98000, 1981, 'NXB Văn Học', 'Available', '/com/vithay/libman/images/totto_chan.jpg', 8, 8, 0),
 ('BK034', 'Đảo Giấu Vàng (Treasure Island)', 'Robert Louis Stevenson', 'Truyện tranh & Sách thiếu nhi', 11, 'Khu TN - Kệ 04', '978-604-56-6543-2', 88000, 1883, 'NXB Văn Học', 'Available', '/com/vithay/libman/images/dao_giau_vang.jpg', 6, 6, 0),
 ('BK035', 'Không Gia Đình (Sans Famille)', 'Hector Malot', 'Truyện tranh & Sách thiếu nhi', 11, 'Khu TN - Kệ 05', '978-604-56-8877-1', 135000, 1878, 'NXB Văn Học', 'Available', '/com/vithay/libman/images/khong_gia_dinh.jpg', 7, 7, 0),
-('BK036', 'Góc Sân Và Khoảng Trời', 'Trần Đăng Khoa', 'Truyện tranh & Sách thiếu nhi', 11, 'Khu TN - Kệ 05', '978-604-2-07654-6', 55000, 1968, 'NXB Kim Đồng', 'Available', '/com/vithay/libman/images/goc_san_khoang_troi.jpg', 9, 9, 0);
+('BK036', 'Góc Sân Và Khoảng Trời', 'Trần Đăng Khoa', 'Truyện tranh & Sách thiếu nhi', 11, 'Khu TN - Kệ 05', '978-604-2-07654-6', 55000, 1968, 'NXB Kim Đồng', 'Available', '/com/vithay/libman/images/goc_san_khoang_troi.jpg', 9, 9, 0),
+
+-- Sách Bổ Sung Cùng Tác Giả (Yuval Noah Harari, Robert C. Martin, Nguyễn Nhật Ánh, J.K. Rowling)
+('BK037', 'Homo Deus: Lược Sử Tương Lai', 'Yuval Noah Harari', 'Lịch sử & Địa lý', 4, 'Khu L - Kệ 01', '978-604-56-4276-4', 195000, 2016, 'NXB Thế Giới', 'Available', '/com/vithay/libman/images/homo_deus.jpg', 6, 6, 0),
+('BK038', '21 Bài Học Cho Thế Kỷ 21', 'Yuval Noah Harari', 'Lịch sử & Địa lý', 4, 'Khu L - Kệ 01', '978-604-56-4277-1', 175000, 2018, 'NXB Thế Giới', 'Available', '/com/vithay/libman/images/21_bai_hoc.jpg', 5, 5, 0),
+('BK039', 'Clean Architecture: Kiến Trúc Sạch', 'Robert C. Martin', 'Công nghệ thông tin', 9, 'Khu IT - Kệ 01', '978-013-44-9416-6', 350000, 2017, 'Prentice Hall', 'Available', '/com/vithay/libman/images/clean_architecture.jpg', 6, 6, 0),
+('BK040', 'The Clean Coder: Cẩm Nang Cho Lập Trình Viên', 'Robert C. Martin', 'Công nghệ thông tin', 9, 'Khu IT - Kệ 01', '978-013-70-8107-3', 280000, 2011, 'Prentice Hall', 'Available', '/com/vithay/libman/images/clean_coder.jpg', 5, 5, 0),
+('BK041', 'Cho Tôi Xin Một Vé Đi Tuổi Thơ', 'Nguyễn Nhật Ánh', 'Truyện tranh & Sách thiếu nhi', 11, 'Khu TN - Kệ 02', '978-604-2-09415-1', 85000, 2008, 'NXB Trẻ', 'Available', '/com/vithay/libman/images/cho_toi_xin_mot_ve_di_tuoi_tho.jpg', 10, 10, 0),
+('BK042', 'Tôi Thấy Hoa Vàng Trên Cỏ Xanh', 'Nguyễn Nhật Ánh', 'Truyện tranh & Sách thiếu nhi', 11, 'Khu TN - Kệ 02', '978-604-2-09416-8', 95000, 2010, 'NXB Trẻ', 'Available', '/com/vithay/libman/images/toi_thay_hoa_vang_tren_co_xanh.jpg', 8, 8, 0),
+('BK043', 'Harry Potter và Phòng Chứa Bí Mật', 'J.K. Rowling', 'Truyện tranh & Sách thiếu nhi', 11, 'Khu TN - Kệ 03', '978-604-1-08124-2', 170000, 1998, 'NXB Trẻ', 'Available', '/com/vithay/libman/images/harry_potter_2.jpg', 8, 8, 0),
+('BK044', 'Harry Potter và Tên Tù Nhân Ngục Azkaban', 'J.K. Rowling', 'Truyện tranh & Sách thiếu nhi', 11, 'Khu TN - Kệ 03', '978-604-1-08125-9', 185000, 1999, 'NXB Trẻ', 'Available', '/com/vithay/libman/images/harry_potter_3.jpg', 7, 7, 0);
 
 -- Seed Transactions
 INSERT OR IGNORE INTO borrow_transactions (id, reader_id, reader_name, book_id, book_title, borrow_date, due_date, return_date, borrow_type, status, fine_amount, notes)
