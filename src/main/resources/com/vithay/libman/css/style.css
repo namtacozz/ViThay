@@ -1649,5 +1649,55 @@
     -fx-text-fill: #9CA3AF;
 }
 
+/* Sidebar Vector SVG Icons & Brave Vertical Tabs Styling */
+.sidebar-svg-icon {
+    -fx-fill: #B3B3B3;
+}
+.nav-item:hover .sidebar-svg-icon,
+.nav-item-active .sidebar-svg-icon {
+    -fx-fill: #1DB954;
+}
+.theme-pink-light .sidebar-svg-icon {
+    -fx-fill: #666666;
+}
+.theme-pink-light .nav-item:hover .sidebar-svg-icon,
+.theme-pink-light .nav-item-active .sidebar-svg-icon {
+    -fx-fill: #E91E63;
+}
 
+.btn-pin-sidebar {
+    -fx-background-color: transparent;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-padding: 3px 6px;
+}
+.btn-pin-sidebar:hover {
+    -fx-background-color: #282828;
+}
+.theme-pink-light .btn-pin-sidebar:hover {
+    -fx-background-color: #FCE4EC;
+}
+.btn-pin-active .sidebar-svg-icon {
+    -fx-fill: #1DB954;
+}
+.theme-pink-light .btn-pin-active .sidebar-svg-icon {
+    -fx-fill: #E91E63;
+}
 
+/* Segmented View Switcher Icons */
+.view-toggle-icon {
+    -fx-fill: #B3B3B3;
+    -fx-scale-x: 0.85;
+    -fx-scale-y: 0.85;
+}
+.segmented-view-btn:hover .view-toggle-icon,
+.segmented-view-active .view-toggle-icon {
+    -fx-fill: #FFFFFF;
+}
+.theme-pink-light .view-toggle-icon {
+    -fx-fill: #666666;
+}
+.theme-pink-light .segmented-view-btn:hover .view-toggle-icon,
+.theme-pink-light .segmented-view-active .view-toggle-icon {
+    -fx-fill: #FFFFFF;
+}

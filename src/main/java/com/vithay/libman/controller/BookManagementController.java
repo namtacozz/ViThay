@@ -190,7 +190,7 @@ public class BookManagementController implements Initializable {
         isUpdatingFilterUI = true;
         try {
             statusFilterCombo.setItems(FXCollections.observableArrayList(
-                    "Tất cả", "Available", "Borrowed", "On Hold"
+                    "Tất cả", "Còn sách", "Đang mượn", "Tạm giữ"
             ));
             statusFilterCombo.getSelectionModel().selectFirst();
             refreshAuthorFilterOptions();
@@ -204,7 +204,7 @@ public class BookManagementController implements Initializable {
         try {
             if (comboAdvStockStatus != null) {
                 comboAdvStockStatus.setItems(FXCollections.observableArrayList(
-                        "Tất cả", "Còn sách (In Stock)", "Hết sách (Out of Stock)"
+                        "Tất cả", "Còn sách", "Hết sách"
                 ));
                 comboAdvStockStatus.getSelectionModel().selectFirst();
             }
@@ -366,14 +366,18 @@ public class BookManagementController implements Initializable {
                     setGraphic(null);
                     setText(null);
                 } else {
-                    Label badge = new Label(item);
-                    if ("Available".equalsIgnoreCase(item)) {
+                    Label badge = new Label();
+                    if ("Available".equalsIgnoreCase(item) || "Còn sách".equalsIgnoreCase(item) || "KHA_DUNG".equalsIgnoreCase(item)) {
+                        badge.setText("Còn sách");
                         badge.getStyleClass().add("badge-available");
-                    } else if ("Borrowed".equalsIgnoreCase(item)) {
+                    } else if ("Borrowed".equalsIgnoreCase(item) || "Đang mượn".equalsIgnoreCase(item) || "DANG_MUON".equalsIgnoreCase(item)) {
+                        badge.setText("Đang mượn");
                         badge.getStyleClass().add("badge-borrowed");
-                    } else if ("On Hold".equalsIgnoreCase(item)) {
+                    } else if ("On Hold".equalsIgnoreCase(item) || "Tạm giữ".equalsIgnoreCase(item) || "TAM_GIU".equalsIgnoreCase(item)) {
+                        badge.setText("Tạm giữ");
                         badge.getStyleClass().add("badge-onhold");
                     } else {
+                        badge.setText(item);
                         badge.getStyleClass().add("badge-returned");
                     }
                     HBox box = new HBox(badge);
@@ -675,8 +679,19 @@ public class BookManagementController implements Initializable {
             }
 
             // 4. Status Filter
-            boolean matchesStatus = selectedStatus == null || "Tất cả".equalsIgnoreCase(selectedStatus) ||
-                    (b.getStatus() != null && selectedStatus.equalsIgnoreCase(b.getStatus()));
+            boolean matchesStatus = true;
+            if (selectedStatus != null && !"Tất cả".equalsIgnoreCase(selectedStatus)) {
+                String st = b.getStatus() != null ? b.getStatus() : "";
+                if ("Còn sách".equalsIgnoreCase(selectedStatus) || "Available".equalsIgnoreCase(selectedStatus)) {
+                    matchesStatus = "Available".equalsIgnoreCase(st) || "Còn sách".equalsIgnoreCase(st) || "KHA_DUNG".equalsIgnoreCase(st) || b.getAvailableCopies() > 0;
+                } else if ("Đang mượn".equalsIgnoreCase(selectedStatus) || "Borrowed".equalsIgnoreCase(selectedStatus)) {
+                    matchesStatus = "Borrowed".equalsIgnoreCase(st) || "Đang mượn".equalsIgnoreCase(st) || "DANG_MUON".equalsIgnoreCase(st);
+                } else if ("Tạm giữ".equalsIgnoreCase(selectedStatus) || "On Hold".equalsIgnoreCase(selectedStatus)) {
+                    matchesStatus = "On Hold".equalsIgnoreCase(st) || "Tạm giữ".equalsIgnoreCase(st) || "TAM_GIU".equalsIgnoreCase(st);
+                } else {
+                    matchesStatus = st.equalsIgnoreCase(selectedStatus);
+                }
+            }
 
             // 5. Price Range Filter
             boolean matchesMinPrice = (minPrice == null) || (b.getPrice() >= minPrice);
@@ -834,7 +849,7 @@ public class BookManagementController implements Initializable {
 
         // Populate Category items
         comboModalBookCategory.setItems(FXCollections.observableArrayList(categoryService.getAllCategories()));
-        comboModalBookStatus.setItems(FXCollections.observableArrayList("Available", "Borrowed", "On Hold"));
+        comboModalBookStatus.setItems(FXCollections.observableArrayList("Còn sách", "Đang mượn", "Tạm giữ"));
 
         if (bookToEdit != null) {
             lblBookModalTitle.setText("Chỉnh Sửa Thông Tin Sách");
@@ -853,7 +868,14 @@ public class BookManagementController implements Initializable {
             txtModalBookIsbn.setText(bookToEdit.getIsbn());
             txtModalBookPrice.setText(String.valueOf((long) bookToEdit.getPrice()));
             txtModalBookCopies.setText(String.valueOf(bookToEdit.getTotalCopies()));
-            comboModalBookStatus.setValue(bookToEdit.getStatus());
+            String st = bookToEdit.getStatus();
+            if ("Borrowed".equalsIgnoreCase(st) || "Đang mượn".equalsIgnoreCase(st)) {
+                comboModalBookStatus.setValue("Đang mượn");
+            } else if ("On Hold".equalsIgnoreCase(st) || "Tạm giữ".equalsIgnoreCase(st)) {
+                comboModalBookStatus.setValue("Tạm giữ");
+            } else {
+                comboModalBookStatus.setValue("Còn sách");
+            }
         } else {
             lblBookModalTitle.setText("Thêm Sách Mới");
             txtModalBookId.setText("BK0" + (bookMasterList.size() + 1));
@@ -867,7 +889,7 @@ public class BookManagementController implements Initializable {
             txtModalBookIsbn.setText("978-604-");
             txtModalBookPrice.setText("95000");
             txtModalBookCopies.setText("5");
-            comboModalBookStatus.setValue("Available");
+            comboModalBookStatus.setValue("Còn sách");
         }
 
         bookMainContainer.setEffect(new GaussianBlur(14));
@@ -901,6 +923,14 @@ public class BookManagementController implements Initializable {
             int available = currentEditingBook != null ? Math.min(currentEditingBook.getAvailableCopies(), copies) : copies;
             String cover = currentEditingBook != null ? currentEditingBook.getCoverImage() : "/com/vithay/libman/images/doraemon.jpg";
 
+            String rawStatus = comboModalBookStatus.getValue() != null ? comboModalBookStatus.getValue() : "Còn sách";
+            String savedStatus = "Available";
+            if ("Đang mượn".equalsIgnoreCase(rawStatus) || "Borrowed".equalsIgnoreCase(rawStatus)) {
+                savedStatus = "Borrowed";
+            } else if ("Tạm giữ".equalsIgnoreCase(rawStatus) || "On Hold".equalsIgnoreCase(rawStatus)) {
+                savedStatus = "On Hold";
+            }
+
             Book book = new Book(
                     id,
                     title,
@@ -912,7 +942,7 @@ public class BookManagementController implements Initializable {
                     price,
                     2024,
                     "NXB Kim Đồng",
-                    comboModalBookStatus.getValue() != null ? comboModalBookStatus.getValue() : "Available",
+                    savedStatus,
                     cover,
                     copies,
                     available,
@@ -1029,15 +1059,18 @@ public class BookManagementController implements Initializable {
         // Status badge
         if (lblInspectorStatus != null) {
             String status = book.getStatus() != null ? book.getStatus() : "Available";
-            lblInspectorStatus.setText(status);
             lblInspectorStatus.getStyleClass().removeAll("badge-available", "badge-borrowed", "badge-onhold", "badge-returned", "badge-overdue");
-            if ("Available".equalsIgnoreCase(status) || "KHA_DUNG".equalsIgnoreCase(status)) {
+            if ("Available".equalsIgnoreCase(status) || "Còn sách".equalsIgnoreCase(status) || "KHA_DUNG".equalsIgnoreCase(status)) {
+                lblInspectorStatus.setText("Còn sách");
                 lblInspectorStatus.getStyleClass().add("badge-available");
-            } else if ("Borrowed".equalsIgnoreCase(status) || "DANG_MUON".equalsIgnoreCase(status)) {
+            } else if ("Borrowed".equalsIgnoreCase(status) || "Đang mượn".equalsIgnoreCase(status) || "DANG_MUON".equalsIgnoreCase(status)) {
+                lblInspectorStatus.setText("Đang mượn");
                 lblInspectorStatus.getStyleClass().add("badge-borrowed");
-            } else if ("On Hold".equalsIgnoreCase(status) || "CHO_DUYET".equalsIgnoreCase(status)) {
+            } else if ("On Hold".equalsIgnoreCase(status) || "Tạm giữ".equalsIgnoreCase(status) || "CHO_DUYET".equalsIgnoreCase(status)) {
+                lblInspectorStatus.setText("Tạm giữ");
                 lblInspectorStatus.getStyleClass().add("badge-onhold");
             } else {
+                lblInspectorStatus.setText(status);
                 lblInspectorStatus.getStyleClass().add("badge-returned");
             }
         }
@@ -1374,13 +1407,15 @@ public class BookManagementController implements Initializable {
 
         if (lblFullDetailStatus != null) {
             String status = book.getStatus() != null ? book.getStatus() : "Available";
-            lblFullDetailStatus.setText(status);
             lblFullDetailStatus.getStyleClass().removeAll("badge-available", "badge-borrowed", "badge-onhold", "badge-returned");
-            if ("Available".equalsIgnoreCase(status) || "KHA_DUNG".equalsIgnoreCase(status)) {
+            if ("Available".equalsIgnoreCase(status) || "Còn sách".equalsIgnoreCase(status) || "KHA_DUNG".equalsIgnoreCase(status)) {
+                lblFullDetailStatus.setText("Còn sách");
                 lblFullDetailStatus.getStyleClass().add("badge-available");
-            } else if ("Borrowed".equalsIgnoreCase(status) || "DANG_MUON".equalsIgnoreCase(status)) {
+            } else if ("Borrowed".equalsIgnoreCase(status) || "Đang mượn".equalsIgnoreCase(status) || "DANG_MUON".equalsIgnoreCase(status)) {
+                lblFullDetailStatus.setText("Đang mượn");
                 lblFullDetailStatus.getStyleClass().add("badge-borrowed");
             } else {
+                lblFullDetailStatus.setText("Tạm giữ");
                 lblFullDetailStatus.getStyleClass().add("badge-onhold");
             }
         }

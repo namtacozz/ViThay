@@ -4,7 +4,10 @@ import com.vithay.libman.model.Book;
 import com.vithay.libman.model.User;
 import com.vithay.libman.service.AuthService;
 import com.vithay.libman.service.BookService;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,13 +21,16 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class MainLayoutController implements Initializable {
@@ -97,11 +103,22 @@ public class MainLayoutController implements Initializable {
     @FXML private Label lblHeaderUserRole;
     @FXML private Label lblCurrentRoleBadge;
 
-    // Section Labels
+    // Section Labels & Sidebar Brave Vertical Tabs
+    @FXML private VBox sidebarContainer;
+    @FXML private HBox sidebarHeaderBox;
+    @FXML private Label lblSidebarTitle;
+    @FXML private Button btnPinSidebar;
+    @FXML private SVGPath pinIconPath;
+    @FXML private Tooltip pinTooltip;
+    @FXML private Label lblSecMenu;
     @FXML private Label lblSecBooks;
     @FXML private Label lblSecReaders;
     @FXML private Label lblSecBorrow;
     @FXML private Label lblSecAdmin;
+    @FXML private HBox sidebarRoleBox;
+
+    private boolean isSidebarPinned = false;
+    private final Map<Button, String> navButtonOriginalTexts = new HashMap<>();
 
     // Views & Sub-Controllers
     private Node homeView;
@@ -138,6 +155,7 @@ public class MainLayoutController implements Initializable {
         setupSearchAutocomplete();
         loadViews();
         updateUserSessionUI();
+        setupBraveVerticalSidebar();
         showHomeView();
 
         rootStackPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -879,5 +897,144 @@ public class MainLayoutController implements Initializable {
         alert.setHeaderText("Tin nhắn thủ thư");
         alert.setContentText("Không có tin nhắn mới nào.");
         alert.showAndWait();
+    }
+
+    private void setupBraveVerticalSidebar() {
+        if (sidebarContainer == null) return;
+
+        Button[] navButtons = {
+                btnNavHome, btnNavBooks, btnNavCategories,
+                btnNavReaders, btnNavBorrowReturn, btnNavTransactions, btnNavStats,
+                btnNavRecycleBin, btnNavSettings, btnHelp
+        };
+        for (Button btn : navButtons) {
+            if (btn != null && btn.getText() != null) {
+                navButtonOriginalTexts.put(btn, btn.getText());
+            }
+        }
+
+        // Hover expand/collapse when not pinned
+        sidebarContainer.setOnMouseEntered(e -> {
+            if (!isSidebarPinned) {
+                expandSidebar();
+            }
+        });
+
+        sidebarContainer.setOnMouseExited(e -> {
+            if (!isSidebarPinned) {
+                collapseSidebar();
+            }
+        });
+
+        // Initialize state (unpinned -> collapsed by default)
+        if (isSidebarPinned) {
+            expandSidebar();
+        } else {
+            collapseSidebar();
+        }
+    }
+
+    @FXML
+    public void handleTogglePinSidebar() {
+        isSidebarPinned = !isSidebarPinned;
+        if (isSidebarPinned) {
+            expandSidebar();
+            if (btnPinSidebar != null) {
+                btnPinSidebar.getStyleClass().add("btn-pin-active");
+            }
+            if (pinTooltip != null) {
+                pinTooltip.setText("Bỏ ghim (tự động thu gọn khi rời chuột)");
+            }
+        } else {
+            if (btnPinSidebar != null) {
+                btnPinSidebar.getStyleClass().remove("btn-pin-active");
+            }
+            if (pinTooltip != null) {
+                pinTooltip.setText("Ghim thanh bên (không tự động thu nhỏ)");
+            }
+            collapseSidebar();
+        }
+    }
+
+    private void collapseSidebar() {
+        if (sidebarContainer == null) return;
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.millis(140),
+                        new KeyValue(sidebarContainer.prefWidthProperty(), 64),
+                        new KeyValue(sidebarContainer.minWidthProperty(), 64),
+                        new KeyValue(sidebarContainer.maxWidthProperty(), 64)
+                )
+        );
+        timeline.play();
+
+        for (Map.Entry<Button, String> entry : navButtonOriginalTexts.entrySet()) {
+            Button btn = entry.getKey();
+            btn.setText("");
+            btn.setAlignment(Pos.CENTER);
+            btn.setStyle("-fx-padding: 8 0;");
+        }
+
+        Label[] sectionLabels = {lblSecMenu, lblSecBooks, lblSecReaders, lblSecBorrow, lblSecAdmin};
+        for (Label lbl : sectionLabels) {
+            if (lbl != null) {
+                lbl.setManaged(false);
+                lbl.setVisible(false);
+            }
+        }
+        if (lblSidebarTitle != null) {
+            lblSidebarTitle.setManaged(false);
+            lblSidebarTitle.setVisible(false);
+        }
+        if (btnToggleCategories != null) {
+            btnToggleCategories.setManaged(false);
+            btnToggleCategories.setVisible(false);
+        }
+        if (categorySubmenuContainer != null) {
+            categorySubmenuContainer.setManaged(false);
+            categorySubmenuContainer.setVisible(false);
+        }
+        if (sidebarRoleBox != null) {
+            sidebarRoleBox.setManaged(false);
+            sidebarRoleBox.setVisible(false);
+        }
+    }
+
+    private void expandSidebar() {
+        if (sidebarContainer == null) return;
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.millis(140),
+                        new KeyValue(sidebarContainer.prefWidthProperty(), 250),
+                        new KeyValue(sidebarContainer.minWidthProperty(), 250),
+                        new KeyValue(sidebarContainer.maxWidthProperty(), 250)
+                )
+        );
+        timeline.play();
+
+        for (Map.Entry<Button, String> entry : navButtonOriginalTexts.entrySet()) {
+            Button btn = entry.getKey();
+            btn.setText(entry.getValue());
+            btn.setAlignment(Pos.CENTER_LEFT);
+            btn.setStyle("");
+        }
+
+        Label[] sectionLabels = {lblSecMenu, lblSecBooks, lblSecReaders, lblSecBorrow, lblSecAdmin};
+        for (Label lbl : sectionLabels) {
+            if (lbl != null) {
+                lbl.setManaged(true);
+                lbl.setVisible(true);
+            }
+        }
+        if (lblSidebarTitle != null) {
+            lblSidebarTitle.setManaged(true);
+            lblSidebarTitle.setVisible(true);
+        }
+        if (btnToggleCategories != null) {
+            btnToggleCategories.setManaged(true);
+            btnToggleCategories.setVisible(true);
+        }
+        if (sidebarRoleBox != null) {
+            sidebarRoleBox.setManaged(true);
+            sidebarRoleBox.setVisible(true);
+        }
     }
 }

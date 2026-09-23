@@ -8,7 +8,7 @@
 
 <ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.vithay.libman.controller.HomeController"
-            fitToWidth="true" fitToHeight="false"
+            fitToWidth="true" fitToHeight="false" hbarPolicy="NEVER"
             styleClass="bg-dark" stylesheets="@../css/style.css">
 
     <VBox spacing="24" styleClass="bg-dark">
@@ -75,10 +75,15 @@
             <Button text="Xem tất cả kho sách →" onAction="#handleViewAllBooks" styleClass="btn-secondary"/>
         </HBox>
 
-        <!-- Featured Books Cards Container (Responsive FlowPane or HBox) -->
-        <HBox fx:id="featuredBooksContainer" spacing="16" alignment="CENTER_LEFT">
-            <!-- Book cards generated dynamically via HomeController -->
-        </HBox>
+        <!-- Featured Books Cards Container (Dedicated Horizontal ScrollPane) -->
+        <ScrollPane fitToHeight="true" vbarPolicy="NEVER" hbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 2 0 8 0;"
+                    styleClass="featured-scroll-pane">
+            <HBox fx:id="featuredBooksContainer" spacing="16" alignment="CENTER_LEFT"
+                  style="-fx-background-color: transparent;">
+                <!-- Book cards generated dynamically via HomeController -->
+            </HBox>
+        </ScrollPane>
 
         <!-- Recent Borrowing Transactions Section -->
         <VBox spacing="12">

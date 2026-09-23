@@ -78,7 +78,7 @@ public class ReaderManagementController implements Initializable {
     }
 
     private void setupFilter() {
-        readerStatusFilterCombo.setItems(FXCollections.observableArrayList("Tất cả", "Chờ Cấp Thẻ", "Active", "Blocked", "Expired"));
+        readerStatusFilterCombo.setItems(FXCollections.observableArrayList("Tất cả", "Hoạt Động", "Chờ Cấp Thẻ", "Bị Khóa", "Hết Hạn"));
         readerStatusFilterCombo.getSelectionModel().selectFirst();
     }
 
@@ -277,7 +277,21 @@ public class ReaderManagementController implements Initializable {
 
         ObservableList<Reader> filtered = FXCollections.observableArrayList();
         for (Reader r : readerMasterList) {
-            boolean matchesStatus = statusFilter == null || "Tất cả".equals(statusFilter) || statusFilter.equalsIgnoreCase(r.getStatus());
+            String st = r.getStatus() != null ? r.getStatus() : "";
+            boolean matchesStatus = true;
+            if (statusFilter != null && !"Tất cả".equals(statusFilter)) {
+                if ("Hoạt Động".equalsIgnoreCase(statusFilter) || "Active".equalsIgnoreCase(statusFilter)) {
+                    matchesStatus = "Active".equalsIgnoreCase(st) || "Hoạt Động".equalsIgnoreCase(st);
+                } else if ("Chờ Cấp Thẻ".equalsIgnoreCase(statusFilter)) {
+                    matchesStatus = "Chờ Cấp Thẻ".equalsIgnoreCase(st);
+                } else if ("Hết Hạn".equalsIgnoreCase(statusFilter) || "Expired".equalsIgnoreCase(statusFilter)) {
+                    matchesStatus = "Expired".equalsIgnoreCase(st) || "Hết Hạn".equalsIgnoreCase(st);
+                } else if ("Bị Khóa".equalsIgnoreCase(statusFilter) || "Blocked".equalsIgnoreCase(statusFilter)) {
+                    matchesStatus = "Blocked".equalsIgnoreCase(st) || "Bị Khóa".equalsIgnoreCase(st);
+                } else {
+                    matchesStatus = statusFilter.equalsIgnoreCase(st);
+                }
+            }
             boolean matchesSearch = search.isEmpty() ||
                     r.getId().toLowerCase().contains(search) ||
                     r.getFullName().toLowerCase().contains(search) ||
@@ -302,7 +316,7 @@ public class ReaderManagementController implements Initializable {
         this.currentEditingReader = readerToEdit;
         lblReaderModalError.setText("");
 
-        comboModalReaderStatus.setItems(FXCollections.observableArrayList("Active", "Chờ Cấp Thẻ", "Blocked", "Expired"));
+        comboModalReaderStatus.setItems(FXCollections.observableArrayList("Hoạt Động", "Chờ Cấp Thẻ", "Bị Khóa", "Hết Hạn"));
 
         int validityMonths = settingService.getCardValidityMonths();
         LocalDate now = LocalDate.now();
@@ -319,7 +333,17 @@ public class ReaderManagementController implements Initializable {
             txtModalReaderBirth.setText(readerToEdit.getBirthDate() != null ? readerToEdit.getBirthDate() : "2000-01-01");
             txtModalReaderIssueDate.setText(readerToEdit.getCardIssueDate() != null ? readerToEdit.getCardIssueDate() : "");
             txtModalReaderExpiryDate.setText(readerToEdit.getCardExpiryDate() != null ? readerToEdit.getCardExpiryDate() : "");
-            comboModalReaderStatus.setValue(readerToEdit.getStatus());
+            
+            String st = readerToEdit.getStatus();
+            if ("Active".equalsIgnoreCase(st) || "Hoạt Động".equalsIgnoreCase(st)) {
+                comboModalReaderStatus.setValue("Hoạt Động");
+            } else if ("Chờ Cấp Thẻ".equalsIgnoreCase(st)) {
+                comboModalReaderStatus.setValue("Chờ Cấp Thẻ");
+            } else if ("Expired".equalsIgnoreCase(st) || "Hết Hạn".equalsIgnoreCase(st)) {
+                comboModalReaderStatus.setValue("Hết Hạn");
+            } else {
+                comboModalReaderStatus.setValue("Bị Khóa");
+            }
         } else {
             lblReaderModalTitle.setText("Thêm Độc Giả Mới");
             txtModalReaderId.setText("DG00" + (readerMasterList.size() + 1));
@@ -332,7 +356,7 @@ public class ReaderManagementController implements Initializable {
             txtModalReaderBirth.setText("2000-01-01");
             txtModalReaderIssueDate.setText(now.toString());
             txtModalReaderExpiryDate.setText(now.plusMonths(validityMonths).toString());
-            comboModalReaderStatus.setValue("Active");
+            comboModalReaderStatus.setValue("Hoạt Động");
         }
 
         readerMainContainer.setEffect(new GaussianBlur(14));
@@ -354,7 +378,15 @@ public class ReaderManagementController implements Initializable {
         String phone = txtModalReaderPhone.getText() != null ? txtModalReaderPhone.getText().trim() : "";
         String idCard = txtModalReaderIdCard.getText() != null ? txtModalReaderIdCard.getText().trim() : "";
         String address = txtModalReaderAddress.getText() != null ? txtModalReaderAddress.getText().trim() : "";
-        String status = comboModalReaderStatus.getValue() != null ? comboModalReaderStatus.getValue() : "Active";
+        String rawStatus = comboModalReaderStatus.getValue() != null ? comboModalReaderStatus.getValue() : "Hoạt Động";
+        String status = "Active";
+        if ("Chờ Cấp Thẻ".equalsIgnoreCase(rawStatus)) {
+            status = "Chờ Cấp Thẻ";
+        } else if ("Hết Hạn".equalsIgnoreCase(rawStatus) || "Expired".equalsIgnoreCase(rawStatus)) {
+            status = "Expired";
+        } else if ("Bị Khóa".equalsIgnoreCase(rawStatus) || "Blocked".equalsIgnoreCase(rawStatus)) {
+            status = "Blocked";
+        }
 
         if (id.isEmpty() || name.isEmpty() || phone.isEmpty() || idCard.isEmpty()) {
             lblReaderModalError.setText("Vui lòng điền đầy đủ: Mã độc giả, Họ tên, SĐT và CCCD!");

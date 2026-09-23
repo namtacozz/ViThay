@@ -44,13 +44,25 @@
             <TextField fx:id="txtSearchBook" promptText="Tìm theo mã, tên, tác giả, vị trí kệ..." prefWidth="240"
                        styleClass="search-field" onKeyReleased="#handleSearchBook"/>
             <Button fx:id="btnToggleAdvancedFilter" text="Lọc nâng cao ▾" onAction="#handleToggleAdvancedFilter"
-                    styleClass="btn-secondary" style="-fx-font-size: 12px;"/>
-            <!-- Segmented View Toggle Buttons -->
+                    styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-min-width: 125px;">
+                <tooltip><Tooltip text="Mở rộng bộ lọc chuyên sâu (thể loại, giá, vị trí kệ, tồn kho)"/></tooltip>
+            </Button>
+            <!-- Segmented View Toggle Buttons with Morphicon/Vector Icons -->
             <HBox styleClass="segmented-view-group" alignment="CENTER_LEFT" spacing="2">
-                <Button fx:id="btnTableView" text="☰ Bảng" onAction="#handleSwitchToTableView"
-                        styleClass="segmented-view-btn, segmented-view-active"/>
-                <Button fx:id="btnGridView" text="⊞ Lưới" onAction="#handleSwitchToGridView"
-                        styleClass="segmented-view-btn"/>
+                <Button fx:id="btnTableView" onAction="#handleSwitchToTableView"
+                        styleClass="segmented-view-btn, segmented-view-active" style="-fx-padding: 6 12;">
+                    <graphic>
+                        <SVGPath content="M 3 6 H 21 M 3 12 H 21 M 3 18 H 21" styleClass="view-toggle-icon" strokeWidth="2.2" stroke="#B3B3B3" fill="TRANSPARENT"/>
+                    </graphic>
+                    <tooltip><Tooltip text="Chế độ xem dạng Bảng chi tiết"/></tooltip>
+                </Button>
+                <Button fx:id="btnGridView" onAction="#handleSwitchToGridView"
+                        styleClass="segmented-view-btn" style="-fx-padding: 6 12;">
+                    <graphic>
+                        <SVGPath content="M 3 3 H 10 V 10 H 3 Z M 14 3 H 21 V 10 H 14 Z M 3 14 H 10 V 21 H 3 Z M 14 14 H 21 V 21 H 14 Z" styleClass="view-toggle-icon" fill="#B3B3B3"/>
+                    </graphic>
+                    <tooltip><Tooltip text="Chế độ xem dạng Lưới thẻ (Spotify Grid)"/></tooltip>
+                </Button>
             </HBox>
         </HBox>
 
