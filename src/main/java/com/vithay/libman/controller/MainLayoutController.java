@@ -850,7 +850,7 @@ public class MainLayoutController implements Initializable {
         ContextMenu menu = new ContextMenu();
         com.vithay.libman.service.ThemeManager tm = com.vithay.libman.service.ThemeManager.getInstance();
         boolean isPink = tm.getCurrentTheme() == com.vithay.libman.service.ThemeManager.Theme.PINK_LIGHT;
-        MenuItem itemTheme = new MenuItem(isPink ? "🌙 Chuyển sang Giao Diện Tối (Spotify Dark)" : "🌸 Chuyển sang Giao Diện Sáng (Modern Pink)");
+        MenuItem itemTheme = new MenuItem(isPink ? "Chuyển sang Giao Diện Tối" : "Chuyển sang Giao Diện Sáng (Modern Pink)");
         itemTheme.setOnAction(e -> {
             tm.toggleTheme();
             if (rootStackPane.getScene() != null) {

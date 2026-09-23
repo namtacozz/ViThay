@@ -17,7 +17,7 @@
 
         <!-- Greeting Section -->
         <VBox spacing="4">
-            <Label fx:id="lblGreeting" text="Xin chào, Minh Trí!" styleClass="greeting-text"/>
+            <Label fx:id="lblGreeting" text="Xin chào, Nguyễn Minh Trí!" styleClass="greeting-text"/>
             <Label text="Chúc một ngày tốt lành. Chào mừng bạn đến với hệ thống quản lý thư viện LibMan." styleClass="greeting-subtext"/>
         </VBox>
 
@@ -64,7 +64,7 @@
         <VBox spacing="12">
             <HBox alignment="CENTER_LEFT" spacing="12">
                 <VBox spacing="2">
-                    <Label text="Recent Borrowing Transactions" styleClass="title-medium"/>
+                    <Label text="Giao Dịch Mượn Sách Gần Đây" styleClass="title-medium"/>
                     <Label text="Danh sách các phiếu mượn phát sinh gần đây" styleClass="text-muted"/>
                 </VBox>
                 <Region HBox.hgrow="ALWAYS"/>

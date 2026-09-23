@@ -32,7 +32,7 @@ public class LibManApp extends Application {
                 logger.warn("Could not load window icon", e);
             }
 
-            primaryStage.setTitle("LibMan - Hệ Thống Quản Lý Thư Viện Hiện Đại (Spotify Dark Theme)");
+            primaryStage.setTitle("LibMan - Hệ Thống Quản Lý Thư Viện Hiện Đại");
             primaryStage.setMinWidth(1100);
             primaryStage.setMinHeight(700);
             primaryStage.setScene(scene);

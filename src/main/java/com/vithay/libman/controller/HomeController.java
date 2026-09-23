@@ -138,17 +138,18 @@ public class HomeController implements Initializable {
         // Status Badge
         Label lblBadge = new Label(book.getStatus());
         String status = book.getStatus();
-        if ("Available".equalsIgnoreCase(status)) {
+        if ("Available".equalsIgnoreCase(status) || "Có sẵn".equalsIgnoreCase(status) || "Khả dụng".equalsIgnoreCase(status)) {
             lblBadge.getStyleClass().add("badge-available");
-            lblBadge.setText("Available");
-        } else if ("Borrowed".equalsIgnoreCase(status)) {
+            lblBadge.setText("Khả dụng");
+        } else if ("Borrowed".equalsIgnoreCase(status) || "Đang mượn".equalsIgnoreCase(status)) {
             lblBadge.getStyleClass().add("badge-borrowed");
-            lblBadge.setText("Borrowed");
-        } else if ("On Hold".equalsIgnoreCase(status)) {
+            lblBadge.setText("Đang mượn");
+        } else if ("On Hold".equalsIgnoreCase(status) || "Đang giữ".equalsIgnoreCase(status)) {
             lblBadge.getStyleClass().add("badge-onhold");
-            lblBadge.setText("On Hold");
+            lblBadge.setText("Đang giữ");
         } else {
             lblBadge.getStyleClass().add("badge-returned");
+            lblBadge.setText("Đã trả");
         }
 
         HBox badgeBox = new HBox(lblBadge);
