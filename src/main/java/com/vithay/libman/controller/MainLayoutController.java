@@ -558,6 +558,13 @@ public class MainLayoutController implements Initializable {
         }
     }
 
+    public void stageBookForBorrow(Book book) {
+        showBorrowReturnView(0);
+        if (borrowReturnController != null && book != null) {
+            borrowReturnController.addToBasket(book);
+        }
+    }
+
     @FXML
     public void handleNavBorrowReturn() {
         showBorrowReturnView(0);

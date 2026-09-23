@@ -1230,7 +1230,7 @@ public class BookManagementController implements Initializable {
         }
 
         if (mainController != null) {
-            mainController.showBorrowReturnView(0);
+            mainController.stageBookForBorrow(currentSelectedBook);
         } else {
             Alert alert = new Alert(Alert.AlertType.INFORMATION, "Đã chọn sách '" + currentSelectedBook.getTitle() + "' để lập phiếu mượn.");
             alert.showAndWait();

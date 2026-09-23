@@ -37,7 +37,7 @@ public class BookCardView {
             imgUrl = BookCardView.class.getResource("/com/vithay/libman/images/clean_code.jpg");
         }
         if (imgUrl != null) {
-            coverView.setImage(new Image(imgUrl.toExternalForm()));
+            coverView.setImage(new Image(imgUrl.toExternalForm(), true));
         }
 
         // Title & Author

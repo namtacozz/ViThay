@@ -640,7 +640,8 @@ public class BorrowReturnController implements Initializable {
             emptyIcon.setStyle("-fx-font-size: 32px;");
 
             Label emptyTitle = new Label("Bàn lưu hành hiện đang trống");
-            emptyTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #FFFFFF; -fx-font-size: 14px;");
+            emptyTitle.getStyleClass().add("desk-empty-title");
+            emptyTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
 
             Label emptySub = new Label("Chọn sách từ bảng bên trái (Palette) và bấm [+ Thêm] để xếp sách lên bàn.");
             emptySub.setStyle("-fx-text-fill: #737373; -fx-font-size: 12px;");
@@ -785,18 +786,19 @@ public class BorrowReturnController implements Initializable {
         }
 
         Reader reader = getSelectedReader();
+        int maxAllowed = settingService != null ? settingService.getMaxBooksPerReader() : 5;
+        int currentBorrowing = (reader != null && borrowService != null) ? borrowService.getActiveBorrowCountForReader(reader.getId()) : 0;
+        int remainingQuota = Math.max(0, maxAllowed - currentBorrowing);
+        boolean isCardValid = reader != null && (readerService == null || readerService.isCardValid(reader));
+
         if (lblSummaryQuotaStatus != null) {
             if (reader == null) {
                 lblSummaryQuotaStatus.setText("⚠️ Chưa chọn độc giả");
                 lblSummaryQuotaStatus.setStyle("-fx-text-fill: #F59E0B; -fx-font-size: 11px;");
-                return;
-            }
-
-            int maxAllowed = settingService.getMaxBooksPerReader();
-            int currentBorrowing = borrowService.getActiveBorrowCountForReader(reader.getId());
-            int remainingQuota = Math.max(0, maxAllowed - currentBorrowing);
-
-            if (count == 0) {
+            } else if (!isCardValid) {
+                lblSummaryQuotaStatus.setText("❌ Thẻ độc giả không hợp lệ hoặc đã hết hạn!");
+                lblSummaryQuotaStatus.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold; -fx-font-size: 11px;");
+            } else if (count == 0) {
                 lblSummaryQuotaStatus.setText("Chưa chọn sách vào giỏ (Hạn ngạch còn: " + remainingQuota + " cuốn)");
                 lblSummaryQuotaStatus.setStyle("-fx-text-fill: #9CA3AF; -fx-font-size: 11px;");
             } else if (count <= remainingQuota) {
@@ -806,6 +808,11 @@ public class BorrowReturnController implements Initializable {
                 lblSummaryQuotaStatus.setText("❌ Vượt hạn ngạch cho phép! (Vượt " + (count - remainingQuota) + " cuốn)");
                 lblSummaryQuotaStatus.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold; -fx-font-size: 11px;");
             }
+        }
+
+        if (btnCompleteCheckout != null) {
+            boolean disabled = (reader == null || count == 0 || count > remainingQuota || !isCardValid);
+            btnCompleteCheckout.setDisable(disabled);
         }
     }
 
@@ -899,7 +906,8 @@ public class BorrowReturnController implements Initializable {
             TextArea txt = new TextArea(slipText);
             txt.setEditable(false);
             txt.setPrefSize(580, 420);
-            txt.setStyle("-fx-font-family: monospace; -fx-font-size: 12px; -fx-text-fill: #FFFFFF;");
+            txt.getStyleClass().add("wizard-slip-preview");
+            txt.setStyle("-fx-font-family: monospace; -fx-font-size: 12px;");
 
             VBox box = new VBox(10, txt);
             box.setPadding(new Insets(12));
@@ -1184,7 +1192,8 @@ public class BorrowReturnController implements Initializable {
         TextArea txt = new TextArea(slipText);
         txt.setEditable(false);
         txt.setPrefSize(520, 380);
-        txt.setStyle("-fx-font-family: monospace; -fx-font-size: 12px; -fx-text-fill: #FFFFFF;");
+        txt.getStyleClass().add("wizard-slip-preview");
+        txt.setStyle("-fx-font-family: monospace; -fx-font-size: 12px;");
 
         VBox box = new VBox(10, txt);
         box.setPadding(new Insets(12));
@@ -1237,7 +1246,8 @@ public class BorrowReturnController implements Initializable {
                         box.setAlignment(Pos.CENTER_LEFT);
                         VBox v = new VBox(2);
                         Label title = new Label(b.getTitle());
-                        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #FFFFFF; -fx-font-size: 12px;");
+                        title.getStyleClass().add("wizard-item-title");
+                        title.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
                         Label sub = new Label(b.getAuthor() + " • Kệ: " + b.getShelfLocation() + " • Còn: " + b.getAvailableCopies() + " cuốn");
                         sub.setStyle("-fx-text-fill: #9CA3AF; -fx-font-size: 11px;");
                         v.getChildren().addAll(title, sub);
@@ -1278,7 +1288,8 @@ public class BorrowReturnController implements Initializable {
                         box.setAlignment(Pos.CENTER_LEFT);
                         VBox v = new VBox(2);
                         Label title = new Label(b.getTitle());
-                        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #FFFFFF; -fx-font-size: 12px;");
+                        title.getStyleClass().add("wizard-item-title");
+                        title.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
                         Label sub = new Label("Mã: " + b.getId() + " • Tác giả: " + b.getAuthor());
                         sub.setStyle("-fx-text-fill: #9CA3AF; -fx-font-size: 11px;");
                         v.getChildren().addAll(title, sub);
