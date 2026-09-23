@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Release tag name (e.g. v1.1.0)'
+        description: 'Release tag name (e.g. v1.3.0)'
         required: true
-        default: 'v1.2.0'
+        default: 'v1.3.0'
 
 permissions:
   contents: write
@@ -35,7 +35,7 @@ jobs:
 
       - name: Build Self-Contained Windows Portable Package (jpackage)
         run: |
-          jpackage --type app-image --name LibMan --input target --main-jar libman-1.0.0.jar --main-class com.vithay.libman.Launcher --icon src/main/resources/com/vithay/libman/images/app_icon.ico --app-version 1.2.0 --vendor "ViThay"
+          jpackage --type app-image --name LibMan --input target --main-jar libman-1.0.0.jar --main-class com.vithay.libman.Launcher --icon src/main/resources/com/vithay/libman/images/app_icon.ico --app-version 1.3.0 --vendor "ViThay"
           Compress-Archive -Path LibMan -DestinationPath LibMan-Windows-Portable-x64.zip
 
       - name: Prepare Release Assets
@@ -49,31 +49,34 @@ jobs:
       - name: Create GitHub Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name != '' && startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.tag_name || 'v1.2.0' }}
-          name: "LibMan Desktop Release ${{ github.ref_name != '' && startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.tag_name || 'v1.2.0' }}"
+          tag_name: ${{ github.ref_name != '' && startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.tag_name || 'v1.3.0' }}
+          name: "LibMan Desktop Release ${{ github.ref_name != '' && startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.tag_name || 'v1.3.0' }}"
           draft: false
           prerelease: false
           generate_release_notes: true
           body: |
-            ## 🚀 LibMan - Hệ Thống Quản Lý Thư Viện Hiện Đại (v1.2.0)
+            ## 🚀 LibMan - Hệ Thống Quản Lý Thư Viện Hiện Đại (v1.3.0)
 
-            Bản phát hành **v1.2.0** mang đến nâng cấp toàn diện về giao diện, trải nghiệm người dùng (UI/UX) và tính năng chi tiết sách 2 tầng:
-            - **Cơ Chế Xem Sách 2 Tầng (Two-Tier Book View):**
-              - *Tầng 1 (Click 1 lần):* Inspector xem nhanh ảnh bìa, tên sách, tác giả, thể loại, tình trạng, vị trí kệ và nút mượn nhanh.
-              - *Tầng 2 (Click lần 2 / Double click / Nút "Xem Chi Tiết Toàn Diện ➔"):* Màn hình chi tiết toàn diện với cột trái 1/4 (Preview & thông số cốt lõi) và cột phải 3/4 (Tóm tắt chuyên sâu Synopsis & Bàn luận của độc giả kèm form gửi bình luận tức thì).
-            - **Đồng Bộ & Tinh Chỉnh Giao Diện:**
-              - Chuẩn hóa tên ứng dụng thành "LibMan - Quản Lý Thư Viện".
-              - Thu gọn giao diện Cài đặt (Settings UI) nhỏ gọn, thanh thoát.
-              - Đồng bộ hóa 100% Tiếng Việt cho toàn bộ bảng biểu, lịch sử giao dịch và badge trạng thái.
-              - Loại bỏ hoàn toàn lỗi hiển thị icon ô vuông (tofu square emojis) trên mọi nền tảng.
-              - Thêm viền tròn chữ "i" (`ⓘ`) sắc nét cho nút Quy chế & chế tài tại Bàn Lưu Hành.
-            - **Dashboard & Bộ Lọc Nâng Cao:**
-              - Nút ẩn/hiện dãy 4 thẻ thống kê Dashboard kèm icon nhận diện từng thẻ.
-              - Sửa lỗi click sách bất kỳ ở Sách Nổi Bật chỉ mở cuốn Sapiens.
-              - Sửa dứt điểm bộ lọc tác giả và nút "Làm Mới" tải lại toàn bộ kho sách.
-              - Chuẩn hóa họ tên độc giả và bổ sung 8 cuốn sách cùng tác giả (Yuval Noah Harari, Robert C. Martin, Nguyễn Nhật Ánh, J.K. Rowling).
-            - **7 Mẫu Thiết Kế Cấu Trúc Vật Lý & Thông Tin (Jenifer Tidwell):**
-              - Two-Panel Selector, Canvas Plus Palette, One-Window Drilldown, Alternative Views, Wizard 4 bước, Extras on Demand, Intriguing Branches.
+            Bản phát hành **v1.3.0** nâng cấp vượt bậc về trải nghiệm người dùng, đồ họa vector, bố cục tự co giãn và kho tư liệu 221 cuốn sách bìa thật:
+            - **Trang Chủ Responsive & Bố Cục Thông Minh:**
+              - Tách riêng thanh cuộn ngang độc quyền cho hàng "Sách Nổi Bật".
+              - Cố định toàn màn hình, nút "+ Lập phiếu mượn" và "Làm mới" luôn hiển thị trọn vẹn trong tầm mắt.
+              - Bảng giao dịch gần đây tự động scale đầy đủ độ rộng cửa sổ khi phóng to/thu nhỏ.
+            - **Sidebar Dọc Phong Cách Brave Browser (Vertical Tabs):**
+              - Chế độ mặc định thu nhỏ 64px chỉ hiện icon vector tinh gọn.
+              - Tự động trượt mở rộng 250px kèm nhãn chữ khi rê chuột vào (hover) và co lại khi rời chuột.
+              - Tích hợp nút Ghim (Pin) giúp người dùng linh hoạt khóa mở rộng hoặc cho phép tự co giãn.
+            - **Hệ Thống Icon Vector SVG Toàn Diện (Morphicons / Lucide):**
+              - 100% icon chuyển thành vector SVG mượt mà, đổi màu chuẩn theo Spotify Dark Theme (#1DB954) và Pink Light Theme (#E91E63).
+              - Loại bỏ cắt chữ trên các nút chuyển đổi Bảng / Lưới thẻ bằng icon vector và Tooltip chỉ dẫn.
+            - **Kho 221 Cuốn Sách Với Bìa Thật & Phân Bố Theo Tác Giả Lớn:**
+              - Bổ sung hơn 221 đầu sách phân bổ đậm đặc cho các tác giả lớn (Nguyễn Nhật Ánh: 17 cuốn, Haruki Murakami: 12 cuốn, J.K. Rowling: 11 cuốn, Kim Dung: 10 cuốn, Arthur Conan Doyle: 10 cuốn, Agatha Christie: 10 cuốn, Thích Nhất Hạnh: 8 cuốn, Paulo Coelho: 8 cuốn, Dan Brown: 7 cuốn, Yuval Noah Harari: 6 cuốn, Walter Isaacson: 6 cuốn, Stephen Hawking: 6 cuốn, Stephen King: 6 cuốn, Robert C. Martin: 6 cuốn, v.v.).
+              - 100% bìa sách chính xác, sắc nét tải trực tiếp từ Open Library.
+            - **Đồng Bộ Hóa 100% Tiếng Việt Cho Toàn Bộ Bộ Lọc & Trạng Thái:**
+              - Dropdown lọc trạng thái: "Tất cả", "Còn sách", "Đang mượn", "Tạm giữ".
+              - Bộ lọc tồn kho: "Tất cả", "Còn sách", "Hết sách".
+              - Bộ lọc độc giả: "Tất cả", "Hoạt Động", "Chờ Cấp Thẻ", "Bị Khóa", "Hết Hạn".
+              - Toàn bộ modal Thêm/Sửa sách và Độc giả hiển thị tiếng Việt hoàn toàn.
             - **Kiểm thử tự động:** 48 bài test tự động JUnit 5 đạt tỷ lệ vượt qua 100%.
 
             ---
