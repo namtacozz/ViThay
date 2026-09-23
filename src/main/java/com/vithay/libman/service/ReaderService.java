@@ -68,4 +68,31 @@ public class ReaderService {
         String today = LocalDate.now().toString();
         return readerDao.deactivateExpiredReaders(today);
     }
+
+    public boolean isCardValid(Reader reader) {
+        if (reader == null || reader.isDeleted()) {
+            return false;
+        }
+        String status = reader.getStatus();
+        if (status == null) {
+            return false;
+        }
+        String s = status.trim().toUpperCase();
+        if (s.contains("BLOCK") || s.contains("KHOA") || s.contains("CHO") || s.contains("CHỜ") || s.contains("EXPIRE") || s.contains("HET")) {
+            return false;
+        }
+        LocalDate expiry = reader.getNgayHetHan();
+        if (expiry == null || expiry.isBefore(LocalDate.now())) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isCardValid(String readerId) {
+        if (readerId == null || readerId.trim().isEmpty()) {
+            return false;
+        }
+        Reader reader = getReaderById(readerId.trim());
+        return isCardValid(reader);
+    }
 }

@@ -140,6 +140,53 @@ public class ExportService {
         return sb.toString();
     }
 
+    public String generateWizardBorrowSlipPreview(Reader reader, List<Book> books, String loanType, int loanDays, String notes) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("======================================================================\n");
+        sb.append("                      THƯ VIỆN ĐẠI HỌC - LIBMAN                       \n");
+        sb.append("             PHIẾU MƯỢN SÁCH TỔNG HỢP (TRỢ LÝ WIZARD - BẢN XEM TRƯỚC) \n");
+        sb.append("======================================================================\n\n");
+        sb.append("Thời gian lập:    ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n");
+        sb.append("Số lượng sách:    ").append(books != null ? books.size() : 0).append(" cuốn\n");
+        sb.append("----------------------------------------------------------------------\n");
+        sb.append("THÔNG TIN ĐỘC GIẢ:\n");
+        if (reader != null) {
+            sb.append(" - Mã độc giả:    ").append(reader.getId()).append("\n");
+            sb.append(" - Họ và tên:     ").append(reader.getFullName()).append("\n");
+            sb.append(" - Email/SĐT:     ").append(reader.getEmail() != null ? reader.getEmail() : "").append(" / ")
+                    .append(reader.getPhone() != null ? reader.getPhone() : "").append("\n");
+            sb.append(" - Hạn thẻ:       ").append(reader.getCardExpiryDate() != null ? reader.getCardExpiryDate() : "--").append("\n");
+        } else {
+            sb.append(" - Chưa chọn độc giả\n");
+        }
+        sb.append("----------------------------------------------------------------------\n");
+        sb.append("DANH SÁCH TÁC PHẨM MƯỢN:\n");
+        if (books != null && !books.isEmpty()) {
+            int idx = 1;
+            java.time.LocalDate dueDate = java.time.LocalDate.now().plusDays(loanDays);
+            for (Book b : books) {
+                sb.append(String.format(" %d. [%s] %s\n", idx++, b.getId(), b.getTitle()));
+                sb.append(String.format("    - Tác giả: %s | Kệ: %s\n", b.getAuthor(), b.getShelfLocation()));
+                sb.append(String.format("    - Hình thức: %s | Ngày mượn: %s | HẠN TRẢ: %s\n", loanType, java.time.LocalDate.now(), dueDate));
+            }
+        } else {
+            sb.append(" (Chưa chọn sách)\n");
+        }
+        if (notes != null && !notes.trim().isEmpty()) {
+            sb.append(" - Ghi chú:       ").append(notes).append("\n");
+        }
+        sb.append("----------------------------------------------------------------------\n");
+        sb.append("QUY ĐỊNH BẢO QUẢN & CHẾ TÀI:\n");
+        sb.append(" 1. Trả sách đúng hạn quy định (Quá hạn phạt 2.000đ/ngày/cuốn).\n");
+        sb.append(" 2. Không làm rách, gạch xóa, hư hỏng hoặc làm mất sách.\n");
+        sb.append(" 3. Bồi hoàn sách mất: 200% giá gốc + 20.000đ lệ phí kỹ thuật.\n\n");
+        sb.append("         ĐỘC GIẢ KÝ TÊN                       THỦ THƯ XÁC NHẬN        \n");
+        sb.append("       (Ký và ghi rõ họ tên)                (Ký và ghi rõ họ tên)     \n\n\n");
+        sb.append("      .........................            .........................  \n");
+        sb.append("======================================================================\n");
+        return sb.toString();
+    }
+
     private String escapeCsv(String val) {
         if (val == null) return "";
         return val.replace("\"", "\"\"");

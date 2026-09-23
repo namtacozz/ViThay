@@ -1,5 +1,7 @@
 package com.vithay.libman.model;
 
+import java.time.LocalDate;
+
 public class Reader {
     private String id;
     private String fullName;
@@ -39,6 +41,22 @@ public class Reader {
         this(id, fullName, email, phone, address, idCard, birthDate, joinDate, joinDate, "2026-12-31", status, false);
     }
 
+    public Reader(String id, String fullName, String email, String phone, String idCard, String address,
+                  LocalDate birthDate, LocalDate cardIssueDate, LocalDate cardExpiryDate, String status) {
+        this.id = id;
+        this.fullName = fullName;
+        this.email = email;
+        this.phone = phone;
+        this.idCard = idCard;
+        this.address = address;
+        this.birthDate = birthDate != null ? birthDate.toString() : null;
+        this.joinDate = cardIssueDate != null ? cardIssueDate.toString() : LocalDate.now().toString();
+        this.cardIssueDate = cardIssueDate != null ? cardIssueDate.toString() : LocalDate.now().toString();
+        this.cardExpiryDate = cardExpiryDate != null ? cardExpiryDate.toString() : null;
+        this.status = status;
+        this.isDeleted = false;
+    }
+
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -74,6 +92,51 @@ public class Reader {
 
     public boolean isDeleted() { return isDeleted; }
     public void setDeleted(boolean deleted) { isDeleted = deleted; }
+
+    public LocalDate getNgayHetHan() {
+        if (cardExpiryDate == null || cardExpiryDate.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(cardExpiryDate.trim());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public void setNgayHetHan(LocalDate date) {
+        this.cardExpiryDate = date != null ? date.toString() : null;
+    }
+
+    public LocalDate getNgayCapThe() {
+        if (cardIssueDate == null || cardIssueDate.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(cardIssueDate.trim());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public void setNgayCapThe(LocalDate date) {
+        this.cardIssueDate = date != null ? date.toString() : null;
+    }
+
+    public LocalDate getNgaySinh() {
+        if (birthDate == null || birthDate.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(birthDate.trim());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public void setNgaySinh(LocalDate date) {
+        this.birthDate = date != null ? date.toString() : null;
+    }
 
     @Override
     public String toString() {

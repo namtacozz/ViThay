@@ -82,6 +82,65 @@ public class BorrowReturnController implements Initializable {
     @FXML private TableColumn<BorrowTransaction, Double> colAllFine;
     @FXML private TableColumn<BorrowTransaction, String> colAllStatus;
 
+    // TAB: TRỢ LÝ WIZARD (BORROWING WIZARD 4 BƯỚC)
+    @FXML private Label stepNode1;
+    @FXML private Label stepNode2;
+    @FXML private Label stepNode3;
+    @FXML private Label stepNode4;
+
+    @FXML private VBox paneWizardStep1;
+    @FXML private VBox paneWizardStep2;
+    @FXML private VBox paneWizardStep3;
+    @FXML private VBox paneWizardStep4;
+
+    // Step 1: Reader
+    @FXML private ComboBox<Reader> comboWizardReader;
+    @FXML private Label lblWizardReaderName;
+    @FXML private Label lblWizardReaderId;
+    @FXML private Label lblWizardCardStatus;
+    @FXML private Label lblWizardCardExpiry;
+    @FXML private Label lblWizardActiveLoans;
+    @FXML private Label lblWizardQuota;
+    @FXML private Label lblWizardStep1Feedback;
+
+    // Step 2: Book Selection
+    @FXML private Label lblWizardQuotaRemainingHeader;
+    @FXML private TextField txtWizardBookSearch;
+    @FXML private ListView<Book> listWizardAvailableBooks;
+    @FXML private Button btnWizardAddBook;
+    @FXML private Label lblWizardSelectedCount;
+    @FXML private ListView<Book> listWizardSelectedBooks;
+    @FXML private Label lblWizardStep2Feedback;
+
+    // Step 3: Terms & Dates
+    @FXML private RadioButton radioWizardHome;
+    @FXML private RadioButton radioWizardOnsite;
+    @FXML private Spinner<Integer> spnWizardLoanDays;
+    @FXML private Label lblWizardMaxDaysNotice;
+    @FXML private Label lblWizardBorrowDate;
+    @FXML private Label lblWizardCalculatedDueDate;
+    @FXML private TextField txtWizardNotes;
+
+    // Step 4: Preview Slip
+    @FXML private TextArea txtWizardSlipPreview;
+
+    // Stepper Navigation
+    @FXML private Button btnWizardCancel;
+    @FXML private Label lblWizardStepIndicator;
+    @FXML private Button btnWizardPrev;
+    @FXML private Button btnWizardNext;
+    @FXML private Button btnWizardFinish;
+
+    private int currentWizardStep = 1;
+    private Reader wizardReader;
+    private final ObservableList<Book> wizardSelectedBooks = FXCollections.observableArrayList();
+    private final ObservableList<Book> wizardAvailableBooks = FXCollections.observableArrayList();
+    private final ObservableList<Book> filteredWizardAvailableBooks = FXCollections.observableArrayList();
+    private ToggleGroup wizardLoanTypeGroup;
+    private String wizardLoanType = "Mang về nhà";
+    private int wizardLoanDays = 14;
+    private String wizardNotesText = "";
+
     private final BorrowService borrowService = new BorrowService();
     private final BookService bookService = new BookService();
     private final ReaderService readerService = new ReaderService();
@@ -98,6 +157,7 @@ public class BorrowReturnController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupDeskTab();
+        setupWizardTab();
         setupReturnTab();
         setupHistoryTab();
         loadAllData();
@@ -110,8 +170,21 @@ public class BorrowReturnController implements Initializable {
         loadAllData();
     }
 
+    public void selectTabByName(String name) {
+        if (borrowTabPane != null && name != null) {
+            for (Tab tab : borrowTabPane.getTabs()) {
+                if (tab.getText().toLowerCase().contains(name.toLowerCase())) {
+                    borrowTabPane.getSelectionModel().select(tab);
+                    break;
+                }
+            }
+        }
+        loadAllData();
+    }
+
     public void loadAllData() {
         loadDeskData();
+        loadWizardData();
         loadActiveTransactionsForReturn();
         loadAllTransactions();
     }
@@ -693,43 +766,59 @@ public class BorrowReturnController implements Initializable {
     }
 
     private void showReceiptDialog(Reader reader, List<BorrowTransaction> transactions) {
-        String slipText = exportService.generateBasketBorrowSlip(reader, transactions);
-
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("In Phiếu Mượn Sách - " + reader.getFullName());
-        dialog.setHeaderText("Lập phiếu mượn thành công! Xem trước mẫu phiếu in (SRS Mục 6.1):");
-
-        DialogPane pane = dialog.getDialogPane();
         try {
-            pane.getStylesheets().add(getClass().getResource("/com/vithay/libman/css/style.css").toExternalForm());
-        } catch (Exception ignored) {
+            if (!javafx.application.Platform.isFxApplicationThread()) {
+                logger.info("Receipt dialog skipped in non-FX environment for reader: {}", reader != null ? reader.getFullName() : "");
+                return;
+            }
+            String slipText = exportService.generateBasketBorrowSlip(reader, transactions);
+
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setTitle("In Phiếu Mượn Sách - " + reader.getFullName());
+            dialog.setHeaderText("Lập phiếu mượn thành công! Xem trước mẫu phiếu in (SRS Mục 6.1):");
+
+            DialogPane pane = dialog.getDialogPane();
+            try {
+                pane.getStylesheets().add(getClass().getResource("/com/vithay/libman/css/style.css").toExternalForm());
+            } catch (Exception ignored) {
+            }
+            pane.getStyleClass().add("bg-surface");
+            pane.getButtonTypes().add(ButtonType.CLOSE);
+
+            TextArea txt = new TextArea(slipText);
+            txt.setEditable(false);
+            txt.setPrefSize(580, 420);
+            txt.setStyle("-fx-font-family: monospace; -fx-font-size: 12px; -fx-text-fill: #FFFFFF;");
+
+            VBox box = new VBox(10, txt);
+            box.setPadding(new Insets(12));
+            pane.setContent(box);
+
+            dialog.showAndWait();
+        } catch (Throwable t) {
+            logger.warn("Could not display receipt dialog: {}", t.getMessage());
         }
-        pane.getStyleClass().add("bg-surface");
-        pane.getButtonTypes().add(ButtonType.CLOSE);
-
-        TextArea txt = new TextArea(slipText);
-        txt.setEditable(false);
-        txt.setPrefSize(580, 420);
-        txt.setStyle("-fx-font-family: monospace; -fx-font-size: 12px; -fx-text-fill: #FFFFFF;");
-
-        VBox box = new VBox(10, txt);
-        box.setPadding(new Insets(12));
-        pane.setContent(box);
-
-        dialog.showAndWait();
     }
 
     private void showDeskAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type, message, ButtonType.OK);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
         try {
-            DialogPane pane = alert.getDialogPane();
-            pane.getStylesheets().add(getClass().getResource("/com/vithay/libman/css/style.css").toExternalForm());
-            pane.getStyleClass().add("bg-surface");
-        } catch (Exception ignored) {
+            if (javafx.application.Platform.isFxApplicationThread()) {
+                Alert alert = new Alert(type, message, ButtonType.OK);
+                alert.setTitle(title);
+                alert.setHeaderText(null);
+                try {
+                    DialogPane pane = alert.getDialogPane();
+                    pane.getStylesheets().add(getClass().getResource("/com/vithay/libman/css/style.css").toExternalForm());
+                    pane.getStyleClass().add("bg-surface");
+                } catch (Throwable ignored) {
+                }
+                alert.showAndWait();
+            } else {
+                logger.info("[DESK ALERT - {}] {}: {}", type, title, message);
+            }
+        } catch (Throwable t) {
+            logger.warn("Could not display desk alert: {}", t.getMessage());
         }
-        alert.showAndWait();
     }
 
     // =========================================================================
@@ -997,5 +1086,721 @@ public class BorrowReturnController implements Initializable {
         pane.setContent(box);
 
         dialog.showAndWait();
+    }
+
+    // =========================================================================
+    // 4. TRỢ LÝ WIZARD (4-STEP BORROWING WIZARD)
+    // =========================================================================
+
+    private void setupWizardTab() {
+        if (comboWizardReader != null) {
+            comboWizardReader.setCellFactory(lv -> new ListCell<>() {
+                @Override
+                protected void updateItem(Reader r, boolean empty) {
+                    super.updateItem(r, empty);
+                    if (empty || r == null) {
+                        setText(null);
+                    } else {
+                        setText(r.getFullName() + " (" + r.getId() + ")");
+                    }
+                }
+            });
+            comboWizardReader.setButtonCell(new ListCell<>() {
+                @Override
+                protected void updateItem(Reader r, boolean empty) {
+                    super.updateItem(r, empty);
+                    if (empty || r == null) {
+                        setText(null);
+                    } else {
+                        setText(r.getFullName() + " (" + r.getId() + ")");
+                    }
+                }
+            });
+        }
+
+        if (listWizardAvailableBooks != null) {
+            listWizardAvailableBooks.setItems(filteredWizardAvailableBooks);
+            listWizardAvailableBooks.setCellFactory(lv -> new ListCell<>() {
+                @Override
+                protected void updateItem(Book b, boolean empty) {
+                    super.updateItem(b, empty);
+                    if (empty || b == null) {
+                        setText(null);
+                        setGraphic(null);
+                    } else {
+                        HBox box = new HBox(8);
+                        box.setAlignment(Pos.CENTER_LEFT);
+                        VBox v = new VBox(2);
+                        Label title = new Label(b.getTitle());
+                        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #FFFFFF; -fx-font-size: 12px;");
+                        Label sub = new Label(b.getAuthor() + " • Kệ: " + b.getShelfLocation() + " • Còn: " + b.getAvailableCopies() + " cuốn");
+                        sub.setStyle("-fx-text-fill: #9CA3AF; -fx-font-size: 11px;");
+                        v.getChildren().addAll(title, sub);
+                        HBox.setHgrow(v, Priority.ALWAYS);
+
+                        Button add = new Button("+ Chọn");
+                        add.getStyleClass().add("btn-secondary");
+                        add.setStyle("-fx-font-size: 11px; -fx-padding: 3 8;");
+                        add.setOnAction(e -> addWizardBook(b));
+
+                        box.getChildren().addAll(v, add);
+                        setGraphic(box);
+                    }
+                }
+            });
+
+            listWizardAvailableBooks.setOnMouseClicked(e -> {
+                if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY) {
+                    Book selected = listWizardAvailableBooks.getSelectionModel().getSelectedItem();
+                    if (selected != null) {
+                        addWizardBook(selected);
+                    }
+                }
+            });
+        }
+
+        if (listWizardSelectedBooks != null) {
+            listWizardSelectedBooks.setItems(wizardSelectedBooks);
+            listWizardSelectedBooks.setCellFactory(lv -> new ListCell<>() {
+                @Override
+                protected void updateItem(Book b, boolean empty) {
+                    super.updateItem(b, empty);
+                    if (empty || b == null) {
+                        setText(null);
+                        setGraphic(null);
+                    } else {
+                        HBox box = new HBox(8);
+                        box.setAlignment(Pos.CENTER_LEFT);
+                        VBox v = new VBox(2);
+                        Label title = new Label(b.getTitle());
+                        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #FFFFFF; -fx-font-size: 12px;");
+                        Label sub = new Label("Mã: " + b.getId() + " • Tác giả: " + b.getAuthor());
+                        sub.setStyle("-fx-text-fill: #9CA3AF; -fx-font-size: 11px;");
+                        v.getChildren().addAll(title, sub);
+                        HBox.setHgrow(v, Priority.ALWAYS);
+
+                        Button remove = new Button("✕");
+                        remove.getStyleClass().add("btn-secondary");
+                        remove.setStyle("-fx-font-size: 11px; -fx-text-fill: #EF4444; -fx-padding: 2 6;");
+                        remove.setOnAction(e -> removeWizardBook(b));
+
+                        box.getChildren().addAll(v, remove);
+                        setGraphic(box);
+                    }
+                }
+            });
+        }
+
+        wizardLoanTypeGroup = new ToggleGroup();
+        if (radioWizardHome != null && radioWizardOnsite != null) {
+            radioWizardHome.setToggleGroup(wizardLoanTypeGroup);
+            radioWizardOnsite.setToggleGroup(wizardLoanTypeGroup);
+            radioWizardHome.setSelected(true);
+
+            wizardLoanTypeGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+                if (radioWizardHome.isSelected()) {
+                    wizardLoanType = "Mang về nhà";
+                    int maxHome = settingService.getMaxBorrowDaysHome();
+                    setWizardLoanDays(maxHome > 0 ? maxHome : 14);
+                    if (lblWizardMaxDaysNotice != null) {
+                        lblWizardMaxDaysNotice.setText("(Tối đa " + wizardLoanDays + " ngày đối với mang về)");
+                    }
+                } else {
+                    wizardLoanType = "Mượn đọc tại chỗ";
+                    int maxOnsite = settingService.getMaxBorrowDaysOnsite();
+                    setWizardLoanDays(maxOnsite > 0 ? maxOnsite : 1);
+                    if (lblWizardMaxDaysNotice != null) {
+                        lblWizardMaxDaysNotice.setText("(Phải trả trong ngày)");
+                    }
+                }
+                updateWizardDueDate();
+            });
+        }
+
+        int defaultDays = settingService.getMaxBorrowDaysHome();
+        if (defaultDays <= 0) defaultDays = 14;
+        wizardLoanDays = defaultDays;
+
+        if (spnWizardLoanDays != null) {
+            spnWizardLoanDays.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 90, wizardLoanDays));
+            spnWizardLoanDays.valueProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null) {
+                    wizardLoanDays = newVal;
+                    updateWizardDueDate();
+                }
+            });
+        }
+
+        if (lblWizardBorrowDate != null) {
+            lblWizardBorrowDate.setText(LocalDate.now().toString());
+        }
+        updateWizardDueDate();
+
+        updateWizardStepUi();
+    }
+
+    public void loadWizardData() {
+        List<Reader> all = readerService.getAllReaders();
+        if (comboWizardReader != null) {
+            comboWizardReader.setItems(FXCollections.observableArrayList(all));
+            if (wizardReader != null) {
+                for (Reader r : all) {
+                    if (r.getId().equals(wizardReader.getId())) {
+                        comboWizardReader.setValue(r);
+                        break;
+                    }
+                }
+            }
+        }
+
+        List<Book> available = bookService.getAllBooks().stream()
+                .filter(b -> b.getAvailableCopies() > 0 && !"Ngưng phục vụ".equalsIgnoreCase(b.getStatus()))
+                .toList();
+        wizardAvailableBooks.setAll(available);
+        applyWizardBookFilter();
+        updateWizardReaderInfo();
+    }
+
+    public void updateWizardStepUi() {
+        Label[] nodes = new Label[]{stepNode1, stepNode2, stepNode3, stepNode4};
+        for (int i = 0; i < nodes.length; i++) {
+            Label node = nodes[i];
+            if (node == null) continue;
+            node.getStyleClass().removeAll("wizard-step-active", "wizard-step-done");
+            if (!node.getStyleClass().contains("wizard-step-node")) {
+                node.getStyleClass().add("wizard-step-node");
+            }
+            int stepNum = i + 1;
+            if (stepNum == currentWizardStep) {
+                node.getStyleClass().add("wizard-step-active");
+            } else if (stepNum < currentWizardStep) {
+                node.getStyleClass().add("wizard-step-done");
+            }
+        }
+
+        VBox[] panes = new VBox[]{paneWizardStep1, paneWizardStep2, paneWizardStep3, paneWizardStep4};
+        for (int i = 0; i < panes.length; i++) {
+            VBox pane = panes[i];
+            if (pane == null) continue;
+            boolean active = (i + 1 == currentWizardStep);
+            pane.setVisible(active);
+            pane.setManaged(active);
+        }
+
+        if (btnWizardPrev != null) {
+            btnWizardPrev.setDisable(currentWizardStep <= 1);
+        }
+
+        if (lblWizardStepIndicator != null) {
+            switch (currentWizardStep) {
+                case 1 -> lblWizardStepIndicator.setText("Bước 1 / 4: Chọn Độc Giả");
+                case 2 -> lblWizardStepIndicator.setText("Bước 2 / 4: Chọn Sách Khả Dụng (" + wizardSelectedBooks.size() + " cuốn)");
+                case 3 -> lblWizardStepIndicator.setText("Bước 3 / 4: Thiết Lập Hạn & Quy Định");
+                case 4 -> lblWizardStepIndicator.setText("Bước 4 / 4: Xác Nhận & In Phiếu");
+            }
+        }
+
+        if (btnWizardNext != null && btnWizardFinish != null) {
+            if (currentWizardStep < 4) {
+                btnWizardNext.setVisible(true);
+                btnWizardNext.setManaged(true);
+                btnWizardFinish.setVisible(false);
+                btnWizardFinish.setManaged(false);
+            } else {
+                btnWizardNext.setVisible(false);
+                btnWizardNext.setManaged(false);
+                btnWizardFinish.setVisible(true);
+                btnWizardFinish.setManaged(true);
+            }
+        }
+
+        if (currentWizardStep == 1) {
+            updateWizardReaderInfo();
+        } else if (currentWizardStep == 2) {
+            updateWizardStep2Ui();
+        } else if (currentWizardStep == 3) {
+            updateWizardDueDate();
+        } else if (currentWizardStep == 4) {
+            updateWizardStep4Preview();
+        }
+    }
+
+    private void updateWizardDueDate() {
+        LocalDate due = LocalDate.now().plusDays(getWizardLoanDays());
+        if (lblWizardCalculatedDueDate != null) {
+            lblWizardCalculatedDueDate.setText(due.toString() + " (" + getWizardLoanDays() + " ngày)");
+        }
+    }
+
+    private void updateWizardReaderInfo() {
+        Reader reader = getWizardReader();
+        if (reader == null) {
+            if (lblWizardReaderName != null) lblWizardReaderName.setText("-- Chưa chọn --");
+            if (lblWizardReaderId != null) lblWizardReaderId.setText("--");
+            if (lblWizardCardStatus != null) {
+                lblWizardCardStatus.setText("--");
+                lblWizardCardStatus.setStyle("-fx-text-fill: #CCCCCC;");
+            }
+            if (lblWizardCardExpiry != null) lblWizardCardExpiry.setText("--");
+            if (lblWizardActiveLoans != null) lblWizardActiveLoans.setText("0 / 5 cuốn");
+            if (lblWizardQuota != null) {
+                lblWizardQuota.setText("5 cuốn");
+                lblWizardQuota.setStyle("-fx-font-weight: bold; -fx-text-fill: #1DB954;");
+            }
+            if (lblWizardStep1Feedback != null) {
+                lblWizardStep1Feedback.setText("Vui lòng chọn độc giả để tiến hành kiểm tra điều kiện mượn.");
+                lblWizardStep1Feedback.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #F59E0B;");
+            }
+            return;
+        }
+
+        int maxAllowed = settingService.getMaxBooksPerReader();
+        int activeLoans = borrowService.getActiveBorrowCountForReader(reader.getId());
+        int remainingQuota = Math.max(0, maxAllowed - activeLoans);
+
+        if (lblWizardReaderName != null) lblWizardReaderName.setText(reader.getFullName());
+        if (lblWizardReaderId != null) lblWizardReaderId.setText(reader.getId() + " • " + (reader.getEmail() != null ? reader.getEmail() : ""));
+        if (lblWizardCardExpiry != null) lblWizardCardExpiry.setText(reader.getCardExpiryDate() != null ? reader.getCardExpiryDate() : "--");
+        if (lblWizardActiveLoans != null) lblWizardActiveLoans.setText(activeLoans + " / " + maxAllowed + " cuốn");
+        if (lblWizardQuota != null) {
+            lblWizardQuota.setText(remainingQuota + " cuốn");
+            lblWizardQuota.setStyle(remainingQuota > 0 ? "-fx-font-weight: bold; -fx-text-fill: #1DB954;" : "-fx-font-weight: bold; -fx-text-fill: #EF4444;");
+        }
+
+        if (lblWizardQuotaRemainingHeader != null) {
+            lblWizardQuotaRemainingHeader.setText("Hạn ngạch còn: " + remainingQuota + " cuốn");
+            lblWizardQuotaRemainingHeader.setStyle(remainingQuota > 0 ? "-fx-font-weight: bold; -fx-text-fill: #1DB954; -fx-font-size: 12px;" : "-fx-font-weight: bold; -fx-text-fill: #EF4444; -fx-font-size: 12px;");
+        }
+
+        boolean isValid = readerService.isCardValid(reader);
+        if (lblWizardCardStatus != null) {
+            String status = reader.getStatus() != null ? reader.getStatus() : "Không xác định";
+            lblWizardCardStatus.setText(status);
+            if (isValid) {
+                lblWizardCardStatus.setStyle("-fx-text-fill: #1DB954; -fx-font-weight: bold;");
+            } else {
+                lblWizardCardStatus.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold;");
+            }
+        }
+
+        if (lblWizardStep1Feedback != null) {
+            if ("Blocked".equalsIgnoreCase(reader.getStatus()) || "KHOA".equalsIgnoreCase(reader.getStatus())) {
+                lblWizardStep1Feedback.setText("❌ THẺ BỊ KHÓA: Độc giả đang bị khóa tài khoản! Không thể mượn sách.");
+                lblWizardStep1Feedback.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #EF4444;");
+            } else if ("Expired".equalsIgnoreCase(reader.getStatus()) || (reader.getNgayHetHan() != null && reader.getNgayHetHan().isBefore(LocalDate.now()))) {
+                lblWizardStep1Feedback.setText("❌ THẺ HẾT HẠN: Thẻ độc giả đã hết hạn sử dụng (" + reader.getCardExpiryDate() + ")! Cần gia hạn thẻ trước.");
+                lblWizardStep1Feedback.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #EF4444;");
+            } else if ("Chờ Cấp Thẻ".equalsIgnoreCase(reader.getStatus())) {
+                lblWizardStep1Feedback.setText("⚠️ CHƯA CẤP THẺ: Độc giả chưa hoàn tất cấp thẻ tại quầy.");
+                lblWizardStep1Feedback.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #F59E0B;");
+            } else if (remainingQuota <= 0) {
+                lblWizardStep1Feedback.setText("❌ HẾT HẠN NGẠCH: Độc giả đang mượn đủ " + activeLoans + "/" + maxAllowed + " cuốn! Cần trả sách trước khi mượn tiếp.");
+                lblWizardStep1Feedback.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #EF4444;");
+            } else {
+                lblWizardStep1Feedback.setText("✓ THẺ HỢP LỆ: Đủ điều kiện lập phiếu. Được mượn thêm tối đa " + remainingQuota + " cuốn sách.");
+                lblWizardStep1Feedback.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1DB954;");
+            }
+        }
+    }
+
+    public int getWizardRemainingQuota() {
+        Reader reader = getWizardReader();
+        if (reader == null) return 0;
+        int maxAllowed = settingService.getMaxBooksPerReader();
+        int activeLoans = borrowService.getActiveBorrowCountForReader(reader.getId());
+        return Math.max(0, maxAllowed - activeLoans);
+    }
+
+    public boolean addWizardBook(Book book) {
+        if (book == null) return false;
+        Reader reader = getWizardReader();
+        if (reader == null) {
+            showDeskAlert(Alert.AlertType.WARNING, "Chưa Chọn Độc Giả", "Vui lòng hoàn thành Bước 1 (chọn độc giả) trước!");
+            return false;
+        }
+
+        for (Book b : wizardSelectedBooks) {
+            if (b.getId().equalsIgnoreCase(book.getId())) {
+                showDeskAlert(Alert.AlertType.WARNING, "Đã Chọn", "Cuốn sách này đã có trong danh sách chọn!");
+                return false;
+            }
+        }
+
+        if (book.getAvailableCopies() <= 0) {
+            showDeskAlert(Alert.AlertType.WARNING, "Hết Sách", "Sách này hiện không còn bản nào khả dụng trong kho!");
+            return false;
+        }
+
+        int remainingQuota = getWizardRemainingQuota();
+        if (wizardSelectedBooks.size() >= remainingQuota) {
+            showDeskAlert(Alert.AlertType.ERROR, "Vượt Hạn Ngạch",
+                    "Hạn ngạch còn lại của độc giả chỉ được mượn thêm " + remainingQuota + " cuốn!");
+            return false;
+        }
+
+        wizardSelectedBooks.add(book);
+        updateWizardStep2Ui();
+        return true;
+    }
+
+    public void removeWizardBook(Book book) {
+        if (book == null) return;
+        wizardSelectedBooks.removeIf(b -> b.getId().equalsIgnoreCase(book.getId()));
+        updateWizardStep2Ui();
+    }
+
+    public void clearWizardSelectedBooks() {
+        wizardSelectedBooks.clear();
+        updateWizardStep2Ui();
+    }
+
+    private void updateWizardStep2Ui() {
+        int count = wizardSelectedBooks.size();
+        int remainingQuota = getWizardRemainingQuota();
+        if (lblWizardSelectedCount != null) {
+            lblWizardSelectedCount.setText("Đã chọn: " + count + " cuốn");
+        }
+        if (lblWizardStep2Feedback != null) {
+            if (count == 0) {
+                lblWizardStep2Feedback.setText("Chưa chọn sách nào. Vui lòng chọn ít nhất 1 cuốn.");
+                lblWizardStep2Feedback.setStyle("-fx-text-fill: #9CA3AF;");
+            } else if (count <= remainingQuota) {
+                lblWizardStep2Feedback.setText("✓ Đã chọn " + count + " cuốn. Hợp lệ để tiếp tục bước tiếp theo.");
+                lblWizardStep2Feedback.setStyle("-fx-text-fill: #1DB954; -fx-font-weight: bold;");
+            } else {
+                lblWizardStep2Feedback.setText("❌ Đã chọn vượt quá hạn ngạch cho phép (" + count + "/" + remainingQuota + ")!");
+                lblWizardStep2Feedback.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold;");
+            }
+        }
+    }
+
+    private void updateWizardStep4Preview() {
+        if (txtWizardSlipPreview != null) {
+            String notes = getWizardNotes();
+            String previewText = exportService.generateWizardBorrowSlipPreview(
+                    getWizardReader(),
+                    new ArrayList<>(wizardSelectedBooks),
+                    getWizardLoanType(),
+                    getWizardLoanDays(),
+                    notes
+            );
+            txtWizardSlipPreview.setText(previewText);
+        }
+    }
+
+    public boolean validateStep1() {
+        Reader reader = getWizardReader();
+        if (reader == null) {
+            showDeskAlert(Alert.AlertType.WARNING, "Chưa Chọn Độc Giả", "Vui lòng chọn độc giả trước khi tiếp tục!");
+            if (lblWizardStep1Feedback != null) {
+                lblWizardStep1Feedback.setText("❌ Chưa chọn độc giả!");
+                lblWizardStep1Feedback.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold;");
+            }
+            return false;
+        }
+
+        if (!readerService.isCardValid(reader)) {
+            String reason = "Thẻ độc giả không hợp lệ hoặc đã hết hạn!";
+            if ("Blocked".equalsIgnoreCase(reader.getStatus()) || "KHOA".equalsIgnoreCase(reader.getStatus())) {
+                reason = "Thẻ độc giả đang bị khóa tài khoản!";
+            } else if ("Expired".equalsIgnoreCase(reader.getStatus()) || (reader.getNgayHetHan() != null && reader.getNgayHetHan().isBefore(LocalDate.now()))) {
+                reason = "Thẻ độc giả đã hết hạn sử dụng (" + reader.getCardExpiryDate() + ")!";
+            } else if ("Chờ Cấp Thẻ".equalsIgnoreCase(reader.getStatus())) {
+                reason = "Độc giả chưa được cấp thẻ thư viện tại quầy!";
+            }
+            showDeskAlert(Alert.AlertType.ERROR, "Thẻ Không Hợp Lệ", reason);
+            return false;
+        }
+
+        int remainingQuota = getWizardRemainingQuota();
+        if (remainingQuota <= 0) {
+            showDeskAlert(Alert.AlertType.ERROR, "Hết Hạn Ngạch", "Độc giả đã mượn tối đa 5 cuốn sách theo quy định!");
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean validateStep2() {
+        if (wizardSelectedBooks.isEmpty()) {
+            showDeskAlert(Alert.AlertType.WARNING, "Chưa Chọn Sách", "Vui lòng chọn ít nhất 1 cuốn sách từ kho!");
+            if (lblWizardStep2Feedback != null) {
+                lblWizardStep2Feedback.setText("❌ Vui lòng chọn ít nhất 1 cuốn sách!");
+                lblWizardStep2Feedback.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold;");
+            }
+            return false;
+        }
+
+        int remainingQuota = getWizardRemainingQuota();
+        if (wizardSelectedBooks.size() > remainingQuota) {
+            showDeskAlert(Alert.AlertType.ERROR, "Vượt Hạn Ngạch",
+                    "Số sách chọn (" + wizardSelectedBooks.size() + ") vượt quá hạn ngạch còn lại (" + remainingQuota + ")!");
+            return false;
+        }
+
+        for (Book b : wizardSelectedBooks) {
+            if (b.getAvailableCopies() <= 0) {
+                showDeskAlert(Alert.AlertType.ERROR, "Sách Hết Bản Khả Dụng",
+                        "Sách \"" + b.getTitle() + "\" đã hết bản khả dụng trong kho!");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean validateStep3() {
+        if (getWizardLoanDays() <= 0) {
+            showDeskAlert(Alert.AlertType.WARNING, "Thời Hạn Không Hợp Lệ", "Thời hạn mượn sách phải lớn hơn 0 ngày!");
+            return false;
+        }
+        return true;
+    }
+
+    public void goToWizardStep(int step) {
+        if (step < 1) step = 1;
+        if (step > 4) step = 4;
+        this.currentWizardStep = step;
+        updateWizardStepUi();
+    }
+
+    public boolean wizardNextStep() {
+        if (currentWizardStep == 1) {
+            if (!validateStep1()) return false;
+            goToWizardStep(2);
+            return true;
+        } else if (currentWizardStep == 2) {
+            if (!validateStep2()) return false;
+            goToWizardStep(3);
+            return true;
+        } else if (currentWizardStep == 3) {
+            if (!validateStep3()) return false;
+            goToWizardStep(4);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean wizardPrevStep() {
+        if (currentWizardStep > 1) {
+            goToWizardStep(currentWizardStep - 1);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean wizardFinish() {
+        if (!validateStep1() || !validateStep2() || !validateStep3()) {
+            return false;
+        }
+
+        Reader reader = getWizardReader();
+        List<BorrowTransaction> createdTransactions = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+        String notes = getWizardNotes();
+        if (notes == null || notes.trim().isEmpty()) {
+            notes = "Mượn qua Trợ Lý Wizard (SRS Mục 6.1)";
+        }
+        String loanType = getWizardLoanType();
+        int loanDays = getWizardLoanDays();
+
+        for (Book book : new ArrayList<>(wizardSelectedBooks)) {
+            String err = borrowService.createBorrowTransaction(
+                    reader.getId(),
+                    book.getId(),
+                    loanType,
+                    loanDays,
+                    notes
+            );
+            if (err != null) {
+                errors.add(book.getTitle() + ": " + err);
+            } else {
+                List<BorrowTransaction> txs = borrowService.getTransactionsByReader(reader.getId());
+                for (BorrowTransaction tx : txs) {
+                    if (tx.getBookId().equals(book.getId()) && "Đang Mượn".equalsIgnoreCase(tx.getStatus())) {
+                        if (createdTransactions.stream().noneMatch(t -> t.getId().equals(tx.getId()))) {
+                            createdTransactions.add(tx);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            showDeskAlert(Alert.AlertType.ERROR, "Lỗi Khi Lập Phiếu", String.join("\n", errors));
+        }
+
+        if (!createdTransactions.isEmpty()) {
+            try {
+                showReceiptDialog(reader, createdTransactions);
+            } catch (Exception e) {
+                logger.warn("Could not show receipt dialog: {}", e.getMessage());
+            }
+            resetWizard();
+            loadAllData();
+            return true;
+        }
+        return false;
+    }
+
+    public void resetWizard() {
+        currentWizardStep = 1;
+        wizardSelectedBooks.clear();
+        setWizardReader(null);
+        if (comboWizardReader != null) comboWizardReader.setValue(null);
+        if (txtWizardBookSearch != null) txtWizardBookSearch.clear();
+        if (txtWizardNotes != null) txtWizardNotes.clear();
+        if (radioWizardHome != null) radioWizardHome.setSelected(true);
+        wizardLoanType = "Mang về nhà";
+        wizardLoanDays = settingService.getMaxBorrowDaysHome();
+        if (wizardLoanDays <= 0) wizardLoanDays = 14;
+        if (spnWizardLoanDays != null && spnWizardLoanDays.getValueFactory() != null) {
+            spnWizardLoanDays.getValueFactory().setValue(wizardLoanDays);
+        }
+        updateWizardStepUi();
+    }
+
+    // Getters and Setters for Wizard State
+    public int getCurrentWizardStep() {
+        return currentWizardStep;
+    }
+
+    public void setCurrentWizardStep(int step) {
+        this.currentWizardStep = step;
+        updateWizardStepUi();
+    }
+
+    public Reader getWizardReader() {
+        if (comboWizardReader != null && comboWizardReader.getValue() != null) {
+            return comboWizardReader.getValue();
+        }
+        return wizardReader;
+    }
+
+    public void setWizardReader(Reader reader) {
+        this.wizardReader = reader;
+        if (comboWizardReader != null) {
+            comboWizardReader.setValue(reader);
+        }
+        updateWizardReaderInfo();
+    }
+
+    public ObservableList<Book> getWizardSelectedBooks() {
+        return wizardSelectedBooks;
+    }
+
+    public String getWizardLoanType() {
+        if (radioWizardOnsite != null && radioWizardOnsite.isSelected()) {
+            return "Mượn đọc tại chỗ";
+        }
+        return wizardLoanType != null ? wizardLoanType : "Mang về nhà";
+    }
+
+    public void setWizardLoanType(String loanType) {
+        this.wizardLoanType = loanType;
+        if ("Mượn đọc tại chỗ".equalsIgnoreCase(loanType)) {
+            if (radioWizardOnsite != null) radioWizardOnsite.setSelected(true);
+        } else {
+            if (radioWizardHome != null) radioWizardHome.setSelected(true);
+        }
+        updateWizardDueDate();
+    }
+
+    public int getWizardLoanDays() {
+        if (spnWizardLoanDays != null && spnWizardLoanDays.getValue() != null) {
+            return spnWizardLoanDays.getValue();
+        }
+        return wizardLoanDays;
+    }
+
+    public void setWizardLoanDays(int days) {
+        this.wizardLoanDays = days;
+        if (spnWizardLoanDays != null && spnWizardLoanDays.getValueFactory() != null) {
+            spnWizardLoanDays.getValueFactory().setValue(days);
+        }
+        updateWizardDueDate();
+    }
+
+    public String getWizardNotes() {
+        if (txtWizardNotes != null && !txtWizardNotes.getText().trim().isEmpty()) {
+            return txtWizardNotes.getText().trim();
+        }
+        return wizardNotesText;
+    }
+
+    public void setWizardNotes(String notes) {
+        this.wizardNotesText = notes;
+        if (txtWizardNotes != null) {
+            txtWizardNotes.setText(notes);
+        }
+    }
+
+    // Wizard Event Handlers
+    @FXML public void handleWizardNext() { wizardNextStep(); }
+    @FXML public void handleWizardPrev() { wizardPrevStep(); }
+    @FXML public void handleWizardFinish() { wizardFinish(); }
+    @FXML public void handleWizardCancel() { resetWizard(); }
+
+    @FXML
+    public void handleSelectWizardReader() {
+        if (comboWizardReader != null) {
+            wizardReader = comboWizardReader.getValue();
+            updateWizardReaderInfo();
+        }
+    }
+
+    @FXML
+    public void handleRefreshWizardReader() {
+        loadWizardData();
+    }
+
+    @FXML
+    public void handleWizardBookSearch() {
+        applyWizardBookFilter();
+    }
+
+    private void applyWizardBookFilter() {
+        String query = (txtWizardBookSearch != null && txtWizardBookSearch.getText() != null)
+                ? txtWizardBookSearch.getText().trim().toLowerCase()
+                : "";
+        if (query.isEmpty()) {
+            filteredWizardAvailableBooks.setAll(wizardAvailableBooks);
+        } else {
+            List<Book> filtered = wizardAvailableBooks.stream()
+                    .filter(b -> (b.getTitle() != null && b.getTitle().toLowerCase().contains(query)) ||
+                            (b.getAuthor() != null && b.getAuthor().toLowerCase().contains(query)) ||
+                            (b.getId() != null && b.getId().toLowerCase().contains(query)) ||
+                            (b.getCategory() != null && b.getCategory().toLowerCase().contains(query)))
+                    .toList();
+            filteredWizardAvailableBooks.setAll(filtered);
+        }
+    }
+
+    @FXML
+    public void handleWizardAddSelectedBook() {
+        if (listWizardAvailableBooks != null) {
+            Book selected = listWizardAvailableBooks.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                addWizardBook(selected);
+            } else {
+                showDeskAlert(Alert.AlertType.INFORMATION, "Chưa Chọn Sách", "Vui lòng chọn một cuốn sách từ danh sách khả dụng!");
+            }
+        }
+    }
+
+    @FXML
+    public void handleWizardRemoveSelectedBook() {
+        if (listWizardSelectedBooks != null) {
+            Book selected = listWizardSelectedBooks.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                removeWizardBook(selected);
+            }
+        }
+    }
+
+    @FXML
+    public void handleWizardClearSelectedBooks() {
+        clearWizardSelectedBooks();
     }
 }
