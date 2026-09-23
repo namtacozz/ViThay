@@ -101,189 +101,7 @@
                 </SplitPane>
             </Tab>
 
-            <!-- TAB 2: TRỢ LÝ WIZARD (BORROWING WIZARD 4 BƯỚC) -->
-            <Tab text="🧙 Trợ Lý Wizard">
-                <VBox spacing="16">
-                    <padding>
-                        <Insets top="16" right="24" bottom="16" left="24"/>
-                    </padding>
-
-                    <!-- Stepper Bar -->
-                    <HBox alignment="CENTER" spacing="12" styleClass="wizard-stepper-bar">
-                        <Label fx:id="stepNode1" text="1. Độc giả" styleClass="wizard-step-node, wizard-step-active"/>
-                        <Label text="➔" style="-fx-text-fill: #555555; -fx-font-weight: bold;"/>
-                        <Label fx:id="stepNode2" text="2. Chọn sách" styleClass="wizard-step-node"/>
-                        <Label text="➔" style="-fx-text-fill: #555555; -fx-font-weight: bold;"/>
-                        <Label fx:id="stepNode3" text="3. Hạn &amp; Quy định" styleClass="wizard-step-node"/>
-                        <Label text="➔" style="-fx-text-fill: #555555; -fx-font-weight: bold;"/>
-                        <Label fx:id="stepNode4" text="4. Xác nhận &amp; In phiếu" styleClass="wizard-step-node"/>
-                    </HBox>
-
-                    <!-- Step Panes Container -->
-                    <StackPane VBox.vgrow="ALWAYS">
-                        <!-- Step 1 Pane: Choose reader, check validity -->
-                        <VBox fx:id="paneWizardStep1" spacing="16" styleClass="bg-card" style="-fx-padding: 20; -fx-background-radius: 8px;">
-                            <VBox spacing="4">
-                                <Label text="Bước 1: Chọn Độc Giả &amp; Kiểm Tra Thẻ Thư Viện" styleClass="title-medium" style="-fx-font-size: 16px;"/>
-                                <Label text="Hệ thống tự động kiểm tra trạng thái thẻ, ngày hết hạn và hạn ngạch mượn (tối đa 5 cuốn theo SRS)." styleClass="text-muted" style="-fx-font-size: 12px;"/>
-                            </VBox>
-
-                            <HBox alignment="CENTER_LEFT" spacing="14">
-                                <Label text="Chọn Độc Giả:" styleClass="form-label" style="-fx-font-weight: bold; -fx-min-width: 110;"/>
-                                <ComboBox fx:id="comboWizardReader" prefWidth="380" styleClass="form-control"
-                                          promptText="-- Chọn hoặc tìm độc giả --" onAction="#handleSelectWizardReader"/>
-                                <Button text="Làm Mới" onAction="#handleRefreshWizardReader" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
-                            </HBox>
-
-                            <VBox spacing="12" styleClass="wizard-card-container">
-                                <GridPane hgap="20" vgap="10">
-                                    <columnConstraints>
-                                        <ColumnConstraints minWidth="140" prefWidth="160"/>
-                                        <ColumnConstraints hgrow="ALWAYS" minWidth="260"/>
-                                    </columnConstraints>
-                                    <Label text="Họ và tên độc giả:" styleClass="text-muted" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                                    <Label fx:id="lblWizardReaderName" text="-- Chưa chọn --" style="-fx-font-weight: bold; -fx-text-fill: #FFFFFF;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-
-                                    <Label text="Mã độc giả / Email:" styleClass="text-muted" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                                    <Label fx:id="lblWizardReaderId" text="--" style="-fx-text-fill: #CCCCCC;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-
-                                    <Label text="Trạng thái thẻ:" styleClass="text-muted" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                                    <Label fx:id="lblWizardCardStatus" text="--" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-
-                                    <Label text="Hạn sử dụng thẻ:" styleClass="text-muted" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                                    <Label fx:id="lblWizardCardExpiry" text="--" style="-fx-text-fill: #CCCCCC;" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-
-                                    <Label text="Sách đang mượn:" styleClass="text-muted" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                                    <Label fx:id="lblWizardActiveLoans" text="0 / 5 cuốn" style="-fx-text-fill: #FFFFFF;" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-
-                                    <Label text="Hạn ngạch còn lại:" styleClass="text-muted" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                                    <Label fx:id="lblWizardQuota" text="5 cuốn" style="-fx-font-weight: bold; -fx-text-fill: #1DB954;" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
-                                </GridPane>
-
-                                <Separator style="-fx-opacity: 0.15;"/>
-
-                                <Label fx:id="lblWizardStep1Feedback" text="Vui lòng chọn độc giả để tiến hành kiểm tra điều kiện mượn."
-                                       style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #F59E0B;"/>
-                            </VBox>
-                        </VBox>
-
-                        <!-- Step 2 Pane: Select 1..N books from available stock -->
-                        <VBox fx:id="paneWizardStep2" spacing="12" styleClass="bg-card" style="-fx-padding: 16; -fx-background-radius: 8px;" visible="false" managed="false">
-                            <HBox alignment="CENTER_LEFT" spacing="10">
-                                <VBox spacing="2">
-                                    <Label text="Bước 2: Chọn Sách Khả Dụng Trong Kho" styleClass="title-medium" style="-fx-font-size: 16px;"/>
-                                    <Label text="Chọn từ 1 đến N cuốn sách cho phiếu mượn (đảm bảo không vượt quá hạn ngạch còn lại)." styleClass="text-muted" style="-fx-font-size: 11px;"/>
-                                </VBox>
-                                <Region HBox.hgrow="ALWAYS"/>
-                                <Label fx:id="lblWizardQuotaRemainingHeader" text="Hạn ngạch còn: 5 cuốn" style="-fx-text-fill: #1DB954; -fx-font-weight: bold; -fx-font-size: 12px;"/>
-                            </HBox>
-
-                            <SplitPane dividerPositions="0.5" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-box-border: transparent;">
-                                <!-- Left: Available books -->
-                                <VBox spacing="8" style="-fx-padding: 0 8 0 0;">
-                                    <HBox alignment="CENTER_LEFT" spacing="8">
-                                        <Label text="Kho Sách Sẵn Sàng:" styleClass="form-label" style="-fx-font-weight: bold;"/>
-                                        <Region HBox.hgrow="ALWAYS"/>
-                                        <TextField fx:id="txtWizardBookSearch" promptText="Tìm sách..." prefWidth="180"
-                                                   styleClass="search-field" onKeyReleased="#handleWizardBookSearch"/>
-                                    </HBox>
-                                    <ListView fx:id="listWizardAvailableBooks" VBox.vgrow="ALWAYS" styleClass="bg-card"/>
-                                    <HBox alignment="CENTER_RIGHT">
-                                        <Button fx:id="btnWizardAddBook" text="+ Chọn sách này" onAction="#handleWizardAddSelectedBook"
-                                                styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
-                                    </HBox>
-                                </VBox>
-
-                                <!-- Right: Selected books -->
-                                <VBox spacing="8" style="-fx-padding: 0 0 0 8;">
-                                    <HBox alignment="CENTER_LEFT" spacing="8">
-                                        <Label text="Sách Đã Chọn Cho Phiếu:" styleClass="form-label" style="-fx-font-weight: bold;"/>
-                                        <Region HBox.hgrow="ALWAYS"/>
-                                        <Label fx:id="lblWizardSelectedCount" text="Đã chọn: 0 cuốn" style="-fx-text-fill: #1DB954; -fx-font-weight: bold;"/>
-                                    </HBox>
-                                    <ListView fx:id="listWizardSelectedBooks" VBox.vgrow="ALWAYS" styleClass="bg-card"/>
-                                    <HBox alignment="CENTER_RIGHT" spacing="8">
-                                        <Button text="✕ Bỏ chọn" onAction="#handleWizardRemoveSelectedBook" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
-                                        <Button text="Xóa hết" onAction="#handleWizardClearSelectedBooks" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
-                                    </HBox>
-                                </VBox>
-                            </SplitPane>
-                            <Label fx:id="lblWizardStep2Feedback" text="" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
-                        </VBox>
-
-                        <!-- Step 3 Pane: Loan type, days, due date according to settings -->
-                        <VBox fx:id="paneWizardStep3" spacing="16" styleClass="bg-card" style="-fx-padding: 20; -fx-background-radius: 8px;" visible="false" managed="false">
-                            <VBox spacing="4">
-                                <Label text="Bước 3: Thiết Lập Hạn Mượn &amp; Quy Định" styleClass="title-medium" style="-fx-font-size: 16px;"/>
-                                <Label text="Chọn hình thức mượn (đọc tại chỗ hoặc mang về) và thời hạn trả theo quy chế thư viện." styleClass="text-muted" style="-fx-font-size: 12px;"/>
-                            </VBox>
-
-                            <GridPane hgap="24" vgap="16" styleClass="wizard-card-container">
-                                <columnConstraints>
-                                    <ColumnConstraints minWidth="180" prefWidth="200"/>
-                                    <ColumnConstraints hgrow="ALWAYS" minWidth="300"/>
-                                </columnConstraints>
-
-                                <Label text="Hình Thức Mượn:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                                <HBox alignment="CENTER_LEFT" spacing="16" GridPane.rowIndex="0" GridPane.columnIndex="1">
-                                    <RadioButton fx:id="radioWizardHome" text="Mang về nhà" selected="true" style="-fx-text-fill: #FFFFFF;"/>
-                                    <RadioButton fx:id="radioWizardOnsite" text="Đọc tại chỗ (trong ngày)" style="-fx-text-fill: #FFFFFF;"/>
-                                </HBox>
-
-                                <Label text="Số Ngày Cho Mượn:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                                <HBox alignment="CENTER_LEFT" spacing="12" GridPane.rowIndex="1" GridPane.columnIndex="1">
-                                    <Spinner fx:id="spnWizardLoanDays" prefWidth="90" styleClass="form-control"/>
-                                    <Label text="ngày" styleClass="text-muted"/>
-                                    <Label fx:id="lblWizardMaxDaysNotice" text="(Tối đa 14 ngày đối với mang về)" styleClass="text-muted" style="-fx-font-size: 11px;"/>
-                                </HBox>
-
-                                <Label text="Ngày Mượn:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                                <Label fx:id="lblWizardBorrowDate" text="--" style="-fx-text-fill: #FFFFFF; -fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-
-                                <Label text="Hạn Trả Dự Kiến:" styleClass="form-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                                <Label fx:id="lblWizardCalculatedDueDate" text="--" style="-fx-text-fill: #1DB954; -fx-font-weight: bold; -fx-font-size: 15px;" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-
-                                <Label text="Ghi Chú Phiếu:" styleClass="form-label" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                                <TextField fx:id="txtWizardNotes" promptText="Ghi chú lập phiếu (tùy chọn)..." styleClass="form-control" prefWidth="350" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-                            </GridPane>
-
-                            <VBox spacing="6" styleClass="wizard-info-callout">
-                                <Label text="📌 Quy Định Lưu Hành Áp Dụng (SRS Mục 6.1):" style="-fx-font-weight: bold; -fx-text-fill: #FFFFFF; -fx-font-size: 12px;"/>
-                                <Label text="• Mượn mang về nhà: Tối đa 14 ngày, không quá 5 cuốn cùng lúc." styleClass="text-muted" style="-fx-font-size: 11px;"/>
-                                <Label text="• Mượn tại chỗ: Phải hoàn trả trước giờ đóng cửa cùng ngày." styleClass="text-muted" style="-fx-font-size: 11px;"/>
-                                <Label text="• Phí phạt trễ hạn: 2.000 VNĐ / cuốn / ngày quá hạn." styleClass="text-muted" style="-fx-font-size: 11px;"/>
-                            </VBox>
-                        </VBox>
-
-                        <!-- Step 4 Pane: Confirmation & Slip Preview -->
-                        <VBox fx:id="paneWizardStep4" spacing="14" styleClass="bg-card" style="-fx-padding: 16; -fx-background-radius: 8px;" visible="false" managed="false">
-                            <HBox alignment="CENTER_LEFT" spacing="10">
-                                <VBox spacing="2">
-                                    <Label text="Bước 4: Xác Nhận &amp; Bản Xem Trước Phiếu In" styleClass="title-medium" style="-fx-font-size: 16px;"/>
-                                    <Label text="Xem trước phiếu mượn chuẩn thư viện (SRS) trước khi ghi sổ lưu hành." styleClass="text-muted" style="-fx-font-size: 11px;"/>
-                                </VBox>
-                                <Region HBox.hgrow="ALWAYS"/>
-                                <Label text="✓ Đã sẵn sàng lập phiếu" style="-fx-text-fill: #1DB954; -fx-font-weight: bold;"/>
-                            </HBox>
-
-                            <TextArea fx:id="txtWizardSlipPreview" VBox.vgrow="ALWAYS" editable="false" prefHeight="320"
-                                      styleClass="wizard-slip-preview"/>
-                        </VBox>
-                    </StackPane>
-
-                    <!-- Stepper Controls Bar -->
-                    <HBox alignment="CENTER_RIGHT" spacing="12" styleClass="desk-summary-bar">
-                        <Button fx:id="btnWizardCancel" text="↺ Làm Mới Wizard" onAction="#handleWizardCancel" styleClass="btn-secondary" style="-fx-font-size: 12px;"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="lblWizardStepIndicator" text="Bước 1 / 4: Chọn Độc Giả" styleClass="text-muted" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
-                        <Button fx:id="btnWizardPrev" text="◀ Quay Lại" onAction="#handleWizardPrev" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
-                        <Button fx:id="btnWizardNext" text="Tiếp Tục ▶" onAction="#handleWizardNext" styleClass="btn-primary" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
-                        <Button fx:id="btnWizardFinish" text="⚡ Xác Nhận &amp; In Phiếu" onAction="#handleWizardFinish" visible="false" managed="false" styleClass="btn-primary" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 8 20;"/>
-                    </HBox>
-                </VBox>
-            </Tab>
-
-            <!-- TAB 3: XỬ LÝ TRẢ SÁCH -->
+            <!-- TAB 2: XỬ LÝ TRẢ SÁCH -->
             <Tab text="Xử Lý Trả Sách &amp; Bồi Hoàn">
                 <VBox spacing="20">
                     <padding>
@@ -363,6 +181,188 @@
                             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
                         </columnResizePolicy>
                     </TableView>
+                </VBox>
+            </Tab>
+
+            <!-- TAB 4: TRỢ LÝ WIZARD (BORROWING WIZARD 4 BƯỚC) -->
+            <Tab text="🧙 Trợ Lý Wizard">
+                <VBox spacing="16">
+                    <padding>
+                        <Insets top="16" right="24" bottom="16" left="24"/>
+                    </padding>
+
+                    <!-- Stepper Bar -->
+                    <HBox alignment="CENTER" spacing="12" styleClass="wizard-stepper-bar">
+                        <Label fx:id="stepNode1" text="1. Độc giả" styleClass="wizard-step-node, wizard-step-active"/>
+                        <Label text="➔" style="-fx-text-fill: #555555; -fx-font-weight: bold;"/>
+                        <Label fx:id="stepNode2" text="2. Chọn sách" styleClass="wizard-step-node"/>
+                        <Label text="➔" style="-fx-text-fill: #555555; -fx-font-weight: bold;"/>
+                        <Label fx:id="stepNode3" text="3. Hạn &amp; Quy định" styleClass="wizard-step-node"/>
+                        <Label text="➔" style="-fx-text-fill: #555555; -fx-font-weight: bold;"/>
+                        <Label fx:id="stepNode4" text="4. Xác nhận &amp; In phiếu" styleClass="wizard-step-node"/>
+                    </HBox>
+
+                    <!-- Step Panes Container -->
+                    <StackPane VBox.vgrow="ALWAYS">
+                        <!-- Step 1 Pane: Choose reader, check validity -->
+                        <VBox fx:id="paneWizardStep1" spacing="16" styleClass="bg-card" style="-fx-padding: 20; -fx-background-radius: 8px;">
+                            <VBox spacing="4">
+                                <Label text="Bước 1: Chọn Độc Giả &amp; Kiểm Tra Thẻ Thư Viện" styleClass="title-medium" style="-fx-font-size: 16px;"/>
+                                <Label text="Hệ thống tự động kiểm tra trạng thái thẻ, ngày hết hạn và hạn ngạch mượn (tối đa 5 cuốn theo SRS)." styleClass="text-muted" style="-fx-font-size: 12px;"/>
+                            </VBox>
+
+                            <HBox alignment="CENTER_LEFT" spacing="14">
+                                <Label text="Chọn Độc Giả:" styleClass="form-label" style="-fx-font-weight: bold; -fx-min-width: 110;"/>
+                                <ComboBox fx:id="comboWizardReader" prefWidth="380" styleClass="form-control"
+                                          promptText="-- Chọn hoặc tìm độc giả --" onAction="#handleSelectWizardReader"/>
+                                <Button text="Làm Mới" onAction="#handleRefreshWizardReader" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
+                            </HBox>
+
+                            <VBox spacing="12" styleClass="wizard-card-container">
+                                <GridPane hgap="20" vgap="10">
+                                    <columnConstraints>
+                                        <ColumnConstraints minWidth="140" prefWidth="160"/>
+                                        <ColumnConstraints hgrow="ALWAYS" minWidth="260"/>
+                                    </columnConstraints>
+                                    <Label text="Họ và tên độc giả:" styleClass="text-muted" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <Label fx:id="lblWizardReaderName" text="-- Chưa chọn --" styleClass="wizard-item-title" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                                    <Label text="Mã độc giả / Email:" styleClass="text-muted" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <Label fx:id="lblWizardReaderId" text="--" styleClass="wizard-item-desc" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                                    <Label text="Trạng thái thẻ:" styleClass="text-muted" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                    <Label fx:id="lblWizardCardStatus" text="--" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                                    <Label text="Hạn sử dụng thẻ:" styleClass="text-muted" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                    <Label fx:id="lblWizardCardExpiry" text="--" styleClass="wizard-item-desc" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                                    <Label text="Sách đang mượn:" styleClass="text-muted" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                                    <Label fx:id="lblWizardActiveLoans" text="0 / 5 cuốn" styleClass="wizard-item-title" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                                    <Label text="Hạn ngạch còn lại:" styleClass="text-muted" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                                    <Label fx:id="lblWizardQuota" text="5 cuốn" style="-fx-font-weight: bold; -fx-text-fill: #1DB954;" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                                </GridPane>
+
+                                <Separator style="-fx-opacity: 0.15;"/>
+
+                                <Label fx:id="lblWizardStep1Feedback" text="Vui lòng chọn độc giả để tiến hành kiểm tra điều kiện mượn."
+                                       style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #F59E0B;"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Step 2 Pane: Select 1..N books from available stock -->
+                        <VBox fx:id="paneWizardStep2" spacing="12" styleClass="bg-card" style="-fx-padding: 16; -fx-background-radius: 8px;" visible="false" managed="false">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <VBox spacing="2">
+                                    <Label text="Bước 2: Chọn Sách Khả Dụng Trong Kho" styleClass="title-medium" style="-fx-font-size: 16px;"/>
+                                    <Label text="Chọn từ 1 đến N cuốn sách cho phiếu mượn (đảm bảo không vượt quá hạn ngạch còn lại)." styleClass="text-muted" style="-fx-font-size: 11px;"/>
+                                </VBox>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="lblWizardQuotaRemainingHeader" text="Hạn ngạch còn: 5 cuốn" style="-fx-text-fill: #1DB954; -fx-font-weight: bold; -fx-font-size: 12px;"/>
+                            </HBox>
+
+                            <SplitPane dividerPositions="0.5" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-box-border: transparent;">
+                                <!-- Left: Available books -->
+                                <VBox spacing="8" style="-fx-padding: 0 8 0 0;">
+                                    <HBox alignment="CENTER_LEFT" spacing="8">
+                                        <Label text="Kho Sách Sẵn Sàng:" styleClass="form-label" style="-fx-font-weight: bold;"/>
+                                        <Region HBox.hgrow="ALWAYS"/>
+                                        <TextField fx:id="txtWizardBookSearch" promptText="Tìm sách..." prefWidth="180"
+                                                   styleClass="search-field" onKeyReleased="#handleWizardBookSearch"/>
+                                    </HBox>
+                                    <ListView fx:id="listWizardAvailableBooks" VBox.vgrow="ALWAYS" styleClass="bg-card"/>
+                                    <HBox alignment="CENTER_RIGHT">
+                                        <Button fx:id="btnWizardAddBook" text="+ Chọn sách này" onAction="#handleWizardAddSelectedBook"
+                                                styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
+                                    </HBox>
+                                </VBox>
+
+                                <!-- Right: Selected books -->
+                                <VBox spacing="8" style="-fx-padding: 0 0 0 8;">
+                                    <HBox alignment="CENTER_LEFT" spacing="8">
+                                        <Label text="Sách Đã Chọn Cho Phiếu:" styleClass="form-label" style="-fx-font-weight: bold;"/>
+                                        <Region HBox.hgrow="ALWAYS"/>
+                                        <Label fx:id="lblWizardSelectedCount" text="Đã chọn: 0 cuốn" style="-fx-text-fill: #1DB954; -fx-font-weight: bold;"/>
+                                    </HBox>
+                                    <ListView fx:id="listWizardSelectedBooks" VBox.vgrow="ALWAYS" styleClass="bg-card"/>
+                                    <HBox alignment="CENTER_RIGHT" spacing="8">
+                                        <Button text="✕ Bỏ chọn" onAction="#handleWizardRemoveSelectedBook" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
+                                        <Button text="Xóa hết" onAction="#handleWizardClearSelectedBooks" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
+                                    </HBox>
+                                </VBox>
+                            </SplitPane>
+                            <Label fx:id="lblWizardStep2Feedback" text="" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+                        </VBox>
+
+                        <!-- Step 3 Pane: Loan type, days, due date according to settings -->
+                        <VBox fx:id="paneWizardStep3" spacing="16" styleClass="bg-card" style="-fx-padding: 20; -fx-background-radius: 8px;" visible="false" managed="false">
+                            <VBox spacing="4">
+                                <Label text="Bước 3: Thiết Lập Hạn Mượn &amp; Quy Định" styleClass="title-medium" style="-fx-font-size: 16px;"/>
+                                <Label text="Chọn hình thức mượn (đọc tại chỗ hoặc mang về) và thời hạn trả theo quy chế thư viện." styleClass="text-muted" style="-fx-font-size: 12px;"/>
+                            </VBox>
+
+                            <GridPane hgap="24" vgap="16" styleClass="wizard-card-container">
+                                <columnConstraints>
+                                    <ColumnConstraints minWidth="180" prefWidth="200"/>
+                                    <ColumnConstraints hgrow="ALWAYS" minWidth="300"/>
+                                </columnConstraints>
+
+                                <Label text="Hình Thức Mượn:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                <HBox alignment="CENTER_LEFT" spacing="16" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                                    <RadioButton fx:id="radioWizardHome" text="Mang về nhà" selected="true"/>
+                                    <RadioButton fx:id="radioWizardOnsite" text="Đọc tại chỗ (trong ngày)"/>
+                                </HBox>
+
+                                <Label text="Số Ngày Cho Mượn:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                <HBox alignment="CENTER_LEFT" spacing="12" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                                    <Spinner fx:id="spnWizardLoanDays" prefWidth="90" styleClass="form-control"/>
+                                    <Label text="ngày" styleClass="text-muted"/>
+                                    <Label fx:id="lblWizardMaxDaysNotice" text="(Tối đa 14 ngày đối với mang về)" styleClass="text-muted" style="-fx-font-size: 11px;"/>
+                                </HBox>
+
+                                <Label text="Ngày Mượn:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                <Label fx:id="lblWizardBorrowDate" text="--" styleClass="wizard-item-title" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                                <Label text="Hạn Trả Dự Kiến:" styleClass="form-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                <Label fx:id="lblWizardCalculatedDueDate" text="--" style="-fx-text-fill: #1DB954; -fx-font-weight: bold; -fx-font-size: 15px;" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                                <Label text="Ghi Chú Phiếu:" styleClass="form-label" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                                <TextField fx:id="txtWizardNotes" promptText="Ghi chú lập phiếu (tùy chọn)..." styleClass="form-control" prefWidth="350" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                            </GridPane>
+
+                            <VBox spacing="6" styleClass="wizard-info-callout">
+                                <Label text="📌 Quy Định Lưu Hành Áp Dụng (SRS Mục 6.1):" styleClass="wizard-callout-title"/>
+                                <Label text="• Mượn mang về nhà: Tối đa 14 ngày, không quá 5 cuốn cùng lúc." styleClass="text-muted" style="-fx-font-size: 11px;"/>
+                                <Label text="• Mượn tại chỗ: Phải hoàn trả trước giờ đóng cửa cùng ngày." styleClass="text-muted" style="-fx-font-size: 11px;"/>
+                                <Label text="• Phí phạt trễ hạn: 2.000 VNĐ / cuốn / ngày quá hạn." styleClass="text-muted" style="-fx-font-size: 11px;"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Step 4 Pane: Confirmation & Slip Preview -->
+                        <VBox fx:id="paneWizardStep4" spacing="14" styleClass="bg-card" style="-fx-padding: 16; -fx-background-radius: 8px;" visible="false" managed="false">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <VBox spacing="2">
+                                    <Label text="Bước 4: Xác Nhận &amp; Bản Xem Trước Phiếu In" styleClass="title-medium" style="-fx-font-size: 16px;"/>
+                                    <Label text="Xem trước phiếu mượn chuẩn thư viện (SRS) trước khi ghi sổ lưu hành." styleClass="text-muted" style="-fx-font-size: 11px;"/>
+                                </VBox>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="✓ Đã sẵn sàng lập phiếu" style="-fx-text-fill: #1DB954; -fx-font-weight: bold;"/>
+                            </HBox>
+
+                            <TextArea fx:id="txtWizardSlipPreview" VBox.vgrow="ALWAYS" editable="false" prefHeight="320"
+                                      styleClass="wizard-slip-preview"/>
+                        </VBox>
+                    </StackPane>
+
+                    <!-- Stepper Controls Bar -->
+                    <HBox alignment="CENTER_RIGHT" spacing="12" styleClass="desk-summary-bar">
+                        <Button fx:id="btnWizardCancel" text="↺ Làm Mới Wizard" onAction="#handleWizardCancel" styleClass="btn-secondary" style="-fx-font-size: 12px;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblWizardStepIndicator" text="Bước 1 / 4: Chọn Độc Giả" styleClass="text-muted" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
+                        <Button fx:id="btnWizardPrev" text="◀ Quay Lại" onAction="#handleWizardPrev" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
+                        <Button fx:id="btnWizardNext" text="Tiếp Tục ▶" onAction="#handleWizardNext" styleClass="btn-primary" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
+                        <Button fx:id="btnWizardFinish" text="⚡ Xác Nhận &amp; In Phiếu" onAction="#handleWizardFinish" visible="false" managed="false" styleClass="btn-primary" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 8 20;"/>
+                    </HBox>
                 </VBox>
             </Tab>
         </tabs>

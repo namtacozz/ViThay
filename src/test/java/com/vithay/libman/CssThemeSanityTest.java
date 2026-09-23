@@ -21,6 +21,14 @@ public class CssThemeSanityTest {
             assertTrue(css.contains(".wizard-slip-preview"), "Must contain wizard-slip-preview");
             assertTrue(css.contains(".theme-pink-light .wizard-stepper-bar"), "Must contain light theme wizard stepper bar");
             assertTrue(css.contains(".theme-pink-light .wizard-card-container"), "Must contain light theme wizard card container");
+            assertTrue(css.contains(".wizard-item-title"), "Must contain wizard-item-title");
+            assertTrue(css.contains(".wizard-item-desc"), "Must contain wizard-item-desc");
+            assertTrue(css.contains(".wizard-callout-title"), "Must contain wizard-callout-title");
+            assertTrue(css.contains(".radio-button"), "Must contain radio-button");
+            assertTrue(css.contains(".theme-pink-light .wizard-item-title"), "Must contain light theme wizard item title");
+            assertTrue(css.contains(".theme-pink-light .wizard-item-desc"), "Must contain light theme wizard item desc");
+            assertTrue(css.contains(".theme-pink-light .wizard-callout-title"), "Must contain light theme wizard callout title");
+            assertTrue(css.contains(".theme-pink-light .radio-button"), "Must contain light theme radio button");
         }
     }
 }

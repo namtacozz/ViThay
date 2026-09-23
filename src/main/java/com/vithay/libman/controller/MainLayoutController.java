@@ -547,17 +547,13 @@ public class MainLayoutController implements Initializable {
         if (borrowReturnView != null) {
             contentArea.getChildren().setAll(borrowReturnView);
             activeSubController = borrowReturnController;
-            if (tabIndex == 3 || tabIndex == 2) {
+            if (tabIndex == 2) {
                 setActiveNavButton(btnNavTransactions);
             } else {
                 setActiveNavButton(btnNavBorrowReturn);
             }
             if (borrowReturnController != null) {
-                if (tabIndex == 3 || tabIndex == 2) {
-                    borrowReturnController.selectTabByName("Lịch Sử");
-                } else {
-                    borrowReturnController.selectTab(tabIndex);
-                }
+                borrowReturnController.selectTab(tabIndex);
             }
         }
     }
@@ -569,7 +565,7 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     public void handleNavTransactions() {
-        showBorrowReturnView(3);
+        showBorrowReturnView(2);
     }
 
     public void showStatsView() {
