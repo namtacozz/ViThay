@@ -58,6 +58,13 @@ public class BorrowReturnController implements Initializable {
     @FXML private TextField txtDeskNotes;
     @FXML private Button btnCompleteCheckout;
 
+    // Intriguing Branches & Extras on Demand (Task 7)
+    @FXML private HBox deskDueAlertBanner;
+    @FXML private Label lblDeskDueAlertText;
+    @FXML private Button btnDeskGoToReturn;
+    @FXML private Button btnToggleRegulations;
+    @FXML private VBox paneDeskRegulations;
+
     // TAB 2: Trả Sách
     @FXML private ComboBox<BorrowTransaction> comboReturnTransaction;
     @FXML private Label lblReturnDetailReader;
@@ -354,6 +361,7 @@ public class BorrowReturnController implements Initializable {
                 lblDeskReaderNote.setStyle("-fx-text-fill: #9CA3AF; -fx-font-size: 12px;");
             }
             updateBasketSummary();
+            checkReaderUpcomingDueAlerts(null);
             return;
         }
 
@@ -407,7 +415,110 @@ public class BorrowReturnController implements Initializable {
         }
 
         updateBasketSummary();
+        checkReaderUpcomingDueAlerts(reader.getId());
     }
+
+    public List<BorrowTransaction> checkReaderUpcomingDueAlerts(String readerId) {
+        if (readerId == null || readerId.trim().isEmpty()) {
+            if (deskDueAlertBanner != null) {
+                deskDueAlertBanner.setVisible(false);
+                deskDueAlertBanner.setManaged(false);
+            }
+            return new ArrayList<>();
+        }
+
+        LocalDate today = LocalDate.now();
+        List<BorrowTransaction> readerTx = borrowService.getTransactionsByReader(readerId);
+        List<BorrowTransaction> dueOrOverdue = readerTx.stream()
+                .filter(tx -> {
+                    String st = tx.getStatus();
+                    boolean isActive = !"Đã Trả".equalsIgnoreCase(st) && !"DA_TRA".equalsIgnoreCase(st);
+                    if (!isActive) return false;
+                    LocalDate due = tx.getHanTra();
+                    if (due == null) return false;
+                    // Quá hạn hoặc sắp hết hạn trong vòng 2 ngày (hôm nay, ngày mai, ngày kia)
+                    return due.isBefore(today.plusDays(3));
+                })
+                .toList();
+
+        if (!dueOrOverdue.isEmpty()) {
+            String msg = "⚠️ Độc giả có " + dueOrOverdue.size() + " cuốn sách sắp đến hạn trả (hoặc quá hạn): Vui lòng nhắc nhở độc giả gia hạn hoặc mang trả!";
+            if (lblDeskDueAlertText != null) {
+                lblDeskDueAlertText.setText(msg);
+            }
+            if (deskDueAlertBanner != null) {
+                deskDueAlertBanner.setVisible(true);
+                deskDueAlertBanner.setManaged(true);
+            }
+        } else {
+            if (deskDueAlertBanner != null) {
+                deskDueAlertBanner.setVisible(false);
+                deskDueAlertBanner.setManaged(false);
+            }
+        }
+        return dueOrOverdue;
+    }
+
+    @FXML
+    public void handleDeskGoToReturnTab() {
+        if (borrowTabPane != null) {
+            borrowTabPane.getSelectionModel().select(1);
+        }
+        Reader reader = getSelectedReader();
+        if (reader != null && comboReturnTransaction != null) {
+            for (BorrowTransaction tx : comboReturnTransaction.getItems()) {
+                if (reader.getId().equals(tx.getReaderId())) {
+                    comboReturnTransaction.setValue(tx);
+                    handleSelectReturnTransaction();
+                    break;
+                }
+            }
+        }
+    }
+
+    @FXML
+    public void handleDismissDueAlert() {
+        if (deskDueAlertBanner != null) {
+            deskDueAlertBanner.setVisible(false);
+            deskDueAlertBanner.setManaged(false);
+        }
+    }
+
+    @FXML
+    public void handleToggleDeskRegulations() {
+        if (paneDeskRegulations != null) {
+            boolean show = !paneDeskRegulations.isVisible();
+            paneDeskRegulations.setVisible(show);
+            paneDeskRegulations.setManaged(show);
+            if (btnToggleRegulations != null) {
+                btnToggleRegulations.setText(show ? "ℹ Thu gọn quy chế ▴" : "ℹ Quy chế & chế tài áp dụng ▾");
+            }
+        }
+    }
+
+    public void setPaneDeskRegulationsVisible(boolean visible) {
+        if (paneDeskRegulations != null) {
+            paneDeskRegulations.setVisible(visible);
+            paneDeskRegulations.setManaged(visible);
+        }
+        if (btnToggleRegulations != null) {
+            btnToggleRegulations.setText(visible ? "ℹ Thu gọn quy chế ▴" : "ℹ Quy chế & chế tài áp dụng ▾");
+        }
+    }
+
+    public boolean isDeskRegulationsVisible() {
+        return paneDeskRegulations != null && paneDeskRegulations.isVisible();
+    }
+
+    @FXML
+    public void handleDeskReaderSelect() {
+        handleSelectDeskReader();
+    }
+
+    public HBox getDeskDueAlertBanner() { return deskDueAlertBanner; }
+    public Label getLblDeskDueAlertText() { return lblDeskDueAlertText; }
+    public VBox getPaneDeskRegulations() { return paneDeskRegulations; }
+    public Button getBtnToggleRegulations() { return btnToggleRegulations; }
 
     @FXML
     public void handleDeskAddSelectedBook() {

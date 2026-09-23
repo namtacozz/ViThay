@@ -29,6 +29,12 @@ public class CssThemeSanityTest {
             assertTrue(css.contains(".theme-pink-light .wizard-item-desc"), "Must contain light theme wizard item desc");
             assertTrue(css.contains(".theme-pink-light .wizard-callout-title"), "Must contain light theme wizard callout title");
             assertTrue(css.contains(".theme-pink-light .radio-button"), "Must contain light theme radio button");
+            assertTrue(css.contains(".desk-alert-banner"), "Must contain desk-alert-banner");
+            assertTrue(css.contains(".desk-regulations-pane"), "Must contain desk-regulations-pane");
+            assertTrue(css.contains(".desk-summary-title"), "Must contain desk-summary-title");
+            assertTrue(css.contains(".theme-pink-light .desk-alert-banner"), "Must contain light theme desk alert banner");
+            assertTrue(css.contains(".theme-pink-light .desk-regulations-pane"), "Must contain light theme desk regulations pane");
+            assertTrue(css.contains(".theme-pink-light .desk-summary-title"), "Must contain light theme desk summary title");
         }
     }
 }

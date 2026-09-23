@@ -40,6 +40,10 @@ public class BorrowService {
         return transactionDao.getActiveBorrowCountForReader(readerId);
     }
 
+    public List<BorrowTransaction> getActiveTransactions() {
+        return transactionDao.getActiveTransactions();
+    }
+
     public List<BorrowTransaction> getTransactionsByReader(String readerId) {
         if (readerId == null || readerId.trim().isEmpty()) {
             return new ArrayList<>();

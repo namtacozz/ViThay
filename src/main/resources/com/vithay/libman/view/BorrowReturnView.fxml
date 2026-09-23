@@ -46,6 +46,15 @@
 
                     <!-- Cột Canvas (70%): Bàn làm việc mượn sách -->
                     <VBox styleClass="desk-canvas-zone" spacing="14">
+                        <!-- Intriguing Branches: Banner cảnh báo hạn trả sách -->
+                        <HBox fx:id="deskDueAlertBanner" managed="false" visible="false" alignment="CENTER_LEFT" spacing="12" styleClass="desk-alert-banner">
+                            <Label text="⚠️" styleClass="desk-alert-icon"/>
+                            <Label fx:id="lblDeskDueAlertText" text="Độc giả có sách sắp đến hạn trả (hoặc quá hạn)!" HBox.hgrow="ALWAYS" styleClass="desk-alert-text"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="btnDeskGoToReturn" text="→ Sang Tab Trả Sách" onAction="#handleDeskGoToReturnTab" styleClass="btn-primary" style="-fx-font-size: 11px; -fx-padding: 4 10;"/>
+                            <Button text="✕" onAction="#handleDismissDueAlert" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 4 8;"/>
+                        </HBox>
+
                         <!-- Active Reader Header -->
                         <VBox spacing="8" styleClass="desk-header-box">
                             <HBox alignment="CENTER_LEFT" spacing="12">
@@ -83,12 +92,34 @@
                             </ScrollPane>
                         </VBox>
 
+                        <!-- Extras on Demand: Vùng hiển thị quy chế & chế tài -->
+                        <VBox fx:id="paneDeskRegulations" managed="false" visible="false" spacing="8" styleClass="desk-regulations-pane">
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <Label text="📋 Quy Chế Lưu Hành &amp; Chế Tài Áp Dụng (SRS Mục 5.5)" styleClass="desk-regulations-title"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="✕ Đóng" onAction="#handleToggleDeskRegulations" styleClass="btn-secondary" style="-fx-font-size: 10px; -fx-padding: 2 8;"/>
+                            </HBox>
+                            <HBox spacing="20">
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="• Hạn ngạch mượn: Tối đa 5 cuốn, thời hạn 14 ngày (mang về) hoặc trong ngày (tại chỗ)" styleClass="desk-regulations-item"/>
+                                    <Label text="• Phạt quá hạn: 2.000 VNĐ / ngày / cuốn (SRS Mục 5.5)" styleClass="desk-regulations-item"/>
+                                </VBox>
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="• Bồi hoàn sách hỏng/mất: 200% giá sách + 20.000 VNĐ phí xử lý (SRS Mục 5.5)" styleClass="desk-regulations-item"/>
+                                    <Label text="• Quy định thẻ: Thẻ độc giả phải còn hạn sử dụng và không bị khóa tài khoản." styleClass="desk-regulations-item"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
                         <!-- Bottom Summary Bar -->
                         <HBox alignment="CENTER_LEFT" spacing="14" styleClass="desk-summary-bar">
                             <VBox spacing="2">
-                                <Label fx:id="lblSummaryTotalBooks" text="Tổng trong giỏ: 0 cuốn" style="-fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
+                                <Label fx:id="lblSummaryTotalBooks" text="Tổng trong giỏ: 0 cuốn" styleClass="desk-summary-title"/>
                                 <Label fx:id="lblSummaryQuotaStatus" text="Chưa chọn sách" styleClass="text-muted" style="-fx-font-size: 11px;"/>
                             </VBox>
+
+                            <Button fx:id="btnToggleRegulations" text="ℹ Quy chế &amp; chế tài áp dụng ▾" onAction="#handleToggleDeskRegulations"
+                                    styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 6 12;"/>
 
                             <Region HBox.hgrow="ALWAYS"/>
 
@@ -136,7 +167,7 @@
                         <Label text="Tình Trạng Sách Khi Trả:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
                         <VBox spacing="8" GridPane.rowIndex="2" GridPane.columnIndex="1">
                             <CheckBox fx:id="chkDamagedOrLost" text="Sách bị mất hoặc hư hỏng nặng (Áp dụng đền bù theo quy chế thư viện)"
-                                      style="-fx-text-fill: #FFFFFF;" onAction="#handleDamagedToggle"/>
+                                      onAction="#handleDamagedToggle"/>
                             <Label fx:id="lblCompensationNote" text="" style="-fx-text-fill: #EF4444; -fx-font-weight: bold;"/>
                         </VBox>
                     </GridPane>

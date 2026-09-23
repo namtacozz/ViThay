@@ -1438,6 +1438,56 @@
     -fx-text-fill: #FFFFFF;
 }
 
+/* Circulation Extras on Demand & Intriguing Branches */
+.desk-alert-banner {
+    -fx-background-color: #2D2310;
+    -fx-border-color: #F59E0B;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 16px;
+}
+
+.desk-alert-icon {
+    -fx-font-size: 16px;
+}
+
+.desk-alert-text {
+    -fx-text-fill: #FDE68A;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.desk-regulations-pane {
+    -fx-background-color: #1E1E1E;
+    -fx-border-color: #333333;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 16px;
+}
+
+.desk-regulations-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-text-fill: #1DB954;
+}
+
+.desk-regulations-item {
+    -fx-text-fill: #D1D5DB;
+    -fx-font-size: 11px;
+}
+
+.desk-summary-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: #FFFFFF;
+}
+
+.check-box {
+    -fx-text-fill: #FFFFFF;
+}
+
 /* Light Theme overrides for Wizard */
 .theme-pink-light .wizard-stepper-bar {
     -fx-background-color: #FFFFFF;
@@ -1490,4 +1540,39 @@
 .theme-pink-light .radio-button .text {
     -fx-fill: #1E1B1D;
 }
+
+.theme-pink-light .desk-alert-banner {
+    -fx-background-color: #FEF3C7;
+    -fx-border-color: #F59E0B;
+}
+
+.theme-pink-light .desk-alert-text {
+    -fx-text-fill: #92400E;
+}
+
+.theme-pink-light .desk-regulations-pane {
+    -fx-background-color: #FFF5F7;
+    -fx-border-color: #F1D4DB;
+}
+
+.theme-pink-light .desk-regulations-title {
+    -fx-text-fill: #E11D48;
+}
+
+.theme-pink-light .desk-regulations-item {
+    -fx-text-fill: #4B5563;
+}
+
+.theme-pink-light .desk-summary-title {
+    -fx-text-fill: #1E1B1D;
+}
+
+.theme-pink-light .check-box {
+    -fx-text-fill: #1E1B1D;
+}
+
+.theme-pink-light .check-box .text {
+    -fx-fill: #1E1B1D;
+}
+
 

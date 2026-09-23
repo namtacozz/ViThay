@@ -1,5 +1,7 @@
 package com.vithay.libman.model;
 
+import java.time.LocalDate;
+
 public class BorrowTransaction {
     private String id;
     private String readerId;
@@ -35,6 +37,20 @@ public class BorrowTransaction {
         this.notes = notes;
     }
 
+    public BorrowTransaction(String id, String readerId, String bookId, String borrowType,
+                             LocalDate borrowDate, LocalDate dueDate, LocalDate returnDate,
+                             double fineAmount, String status) {
+        this.id = id;
+        this.readerId = readerId;
+        this.bookId = bookId;
+        this.borrowType = borrowType != null ? borrowType : "Mang về nhà";
+        this.borrowDate = borrowDate != null ? borrowDate.toString() : null;
+        this.dueDate = dueDate != null ? dueDate.toString() : null;
+        this.returnDate = returnDate != null ? returnDate.toString() : null;
+        this.fineAmount = fineAmount;
+        this.status = status;
+    }
+
     public BorrowTransaction(String id, String readerId, String readerName, String bookId,
                              String bookTitle, String borrowDate, String dueDate,
                              String returnDate, String status, double fineAmount, String notes) {
@@ -42,6 +58,7 @@ public class BorrowTransaction {
     }
 
     public String getId() { return id; }
+    public String getMaPhieu() { return id; }
     public void setId(String id) { this.id = id; }
 
     public String getReaderId() { return readerId; }
@@ -61,6 +78,36 @@ public class BorrowTransaction {
 
     public String getDueDate() { return dueDate; }
     public void setDueDate(String dueDate) { this.dueDate = dueDate; }
+
+    public LocalDate getHanTra() {
+        if (dueDate == null || dueDate.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(dueDate.trim());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public void setHanTra(LocalDate date) {
+        this.dueDate = date != null ? date.toString() : null;
+    }
+
+    public LocalDate getNgayMuon() {
+        if (borrowDate == null || borrowDate.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(borrowDate.trim());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public void setNgayMuon(LocalDate date) {
+        this.borrowDate = date != null ? date.toString() : null;
+    }
 
     public String getReturnDate() { return returnDate; }
     public void setReturnDate(String returnDate) { this.returnDate = returnDate; }

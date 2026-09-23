@@ -93,6 +93,21 @@ public class BorrowTransactionDao {
         return 0;
     }
 
+    public List<BorrowTransaction> getActiveTransactions() {
+        List<BorrowTransaction> list = new ArrayList<>();
+        String sql = "SELECT * FROM borrow_transactions WHERE status = 'Đang Mượn' OR status = 'DANG_MUON' ORDER BY due_date ASC";
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(mapResultSet(rs));
+            }
+        } catch (SQLException e) {
+            logger.error("Error retrieving active transactions", e);
+        }
+        return list;
+    }
+
     public BorrowTransaction getTransactionById(String id) {
         String sql = "SELECT * FROM borrow_transactions WHERE id = ?";
         try (Connection conn = DatabaseConfig.getConnection();

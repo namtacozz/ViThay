@@ -58,6 +58,7 @@ public class Reader {
     }
 
     public String getId() { return id; }
+    public String getMaDocGia() { return id; }
     public void setId(String id) { this.id = id; }
 
     public String getFullName() { return fullName; }
