@@ -1575,4 +1575,25 @@
     -fx-fill: #1E1B1D;
 }
 
+#btnToggleRegulations {
+    -fx-font-weight: bold;
+    -fx-border-color: #3E3E3E;
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+}
+
+#btnToggleRegulations:hover {
+    -fx-border-color: #1DB954;
+    -fx-text-fill: #1DB954;
+}
+
+.theme-pink-light #btnToggleRegulations {
+    -fx-border-color: #FECDD3;
+}
+
+.theme-pink-light #btnToggleRegulations:hover {
+    -fx-border-color: #FB7185;
+    -fx-text-fill: #FB7185;
+}
+
 

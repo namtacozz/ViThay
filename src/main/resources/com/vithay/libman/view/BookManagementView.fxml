@@ -23,7 +23,7 @@
                 <Label text="Quản lý toàn bộ danh mục sách, vị trí kệ, số lượng và tình trạng (SRS Mục 5.3)" styleClass="text-muted"/>
             </VBox>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnExportBooks" text="📥 Xuất File CSV" onAction="#handleExportCsv" styleClass="btn-secondary"/>
+            <Button fx:id="btnExportBooks" text="Xuất File CSV" onAction="#handleExportCsv" styleClass="btn-secondary"/>
             <Button fx:id="btnAddBook" text="+ Thêm Sách Mới" onAction="#handleOpenAddDialog" styleClass="btn-primary"/>
             <Button text="Làm Mới" onAction="#loadBooks" styleClass="btn-secondary"/>
         </HBox>
@@ -192,10 +192,10 @@
 
                             <!-- Action Buttons -->
                             <VBox spacing="8">
-                                <Button fx:id="btnInspectorBorrow" text="⚡ Lập Phiếu Mượn" maxWidth="Infinity" styleClass="btn-primary" onAction="#handleInspectorQuickBorrow"/>
+                                <Button fx:id="btnInspectorBorrow" text="Lập Phiếu Mượn" maxWidth="Infinity" styleClass="btn-primary" onAction="#handleInspectorQuickBorrow"/>
                                 <HBox spacing="8">
-                                    <Button fx:id="btnInspectorEdit" text="✏ Chỉnh Sửa" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-secondary" onAction="#handleInspectorEdit"/>
-                                    <Button fx:id="btnInspectorDelete" text="🗑 Thùng Rác" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-danger" onAction="#handleInspectorDelete"/>
+                                    <Button fx:id="btnInspectorEdit" text="Chỉnh Sửa" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-secondary" onAction="#handleInspectorEdit"/>
+                                    <Button fx:id="btnInspectorDelete" text="Xóa / Thùng Rác" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-danger" onAction="#handleInspectorDelete"/>
                                 </HBox>
                             </VBox>
 

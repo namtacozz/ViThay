@@ -904,7 +904,7 @@ public class BookManagementController implements Initializable {
         VBox shelfBox = new VBox(4);
         HBox shelfHeader = new HBox(8);
         shelfHeader.setAlignment(Pos.CENTER_LEFT);
-        Label lblShelf = new Label("📚 Cùng kệ: " + (book.getShelfLocation() != null ? book.getShelfLocation() : "Chưa xếp"));
+        Label lblShelf = new Label("Cùng vị trí kệ: " + (book.getShelfLocation() != null ? book.getShelfLocation() : "Chưa xếp"));
         lblShelf.getStyleClass().add("branch-header-label");
         Region spacer1 = new Region();
         HBox.setHgrow(spacer1, Priority.ALWAYS);
@@ -937,7 +937,7 @@ public class BookManagementController implements Initializable {
         VBox authorBox = new VBox(4);
         HBox authorHeader = new HBox(8);
         authorHeader.setAlignment(Pos.CENTER_LEFT);
-        Label lblAuthor = new Label("✍ Cùng tác giả: " + (book.getAuthor() != null ? book.getAuthor() : "Không rõ"));
+        Label lblAuthor = new Label("Cùng tác giả: " + (book.getAuthor() != null ? book.getAuthor() : "Không rõ"));
         lblAuthor.getStyleClass().add("branch-header-label");
         Region spacer2 = new Region();
         HBox.setHgrow(spacer2, Priority.ALWAYS);
@@ -967,7 +967,7 @@ public class BookManagementController implements Initializable {
         inspectorBranchesBox.getChildren().add(authorBox);
 
         // 3. Circulation History Action
-        Button btnViewCirculation = new Button("📜 Xem Lịch Sử Lưu Hành Cuốn Này");
+        Button btnViewCirculation = new Button("Xem Lịch Sử Lưu Hành Cuốn Này");
         btnViewCirculation.setMaxWidth(Double.MAX_VALUE);
         btnViewCirculation.getStyleClass().add("btn-secondary");
         btnViewCirculation.setStyle("-fx-font-size: 11px; -fx-padding: 6 12;");
@@ -980,7 +980,7 @@ public class BookManagementController implements Initializable {
         card.setAlignment(Pos.CENTER_LEFT);
         card.getStyleClass().add("branch-card");
 
-        Label iconLbl = new Label("📖");
+        Label iconLbl = new Label("•");
         iconLbl.setStyle("-fx-font-size: 13px;");
 
         VBox info = new VBox(2);

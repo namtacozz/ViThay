@@ -48,7 +48,7 @@
                     <VBox styleClass="desk-canvas-zone" spacing="14">
                         <!-- Intriguing Branches: Banner cảnh báo hạn trả sách -->
                         <HBox fx:id="deskDueAlertBanner" managed="false" visible="false" alignment="CENTER_LEFT" spacing="12" styleClass="desk-alert-banner">
-                            <Label text="⚠️" styleClass="desk-alert-icon"/>
+                            <Label text="!" styleClass="desk-alert-icon"/>
                             <Label fx:id="lblDeskDueAlertText" text="Độc giả có sách sắp đến hạn trả (hoặc quá hạn)!" HBox.hgrow="ALWAYS" styleClass="desk-alert-text"/>
                             <Region HBox.hgrow="ALWAYS"/>
                             <Button fx:id="btnDeskGoToReturn" text="→ Sang Tab Trả Sách" onAction="#handleDeskGoToReturnTab" styleClass="btn-primary" style="-fx-font-size: 11px; -fx-padding: 4 10;"/>
@@ -78,7 +78,7 @@
                         <!-- Circulation Basket Canvas Area -->
                         <VBox VBox.vgrow="ALWAYS" spacing="8">
                             <HBox alignment="CENTER_LEFT" spacing="10">
-                                <Label text="Giỏ Sách Trên Bàn Lưu Hành (Circulation Basket)" styleClass="title-medium" style="-fx-font-size: 14px;"/>
+                                <Label text="Giỏ Sách Lưu Hành" styleClass="title-medium" style="-fx-font-size: 14px;"/>
                                 <Label fx:id="lblBasketCount" text="(0/5 cuốn)" styleClass="text-muted" style="-fx-font-size: 12px;"/>
                                 <Region HBox.hgrow="ALWAYS"/>
                                 <Button text="✕ Xóa hết" onAction="#handleClearBasket" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
@@ -95,7 +95,7 @@
                         <!-- Extras on Demand: Vùng hiển thị quy chế & chế tài -->
                         <VBox fx:id="paneDeskRegulations" managed="false" visible="false" spacing="8" styleClass="desk-regulations-pane">
                             <HBox alignment="CENTER_LEFT" spacing="8">
-                                <Label text="📋 Quy Chế Lưu Hành &amp; Chế Tài Áp Dụng (SRS Mục 5.5)" styleClass="desk-regulations-title"/>
+                                <Label text="Quy Chế Lưu Hành &amp; Chế Tài Áp Dụng (SRS Mục 5.5)" styleClass="desk-regulations-title"/>
                                 <Region HBox.hgrow="ALWAYS"/>
                                 <Button text="✕ Đóng" onAction="#handleToggleDeskRegulations" styleClass="btn-secondary" style="-fx-font-size: 10px; -fx-padding: 2 8;"/>
                             </HBox>
@@ -118,14 +118,14 @@
                                 <Label fx:id="lblSummaryQuotaStatus" text="Chưa chọn sách" styleClass="text-muted" style="-fx-font-size: 11px;"/>
                             </VBox>
 
-                            <Button fx:id="btnToggleRegulations" text="ℹ Quy chế &amp; chế tài áp dụng ▾" onAction="#handleToggleDeskRegulations"
+                            <Button fx:id="btnToggleRegulations" text="ⓘ Quy chế &amp; chế tài áp dụng ▾" onAction="#handleToggleDeskRegulations"
                                     styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 6 12;"/>
 
                             <Region HBox.hgrow="ALWAYS"/>
 
                             <TextField fx:id="txtDeskNotes" promptText="Ghi chú phiếu mượn..." prefWidth="260" styleClass="form-control"/>
 
-                            <Button fx:id="btnCompleteCheckout" text="⚡ Hoàn Tất &amp; In Phiếu" onAction="#handleCompleteDeskCheckout"
+                            <Button fx:id="btnCompleteCheckout" text="Hoàn Tất &amp; In Phiếu" onAction="#handleCompleteDeskCheckout"
                                     styleClass="btn-primary" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8 18;"/>
                         </HBox>
                     </VBox>
@@ -216,7 +216,7 @@
             </Tab>
 
             <!-- TAB 4: TRỢ LÝ WIZARD (BORROWING WIZARD 4 BƯỚC) -->
-            <Tab text="🧙 Trợ Lý Wizard">
+            <Tab text="Trợ Lý Mượn Nhanh">
                 <VBox spacing="16">
                     <padding>
                         <Insets top="16" right="24" bottom="16" left="24"/>
@@ -362,7 +362,7 @@
                             </GridPane>
 
                             <VBox spacing="6" styleClass="wizard-info-callout">
-                                <Label text="📌 Quy Định Lưu Hành Áp Dụng (SRS Mục 6.1):" styleClass="wizard-callout-title"/>
+                                <Label text="Quy Định Lưu Hành Áp Dụng (SRS Mục 6.1):" styleClass="wizard-callout-title"/>
                                 <Label text="• Mượn mang về nhà: Tối đa 14 ngày, không quá 5 cuốn cùng lúc." styleClass="text-muted" style="-fx-font-size: 11px;"/>
                                 <Label text="• Mượn tại chỗ: Phải hoàn trả trước giờ đóng cửa cùng ngày." styleClass="text-muted" style="-fx-font-size: 11px;"/>
                                 <Label text="• Phí phạt trễ hạn: 2.000 VNĐ / cuốn / ngày quá hạn." styleClass="text-muted" style="-fx-font-size: 11px;"/>
@@ -392,7 +392,7 @@
                         <Label fx:id="lblWizardStepIndicator" text="Bước 1 / 4: Chọn Độc Giả" styleClass="text-muted" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
                         <Button fx:id="btnWizardPrev" text="◀ Quay Lại" onAction="#handleWizardPrev" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
                         <Button fx:id="btnWizardNext" text="Tiếp Tục ▶" onAction="#handleWizardNext" styleClass="btn-primary" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
-                        <Button fx:id="btnWizardFinish" text="⚡ Xác Nhận &amp; In Phiếu" onAction="#handleWizardFinish" visible="false" managed="false" styleClass="btn-primary" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 8 20;"/>
+                        <Button fx:id="btnWizardFinish" text="Xác Nhận &amp; In Phiếu" onAction="#handleWizardFinish" visible="false" managed="false" styleClass="btn-primary" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 8 20;"/>
                     </HBox>
                 </VBox>
             </Tab>

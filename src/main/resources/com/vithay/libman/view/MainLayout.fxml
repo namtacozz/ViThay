@@ -4,6 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
 
 <StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
            fx:id="rootStackPane"
@@ -32,7 +33,7 @@
                 <HBox alignment="CENTER_LEFT" spacing="16" HBox.hgrow="ALWAYS" style="-fx-padding: 0 20 0 16;">
                     <!-- Search Box: Starts at x = 250 + 16 = 266px, aligned straight with dropdown below -->
                     <HBox alignment="CENTER_LEFT" spacing="8" styleClass="search-field" prefWidth="440">
-                        <Label text="🔍" style="-fx-text-fill: #727272; -fx-font-size: 13px;"/>
+                        <SVGPath content="M 9 2 C 5.13 2 2 5.13 2 9 C 2 12.87 5.13 16 9 16 C 10.61 16 12.09 15.45 13.28 14.53 L 17.38 18.62 C 17.72 18.96 18.28 18.96 18.62 18.62 C 18.96 18.28 18.96 17.72 18.62 17.38 L 14.53 13.28 C 15.45 12.09 16 10.61 16 9 C 16 5.13 12.87 2 9 2 Z M 9 4 C 11.76 4 14 6.24 14 9 C 14 11.76 11.76 14 9 14 C 6.24 14 4 11.76 4 9 C 4 6.24 6.24 4 9 4 Z" fill="#727272" scaleX="0.7" scaleY="0.7"/>
                         <TextField fx:id="headerSearchField" promptText="Tìm kiếm sách, tác giả, thể loại, độc giả..."
                                    style="-fx-background-color: transparent; -fx-text-fill: inherit; -fx-prompt-text-fill: #727272;"
                                    HBox.hgrow="ALWAYS"/>
@@ -41,8 +42,16 @@
                     <Region HBox.hgrow="ALWAYS"/>
 
                     <!-- Action Icons -->
-                    <Button fx:id="btnNotification" text="🔔" styleClass="btn-circle, btn-header-bell" onAction="#handleNotificationClick"/>
-                    <Button fx:id="btnHeaderSettings" text="⚙" styleClass="btn-circle, btn-header-gear" onAction="#handleHeaderSettingsClick"/>
+                    <Button fx:id="btnNotification" styleClass="btn-circle, btn-header-bell" onAction="#handleNotificationClick">
+                        <graphic>
+                            <SVGPath content="M 12 2 C 10.9 2 10 2.9 10 4 C 7.2 4.7 5 7.2 5 10.3 L 5 15 L 3 17 L 3 18 L 21 18 L 21 17 L 19 15 L 19 10.3 C 19 7.2 16.8 4.7 14 4 C 14 2.9 13.1 2 12 2 Z M 10 19 C 10 20.1 10.9 21 12 21 C 13.1 21 14 20.1 14 19 L 10 19 Z" fill="#FFFFFF" scaleX="0.6" scaleY="0.6"/>
+                        </graphic>
+                    </Button>
+                    <Button fx:id="btnHeaderSettings" styleClass="btn-circle, btn-header-gear" onAction="#handleHeaderSettingsClick">
+                        <graphic>
+                            <SVGPath content="M 19.4 13 C 19.4 12.7 19.5 12.3 19.5 12 C 19.5 11.7 19.4 11.3 19.4 11 L 21.5 9.4 C 21.7 9.2 21.8 8.9 21.6 8.7 L 19.6 5.2 C 19.5 5 19.2 4.9 19 5 L 16.5 6 C 16 5.6 15.4 5.3 14.8 5.1 L 14.4 2.4 C 14.4 2.2 14.2 2 13.9 2 L 10 2 C 9.8 2 9.6 2.2 9.5 2.4 L 9.2 5.1 C 8.6 5.3 8 5.6 7.5 6 L 5 5 C 4.8 4.9 4.5 5 4.4 5.2 L 2.4 8.7 C 2.2 8.9 2.3 9.2 2.5 9.4 L 4.6 11 C 4.6 11.3 4.5 11.7 4.5 12 C 4.5 12.3 4.6 12.7 4.6 13 L 2.5 14.6 C 2.3 14.8 2.2 15.1 2.4 15.3 L 4.4 18.8 C 4.5 19 4.8 19.1 5 19 L 7.5 18 C 8 18.4 8.6 18.7 9.2 18.9 L 9.5 21.6 C 9.6 21.8 9.8 22 10 22 L 13.9 22 C 14.2 22 14.4 21.8 14.4 21.6 L 14.8 18.9 C 15.4 18.7 16 18.4 16.5 18 L 19 19 C 19.2 19.1 19.5 19 19.6 18.8 L 21.6 15.3 C 21.8 15.1 21.7 14.8 21.5 14.6 L 19.4 13 Z M 12 15.5 C 10.1 15.5 8.5 13.9 8.5 12 C 8.5 10.1 10.1 8.5 12 8.5 C 13.9 8.5 15.5 10.1 15.5 12 C 15.5 13.9 13.9 15.5 12 15.5 Z" fill="#FFFFFF" scaleX="0.6" scaleY="0.6"/>
+                        </graphic>
+                    </Button>
 
                     <!-- User Profile Chip (Click to open Account Settings or Login) -->
                     <HBox fx:id="userProfileBox" alignment="CENTER_LEFT" spacing="10" styleClass="user-profile-chip" onMouseClicked="#handleProfileClick" style="-fx-cursor: hand;">
@@ -146,7 +155,7 @@
                 <!-- Bottom System Status & Help -->
                 <VBox spacing="6" style="-fx-padding: 8 4 0 4;">
                     <Separator style="-fx-background-color: #222222;"/>
-                    <Button fx:id="btnHelp" text="❓ Hướng dẫn sử dụng (SRS)" onAction="#handleHelpClick" maxWidth="Infinity"
+                    <Button fx:id="btnHelp" text="Hướng dẫn sử dụng (SRS)" onAction="#handleHelpClick" maxWidth="Infinity"
                             styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 6 10;"/>
                     <HBox alignment="CENTER_LEFT" spacing="6">
                         <Label text="Vai trò:" styleClass="text-muted"/>
@@ -360,9 +369,9 @@
 
             <!-- Action Buttons -->
             <HBox spacing="12" alignment="CENTER_LEFT">
-                <Button text="💾 Lưu Thay Đổi" onAction="#handleSaveProfile" styleClass="btn-primary"/>
+                <Button text="Lưu Thay Đổi" onAction="#handleSaveProfile" styleClass="btn-primary"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="🚪 Đăng Xuất" onAction="#handleExecuteLogout" styleClass="btn-danger"/>
+                <Button text="Đăng Xuất" onAction="#handleExecuteLogout" styleClass="btn-danger"/>
                 <Button text="Đóng" onAction="#closeAuthPopup" styleClass="btn-secondary"/>
             </HBox>
         </VBox>
