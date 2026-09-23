@@ -101,7 +101,7 @@ Lệnh trên tự động biên dịch và tạo ra 2 tệp thực thi trong th�
 ```bash
 ./mvnw test
 ```
-Tất cả 7 test case (DAO, Phân quyền RBAC, Quy định động, Thùng rác Soft-delete, Khôi phục, Tính phạt) đều vượt qua 100%.
+Tất cả 39 bài test tự động (DAO, Phân quyền RBAC, Quy định động, Thùng rác Soft-delete, 7 Interaction Design Patterns, Giỏ lưu hành, Wizard, Cảnh báo hạn trả) đều vượt qua 100%.
 
 ---
 © 2026 LibMan Project. Phát triển bởi Antigravity.
