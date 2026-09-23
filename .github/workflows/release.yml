@@ -9,7 +9,7 @@ on:
       tag_name:
         description: 'Release tag name (e.g. v1.1.0)'
         required: true
-        default: 'v1.1.0'
+        default: 'v1.2.0'
 
 permissions:
   contents: write
@@ -35,7 +35,7 @@ jobs:
 
       - name: Build Self-Contained Windows Portable Package (jpackage)
         run: |
-          jpackage --type app-image --name LibMan --input target --main-jar libman-1.0.0.jar --main-class com.vithay.libman.Launcher --icon src/main/resources/com/vithay/libman/images/app_icon.ico --app-version 1.1.0 --vendor "ViThay"
+          jpackage --type app-image --name LibMan --input target --main-jar libman-1.0.0.jar --main-class com.vithay.libman.Launcher --icon src/main/resources/com/vithay/libman/images/app_icon.ico --app-version 1.2.0 --vendor "ViThay"
           Compress-Archive -Path LibMan -DestinationPath LibMan-Windows-Portable-x64.zip
 
       - name: Prepare Release Assets
@@ -49,22 +49,32 @@ jobs:
       - name: Create GitHub Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name != '' && startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.tag_name || 'v1.1.0' }}
-          name: "LibMan Desktop Release ${{ github.ref_name != '' && startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.tag_name || 'v1.1.0' }}"
+          tag_name: ${{ github.ref_name != '' && startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.tag_name || 'v1.2.0' }}
+          name: "LibMan Desktop Release ${{ github.ref_name != '' && startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.tag_name || 'v1.2.0' }}"
           draft: false
           prerelease: false
           generate_release_notes: true
           body: |
-            ## 🚀 LibMan - Hệ Thống Quản Lý Thư Viện Hiện Đại (v1.1.0)
+            ## 🚀 LibMan - Hệ Thống Quản Lý Thư Viện Hiện Đại (v1.2.0)
 
-            Bản phát hành **v1.1.0** tích hợp toàn diện **7 Mẫu Thiết Kế Cấu Trúc Vật Lý & Thông Tin (Interaction Design Patterns - Jenifer Tidwell)**:
-            - **Two-Panel Selector:** Master-Detail SplitPane với Detail Inspector thời gian thực trong Kho Sách.
-            - **Canvas Plus Palette:** Bàn Lưu Hành trực quan gồm Palette chọn sách (30%) và Canvas cấu hình mượn trả (70%).
-            - **One-Window Drilldown:** Breadcrumb phân cấp và tra cứu lịch sử mượn trả in-place không cần mở modal.
-            - **Alternative Views:** Chuyển đổi linh hoạt giữa Chế độ Bảng (Table) và Chế độ Thẻ Spotify Card Grid.
-            - **Wizard:** Trợ lý lập phiếu mượn 4 bước tuần tự với chốt chặn kiểm soát thẻ & trần hạn ngạch 5 cuốn (SRS 6.1).
-            - **Extras on Demand:** Khung lọc nâng cao và ngăn tra cứu quy chế/chế tài thu gọn linh hoạt.
-            - **Intriguing Branches:** Gợi ý sách cùng kệ/cùng tác giả & banner cảnh báo hạn trả tự động.
+            Bản phát hành **v1.2.0** mang đến nâng cấp toàn diện về giao diện, trải nghiệm người dùng (UI/UX) và tính năng chi tiết sách 2 tầng:
+            - **Cơ Chế Xem Sách 2 Tầng (Two-Tier Book View):**
+              - *Tầng 1 (Click 1 lần):* Inspector xem nhanh ảnh bìa, tên sách, tác giả, thể loại, tình trạng, vị trí kệ và nút mượn nhanh.
+              - *Tầng 2 (Click lần 2 / Double click / Nút "Xem Chi Tiết Toàn Diện ➔"):* Màn hình chi tiết toàn diện với cột trái 1/4 (Preview & thông số cốt lõi) và cột phải 3/4 (Tóm tắt chuyên sâu Synopsis & Bàn luận của độc giả kèm form gửi bình luận tức thì).
+            - **Đồng Bộ & Tinh Chỉnh Giao Diện:**
+              - Chuẩn hóa tên ứng dụng thành "LibMan - Quản Lý Thư Viện".
+              - Thu gọn giao diện Cài đặt (Settings UI) nhỏ gọn, thanh thoát.
+              - Đồng bộ hóa 100% Tiếng Việt cho toàn bộ bảng biểu, lịch sử giao dịch và badge trạng thái.
+              - Loại bỏ hoàn toàn lỗi hiển thị icon ô vuông (tofu square emojis) trên mọi nền tảng.
+              - Thêm viền tròn chữ "i" (`ⓘ`) sắc nét cho nút Quy chế & chế tài tại Bàn Lưu Hành.
+            - **Dashboard & Bộ Lọc Nâng Cao:**
+              - Nút ẩn/hiện dãy 4 thẻ thống kê Dashboard kèm icon nhận diện từng thẻ.
+              - Sửa lỗi click sách bất kỳ ở Sách Nổi Bật chỉ mở cuốn Sapiens.
+              - Sửa dứt điểm bộ lọc tác giả và nút "Làm Mới" tải lại toàn bộ kho sách.
+              - Chuẩn hóa họ tên độc giả và bổ sung 8 cuốn sách cùng tác giả (Yuval Noah Harari, Robert C. Martin, Nguyễn Nhật Ánh, J.K. Rowling).
+            - **7 Mẫu Thiết Kế Cấu Trúc Vật Lý & Thông Tin (Jenifer Tidwell):**
+              - Two-Panel Selector, Canvas Plus Palette, One-Window Drilldown, Alternative Views, Wizard 4 bước, Extras on Demand, Intriguing Branches.
+            - **Kiểm thử tự động:** 48 bài test tự động JUnit 5 đạt tỷ lệ vượt qua 100%.
 
             ---
 
@@ -93,7 +103,7 @@ jobs:
             - **Tra cứu và tìm kiếm thông minh:** Hỗ trợ bộ gõ tiếng Việt Telex/VNI có dấu và gợi ý nhanh tức thì.
             - **Bộ lọc kho sách đa chiều:** Lọc theo thể loại, tác giả và trạng thái mượn sách.
             - **Cơ sở dữ liệu SQLite cục bộ:** Tự khởi tạo và lưu trữ an toàn, độc lập.
-            - **Kiểm thử tự động:** 39 bài test tự động JUnit 5 đạt tỷ lệ vượt qua 100%.
+            - **Kiểm thử tự động:** 48 bài test tự động JUnit 5 đạt tỷ lệ vượt qua 100%.
           files: |
             release-assets/LibMan-Windows-Portable-x64.zip
             release-assets/LibMan.exe
