@@ -101,6 +101,7 @@ public class ExportService {
         sb.append(" 2. Không làm rách, viết, bôi bẩn lên sách (Mất đền 200%).\n\n");
         sb.append("      ĐỘC GIẢ KÝ TÊN                  THỦ THƯ XÁC NHẬN  \n");
         sb.append("    (Ký và ghi rõ họ tên)           (Ký và ghi rõ họ tên)\n\n\n");
+        sb.append("   .........................       .........................\n");
         sb.append("========================================================\n");
         return sb.toString();
     }

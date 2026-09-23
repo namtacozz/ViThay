@@ -1224,6 +1224,158 @@
 .desk-basket-card:hover {
     -fx-border-color: #1DB954;
 }
+.desk-header-box {
+    -fx-background-color: #1A1A1A;
+    -fx-padding: 12px 16px;
+    -fx-background-radius: 8px;
+    -fx-border-color: #282828;
+    -fx-border-radius: 8px;
+}
+.desk-reader-chip {
+    -fx-background-color: #222222;
+    -fx-padding: 6px 12px;
+    -fx-background-radius: 20px;
+    -fx-border-color: #333333;
+    -fx-border-radius: 20px;
+}
+.desk-basket-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: #262626;
+    -fx-border-radius: 8px;
+}
+.desk-summary-bar {
+    -fx-background-color: #1A1A1A;
+    -fx-padding: 12px 16px;
+    -fx-background-radius: 8px;
+    -fx-border-color: #282828;
+    -fx-border-radius: 8px;
+}
+.desk-basket-thumb {
+    -fx-background-color: #262626;
+    -fx-background-radius: 4px;
+    -fx-border-color: #383838;
+    -fx-border-radius: 4px;
+}
+.desk-palette-item-title {
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 12px;
+}
+.desk-palette-item-sub {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 11px;
+}
+.desk-card-title {
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 13px;
+}
+.desk-card-meta {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 11px;
+}
+.desk-card-sub {
+    -fx-text-fill: #6B7280;
+    -fx-font-size: 10px;
+}
+.desk-card-header {
+    -fx-text-fill: #9CA3AF;
+    -fx-font-size: 10px;
+}
+.desk-card-due {
+    -fx-text-fill: #1DB954;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+.desk-card-remove-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #EF4444;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-padding: 4px 8px;
+}
+.desk-card-remove-btn:hover {
+    -fx-background-color: #3F1D1D;
+    -fx-text-fill: #F87171;
+    -fx-background-radius: 4px;
+}
+.desk-empty-title {
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+}
+.desk-empty-sub {
+    -fx-text-fill: #737373;
+    -fx-font-size: 12px;
+}
+
+/* Light Theme Overrides for Circulation Desk */
+.theme-pink-light .desk-palette-box {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #FECDD3;
+}
+.theme-pink-light .desk-canvas-zone {
+    -fx-background-color: #FFF1F2;
+    -fx-border-color: #FECDD3;
+}
+.theme-pink-light .desk-basket-card {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #FFE4E6;
+}
+.theme-pink-light .desk-basket-card:hover {
+    -fx-border-color: #E11D48;
+}
+.theme-pink-light .desk-header-box {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #FECDD3;
+}
+.theme-pink-light .desk-reader-chip {
+    -fx-background-color: #FFF1F2;
+    -fx-border-color: #FECDD3;
+}
+.theme-pink-light .desk-basket-scroll {
+    -fx-border-color: #FECDD3;
+}
+.theme-pink-light .desk-summary-bar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #FECDD3;
+}
+.theme-pink-light .desk-basket-thumb {
+    -fx-background-color: #FFF1F2;
+    -fx-border-color: #FECDD3;
+}
+.theme-pink-light .desk-palette-item-title {
+    -fx-text-fill: #1E1B1D;
+}
+.theme-pink-light .desk-palette-item-sub {
+    -fx-text-fill: #4B5563;
+}
+.theme-pink-light .desk-card-title {
+    -fx-text-fill: #1E1B1D;
+}
+.theme-pink-light .desk-card-meta {
+    -fx-text-fill: #4B5563;
+}
+.theme-pink-light .desk-card-sub {
+    -fx-text-fill: #6B7280;
+}
+.theme-pink-light .desk-card-header {
+    -fx-text-fill: #4B5563;
+}
+.theme-pink-light .desk-card-due {
+    -fx-text-fill: #059669;
+}
+.theme-pink-light .desk-card-remove-btn:hover {
+    -fx-background-color: #FEE2E2;
+}
+.theme-pink-light .desk-empty-title {
+    -fx-text-fill: #1E1B1D;
+}
+.theme-pink-light .desk-empty-sub {
+    -fx-text-fill: #6B7280;
+}
 
 /* 6. Wizard Stepper */
 .wizard-stepper-bar {

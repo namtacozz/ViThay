@@ -137,8 +137,8 @@ public class BorrowReturnController implements Initializable {
                     cellBox.setPadding(new Insets(6, 8, 6, 8));
                     cellBox.setStyle("-fx-background-radius: 6px;");
 
-                    lblTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #FFFFFF; -fx-font-size: 12px;");
-                    lblSub.setStyle("-fx-text-fill: #9CA3AF; -fx-font-size: 11px;");
+                    lblTitle.getStyleClass().add("desk-palette-item-title");
+                    lblSub.getStyleClass().add("desk-palette-item-sub");
                     textContainer.getChildren().addAll(lblTitle, lblSub);
                     HBox.setHgrow(textContainer, Priority.ALWAYS);
 
@@ -482,7 +482,7 @@ public class BorrowReturnController implements Initializable {
         thumbBox.setPrefSize(42, 60);
         thumbBox.setMinSize(42, 60);
         thumbBox.setMaxSize(42, 60);
-        thumbBox.setStyle("-fx-background-color: #262626; -fx-background-radius: 4px; -fx-border-color: #383838; -fx-border-radius: 4px;");
+        thumbBox.getStyleClass().add("desk-basket-thumb");
 
         boolean imageLoaded = false;
         if (book.getImagePath() != null && !book.getImagePath().trim().isEmpty()) {
@@ -514,14 +514,14 @@ public class BorrowReturnController implements Initializable {
         HBox.setHgrow(infoBox, Priority.ALWAYS);
 
         Label lblTitle = new Label(book.getTitle());
-        lblTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #FFFFFF; -fx-font-size: 13px;");
+        lblTitle.getStyleClass().add("desk-card-title");
         lblTitle.setWrapText(true);
 
         Label lblMeta = new Label(book.getAuthor() + " • Kệ: " + book.getShelfLocation());
-        lblMeta.setStyle("-fx-text-fill: #9CA3AF; -fx-font-size: 11px;");
+        lblMeta.getStyleClass().add("desk-card-meta");
 
         Label lblId = new Label("Mã: " + book.getId() + " | Còn: " + book.getAvailableCopies() + " cuốn");
-        lblId.setStyle("-fx-text-fill: #6B7280; -fx-font-size: 10px;");
+        lblId.getStyleClass().add("desk-card-sub");
 
         infoBox.getChildren().addAll(lblTitle, lblMeta, lblId);
 
@@ -529,7 +529,7 @@ public class BorrowReturnController implements Initializable {
         VBox typeBox = new VBox(2);
         typeBox.setAlignment(Pos.CENTER_LEFT);
         Label lblTypeHeader = new Label("Hình thức:");
-        lblTypeHeader.setStyle("-fx-text-fill: #9CA3AF; -fx-font-size: 10px;");
+        lblTypeHeader.getStyleClass().add("desk-card-header");
         ComboBox<String> comboType = new ComboBox<>(FXCollections.observableArrayList("Mang về nhà", "Mượn đọc tại chỗ"));
         comboType.setValue(item.getLoanType());
         comboType.setPrefWidth(135);
@@ -541,7 +541,7 @@ public class BorrowReturnController implements Initializable {
         VBox daysBox = new VBox(2);
         daysBox.setAlignment(Pos.CENTER_LEFT);
         Label lblDaysHeader = new Label("Thời hạn:");
-        lblDaysHeader.setStyle("-fx-text-fill: #9CA3AF; -fx-font-size: 10px;");
+        lblDaysHeader.getStyleClass().add("desk-card-header");
 
         int maxHome = settingService.getMaxBorrowDaysHome();
         int maxOnsite = settingService.getMaxBorrowDaysOnsite();
@@ -556,9 +556,9 @@ public class BorrowReturnController implements Initializable {
         dueBox.setAlignment(Pos.CENTER_LEFT);
         dueBox.setPrefWidth(110);
         Label lblDueHeader = new Label("Hạn trả dự kiến:");
-        lblDueHeader.setStyle("-fx-text-fill: #9CA3AF; -fx-font-size: 10px;");
+        lblDueHeader.getStyleClass().add("desk-card-header");
         Label lblDueDate = new Label(item.getDueDate().toString());
-        lblDueDate.setStyle("-fx-text-fill: #1DB954; -fx-font-weight: bold; -fx-font-size: 12px;");
+        lblDueDate.getStyleClass().add("desk-card-due");
         dueBox.getChildren().addAll(lblDueHeader, lblDueDate);
 
         // Listeners for type & days changes
@@ -584,9 +584,7 @@ public class BorrowReturnController implements Initializable {
 
         // 6. Remove Button [✕]
         Button btnRemove = new Button("✕");
-        btnRemove.setStyle("-fx-background-color: transparent; -fx-text-fill: #EF4444; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 4 8;");
-        btnRemove.setOnMouseEntered(e -> btnRemove.setStyle("-fx-background-color: #3F1D1D; -fx-text-fill: #F87171; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 4px; -fx-cursor: hand; -fx-padding: 4 8;"));
-        btnRemove.setOnMouseExited(e -> btnRemove.setStyle("-fx-background-color: transparent; -fx-text-fill: #EF4444; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 4 8;"));
+        btnRemove.getStyleClass().add("desk-card-remove-btn");
         btnRemove.setOnAction(e -> removeFromBasket(item));
 
         card.getChildren().addAll(thumbBox, infoBox, typeBox, daysBox, dueBox, btnRemove);
@@ -656,7 +654,7 @@ public class BorrowReturnController implements Initializable {
         List<String> errors = new ArrayList<>();
 
         for (CirculationBasketItem item : new ArrayList<>(basketItems)) {
-            String err = borrowService.borrowBook(
+            String err = borrowService.createBorrowTransaction(
                     reader.getId(),
                     item.getBook().getId(),
                     item.getLoanType(),
@@ -667,7 +665,7 @@ public class BorrowReturnController implements Initializable {
                 errors.add(item.getBook().getTitle() + ": " + err);
             } else {
                 // Find newly created transaction
-                List<BorrowTransaction> readerTxs = borrowService.searchTransactions(reader.getId());
+                List<BorrowTransaction> readerTxs = borrowService.getTransactionsByReader(reader.getId());
                 for (BorrowTransaction tx : readerTxs) {
                     if (tx.getBookId().equals(item.getBook().getId()) && "Đang Mượn".equalsIgnoreCase(tx.getStatus())) {
                         if (createdTransactions.stream().noneMatch(t -> t.getId().equals(tx.getId()))) {
@@ -685,7 +683,9 @@ public class BorrowReturnController implements Initializable {
 
         if (!createdTransactions.isEmpty()) {
             showReceiptDialog(reader, createdTransactions);
-            basketItems.clear();
+            for (BorrowTransaction tx : createdTransactions) {
+                basketItems.removeIf(it -> it.getBook().getId().equals(tx.getBookId()));
+            }
             if (txtDeskNotes != null) txtDeskNotes.clear();
             loadAllData();
             updateDeskReaderInfo();

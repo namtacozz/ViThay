@@ -47,15 +47,14 @@
                     <!-- Cột Canvas (70%): Bàn làm việc mượn sách -->
                     <VBox styleClass="desk-canvas-zone" spacing="14">
                         <!-- Active Reader Header -->
-                        <VBox spacing="8" style="-fx-background-color: #1A1A1A; -fx-padding: 12 16; -fx-background-radius: 8px; -fx-border-color: #282828; -fx-border-radius: 8px;">
+                        <VBox spacing="8" styleClass="desk-header-box">
                             <HBox alignment="CENTER_LEFT" spacing="12">
                                 <Label text="Chọn Độc Giả:" styleClass="form-label" style="-fx-font-weight: bold;"/>
                                 <ComboBox fx:id="comboDeskReader" prefWidth="300" styleClass="form-control"
                                           promptText="-- Chọn hoặc tìm độc giả --" onAction="#handleSelectDeskReader"/>
 
                                 <!-- Profile Chip -->
-                                <HBox fx:id="deskReaderChip" alignment="CENTER_LEFT" spacing="10"
-                                      style="-fx-background-color: #222222; -fx-padding: 6 12; -fx-background-radius: 20px; -fx-border-color: #333333; -fx-border-radius: 20px;">
+                                <HBox fx:id="deskReaderChip" alignment="CENTER_LEFT" spacing="10" styleClass="desk-reader-chip">
                                     <Label fx:id="lblDeskReaderStatus" text="Trạng thái: --" styleClass="text-muted" style="-fx-font-size: 12px;"/>
                                     <Label text="•" style="-fx-text-fill: #555555;"/>
                                     <Label fx:id="lblDeskReaderBorrowing" text="Đang mượn: 0/5" styleClass="text-muted" style="-fx-font-size: 12px;"/>
@@ -77,8 +76,7 @@
                             </HBox>
 
                             <!-- Scrollable Basket Workspace -->
-                            <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true"
-                                        style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: #262626; -fx-border-radius: 8px;">
+                            <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" styleClass="desk-basket-scroll">
                                 <VBox fx:id="basketCardsContainer" spacing="10" style="-fx-padding: 10;">
                                     <!-- Dynamic .desk-basket-card elements -->
                                 </VBox>
@@ -86,8 +84,7 @@
                         </VBox>
 
                         <!-- Bottom Summary Bar -->
-                        <HBox alignment="CENTER_LEFT" spacing="14"
-                              style="-fx-background-color: #1A1A1A; -fx-padding: 12 16; -fx-background-radius: 8px; -fx-border-color: #282828; -fx-border-radius: 8px;">
+                        <HBox alignment="CENTER_LEFT" spacing="14" styleClass="desk-summary-bar">
                             <VBox spacing="2">
                                 <Label fx:id="lblSummaryTotalBooks" text="Tổng trong giỏ: 0 cuốn" style="-fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
                                 <Label fx:id="lblSummaryQuotaStatus" text="Chưa chọn sách" styleClass="text-muted" style="-fx-font-size: 11px;"/>

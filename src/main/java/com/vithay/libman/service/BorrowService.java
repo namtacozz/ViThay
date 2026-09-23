@@ -10,6 +10,7 @@ import com.vithay.libman.model.Reader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BorrowService {
@@ -37,6 +38,13 @@ public class BorrowService {
 
     public int getActiveBorrowCountForReader(String readerId) {
         return transactionDao.getActiveBorrowCountForReader(readerId);
+    }
+
+    public List<BorrowTransaction> getTransactionsByReader(String readerId) {
+        if (readerId == null || readerId.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        return transactionDao.getTransactionsByReader(readerId.trim());
     }
 
     public String createBorrowTransaction(String readerId, String bookId, String borrowType, int borrowDays, String notes) {
