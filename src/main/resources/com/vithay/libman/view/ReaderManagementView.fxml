@@ -22,8 +22,8 @@
                 <Label text="Hồ sơ độc giả, cấp thẻ, hạn hiệu lực và quản lý danh mục hội viên (SRS Mục 5.4)" styleClass="text-muted"/>
             </VBox>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnScanExpired" text="⏰ Quét Thẻ Hết Hạn" onAction="#handleScanExpiredReaders" styleClass="btn-secondary"/>
-            <Button fx:id="btnExportReaders" text="📥 Xuất File CSV" onAction="#handleExportCsv" styleClass="btn-secondary"/>
+            <Button fx:id="btnScanExpired" text="Quét Thẻ Hết Hạn" onAction="#handleScanExpiredReaders" styleClass="btn-secondary"/>
+            <Button fx:id="btnExportReaders" text="Xuất File CSV" onAction="#handleExportCsv" styleClass="btn-secondary"/>
             <Button fx:id="btnAddReader" text="+ Thêm Độc Giả Mới" onAction="#handleOpenAddReader" styleClass="btn-primary"/>
             <Button text="Làm Mới" onAction="#loadReaders" styleClass="btn-secondary"/>
         </HBox>

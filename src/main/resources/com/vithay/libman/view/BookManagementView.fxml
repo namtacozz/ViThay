@@ -23,16 +23,16 @@
                 <Label text="Quản lý toàn bộ danh mục sách, vị trí kệ, số lượng và tình trạng (SRS Mục 5.3)" styleClass="text-muted"/>
             </VBox>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnExportBooks" text="📥 Xuất File CSV" onAction="#handleExportCsv" styleClass="btn-secondary"/>
+            <Button fx:id="btnExportBooks" text="Xuất File CSV" onAction="#handleExportCsv" styleClass="btn-secondary"/>
             <Button fx:id="btnAddBook" text="+ Thêm Sách Mới" onAction="#handleOpenAddDialog" styleClass="btn-primary"/>
-            <Button text="Làm Mới" onAction="#loadBooks" styleClass="btn-secondary"/>
+            <Button text="Làm Mới" onAction="#handleRefreshAllBooks" styleClass="btn-secondary"/>
         </HBox>
 
         <!-- Breadcrumb Navigation (One-Window Drilldown) -->
         <HBox fx:id="breadcrumbContainer" alignment="CENTER_LEFT" spacing="8" styleClass="breadcrumb-container"/>
 
         <!-- Filter & Search Toolbar -->
-        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="bg-surface">
+        <HBox fx:id="filterToolbar" alignment="CENTER_LEFT" spacing="12" styleClass="bg-surface">
             <padding>
                 <Insets top="12" right="16" bottom="12" left="16"/>
             </padding>
@@ -192,10 +192,11 @@
 
                             <!-- Action Buttons -->
                             <VBox spacing="8">
-                                <Button fx:id="btnInspectorBorrow" text="⚡ Lập Phiếu Mượn" maxWidth="Infinity" styleClass="btn-primary" onAction="#handleInspectorQuickBorrow"/>
+                                <Button fx:id="btnOpenFullDetail" text="Xem Chi Tiết Toàn Diện ➔" maxWidth="Infinity" styleClass="btn-secondary" onAction="#handleOpenFullDetailView"/>
+                                <Button fx:id="btnInspectorBorrow" text="Lập Phiếu Mượn" maxWidth="Infinity" styleClass="btn-primary" onAction="#handleInspectorQuickBorrow"/>
                                 <HBox spacing="8">
-                                    <Button fx:id="btnInspectorEdit" text="✏ Chỉnh Sửa" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-secondary" onAction="#handleInspectorEdit"/>
-                                    <Button fx:id="btnInspectorDelete" text="🗑 Thùng Rác" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-danger" onAction="#handleInspectorDelete"/>
+                                    <Button fx:id="btnInspectorEdit" text="Chỉnh Sửa" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-secondary" onAction="#handleInspectorEdit"/>
+                                    <Button fx:id="btnInspectorDelete" text="Xóa / Thùng Rác" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-danger" onAction="#handleInspectorDelete"/>
                                 </HBox>
                             </VBox>
 
@@ -206,6 +207,102 @@
                 </VBox>
             </items>
         </SplitPane>
+
+        <!-- Two-Tier Full Book Detail View: 1/4 Left Preview + 3/4 Right Description & Reader Discussions -->
+        <HBox fx:id="bookFullDetailPane" visible="false" managed="false" VBox.vgrow="ALWAYS" spacing="20">
+            <!-- Left Column: 1/4 Preview Pane (~280-320px) -->
+            <VBox minWidth="280" prefWidth="300" maxWidth="340" spacing="12" styleClass="bg-surface"
+                  style="-fx-padding: 16; -fx-background-radius: 8px;">
+                <HBox alignment="CENTER_LEFT">
+                    <Button text="← Quay lại kho sách" onAction="#handleBackFromFullDetail" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 4 10;"/>
+                </HBox>
+
+                <!-- Cover Image -->
+                <VBox alignment="CENTER" style="-fx-padding: 8 0;">
+                    <ImageView fx:id="imgFullDetailCover" fitWidth="180" fitHeight="250" preserveRatio="false"
+                               style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 14, 0, 0, 4);"/>
+                </VBox>
+
+                <!-- Title & Author -->
+                <VBox spacing="4" alignment="CENTER">
+                    <Label fx:id="lblFullDetailTitle" text="Tên Sách" styleClass="title-large" style="-fx-font-size: 15px;" wrapText="true" textAlignment="CENTER"/>
+                    <Label fx:id="lblFullDetailAuthor" text="Tác Giả" styleClass="text-muted" wrapText="true" textAlignment="CENTER"/>
+                </VBox>
+
+                <!-- Category & Status Pill -->
+                <HBox alignment="CENTER" spacing="8">
+                    <Label fx:id="lblFullDetailCategory" text="Thể Loại" styleClass="cat-pill, cat-pill-dark"/>
+                    <Label fx:id="lblFullDetailStatus" text="Available" styleClass="badge-available"/>
+                </HBox>
+
+                <!-- Shelf Box -->
+                <VBox styleClass="inspector-shelf-box" spacing="4">
+                    <Label text="VỊ TRÍ LƯU TRỮ TRÊN KỆ" styleClass="form-label" style="-fx-font-size: 10px; -fx-text-fill: #1DB954;"/>
+                    <Label fx:id="lblFullDetailShelf" text="Khu A - Kệ 01" styleClass="inspector-shelf-location"/>
+                </VBox>
+
+                <!-- Metadata Grid: ISBN, Price, Available Copies -->
+                <GridPane hgap="8" vgap="6" styleClass="bg-dark" style="-fx-padding: 10 12; -fx-background-radius: 6px;">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="80" prefWidth="85"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+                    <Label text="Mã Sách:" styleClass="inspector-meta-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <Label fx:id="lblFullDetailId" text="--" styleClass="inspector-meta-value" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                    <Label text="Mã ISBN:" styleClass="inspector-meta-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <Label fx:id="lblFullDetailIsbn" text="--" styleClass="inspector-meta-value" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Label text="Đơn Giá:" styleClass="inspector-meta-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <Label fx:id="lblFullDetailPrice" text="-- đ" styleClass="inspector-meta-value" style="-fx-text-fill: #1DB954;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                    <Label text="Khả Dụng:" styleClass="inspector-meta-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <Label fx:id="lblFullDetailCopies" text="-- / -- bản" styleClass="inspector-meta-value" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                </GridPane>
+
+                <!-- Borrow Action -->
+                <Button fx:id="btnFullDetailBorrow" text="Lập Phiếu Mượn" maxWidth="Infinity" styleClass="btn-primary" onAction="#handleInspectorQuickBorrow"/>
+            </VBox>
+
+            <!-- Right Column: 3/4 Description & Reader Discussions -->
+            <ScrollPane fitToWidth="true" HBox.hgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent;">
+                <VBox spacing="16" style="-fx-padding: 0 4 20 4;">
+                    <!-- Section 1: Book Description -->
+                    <VBox spacing="10" styleClass="bg-surface" style="-fx-padding: 20; -fx-background-radius: 8px;">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label text="TỔNG QUAN &amp; TÓM TẮT TÁC PHẨM" styleClass="title-large" style="-fx-font-size: 15px; -fx-text-fill: #1DB954;"/>
+                        </HBox>
+                        <Label fx:id="lblFullDetailDescription" styleClass="full-detail-description" wrapText="true"/>
+                    </VBox>
+
+                    <!-- Section 2: Reader Discussions & Reviews -->
+                    <VBox spacing="14" styleClass="bg-surface" style="-fx-padding: 20; -fx-background-radius: 8px;">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label fx:id="lblFullDetailReviewHeader" text="BÀN LUẬN &amp; ĐÁNH GIÁ TỪ ĐỘC GIẢ" styleClass="title-large" style="-fx-font-size: 15px;"/>
+                        </HBox>
+
+                        <!-- Comment Submission Box -->
+                        <VBox spacing="10" styleClass="bg-dark" style="-fx-padding: 14; -fx-background-radius: 8px;">
+                            <HBox alignment="CENTER_LEFT" spacing="12">
+                                <Label text="Gửi bình luận / nhận xét mới:" styleClass="form-label"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="Đánh giá:" styleClass="form-label"/>
+                                <ComboBox fx:id="comboReviewRating" prefWidth="160" styleClass="form-control"/>
+                            </HBox>
+                            <TextArea fx:id="txtReviewContent" promptText="Chia sẻ cảm nhận, góc nhìn hoặc bàn luận về cuốn sách này..."
+                                      prefRowCount="3" wrapText="true" styleClass="form-control"/>
+                            <HBox alignment="CENTER_RIGHT" spacing="12">
+                                <Label fx:id="lblReviewStatus" style="-fx-font-size: 12px;"/>
+                                <Button text="Gửi Bình Luận" onAction="#handleSendReview" styleClass="btn-primary" style="-fx-padding: 6 16;"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- Discussion Comments Feed -->
+                        <VBox fx:id="reviewsContainer" spacing="10"/>
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+        </HBox>
     </VBox>
 
     <!-- IN-WINDOW OVERLAY MODAL FOR ADD/EDIT BOOK -->

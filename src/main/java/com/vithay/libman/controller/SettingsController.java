@@ -65,11 +65,11 @@ public class SettingsController implements Initializable {
         com.vithay.libman.service.ThemeManager tm = com.vithay.libman.service.ThemeManager.getInstance();
         if (radioPinkLightTheme.isSelected()) {
             tm.setTheme(com.vithay.libman.service.ThemeManager.Theme.PINK_LIGHT);
-            lblSettingsMsg.setText("✓ Đã áp dụng Modern Bright Pink Theme (Chế độ Sáng - Soft Rose)!");
+            lblSettingsMsg.setText("✓ Đã áp dụng Chế độ Giao diện Sáng (Modern Pink)!");
             lblSettingsMsg.setStyle("-fx-text-fill: #FB7185;");
         } else {
             tm.setTheme(com.vithay.libman.service.ThemeManager.Theme.DARK);
-            lblSettingsMsg.setText("✓ Đã áp dụng Spotify Dark Theme (Chế độ Tối)!");
+            lblSettingsMsg.setText("✓ Đã áp dụng Chế độ Giao diện Tối!");
             lblSettingsMsg.setStyle("-fx-text-fill: #1DB954;");
         }
     }

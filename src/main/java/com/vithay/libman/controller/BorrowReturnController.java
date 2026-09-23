@@ -491,7 +491,7 @@ public class BorrowReturnController implements Initializable {
             paneDeskRegulations.setVisible(show);
             paneDeskRegulations.setManaged(show);
             if (btnToggleRegulations != null) {
-                btnToggleRegulations.setText(show ? "ℹ Thu gọn quy chế ▴" : "ℹ Quy chế & chế tài áp dụng ▾");
+                btnToggleRegulations.setText(show ? "ⓘ Thu gọn quy chế ▴" : "ⓘ Quy chế & chế tài áp dụng ▾");
             }
         }
     }
@@ -502,7 +502,7 @@ public class BorrowReturnController implements Initializable {
             paneDeskRegulations.setManaged(visible);
         }
         if (btnToggleRegulations != null) {
-            btnToggleRegulations.setText(visible ? "ℹ Thu gọn quy chế ▴" : "ℹ Quy chế & chế tài áp dụng ▾");
+            btnToggleRegulations.setText(visible ? "ⓘ Thu gọn quy chế ▴" : "ⓘ Quy chế & chế tài áp dụng ▾");
         }
     }
 
@@ -636,8 +636,11 @@ public class BorrowReturnController implements Initializable {
             emptyBox.setAlignment(Pos.CENTER);
             emptyBox.setPadding(new Insets(40, 20, 40, 20));
 
-            Label emptyIcon = new Label("📚");
-            emptyIcon.setStyle("-fx-font-size: 32px;");
+            javafx.scene.shape.SVGPath emptyIcon = new javafx.scene.shape.SVGPath();
+            emptyIcon.setContent("M 18 2 H 6 C 4.9 2 4 2.9 4 4 V 20 C 4 21.1 4.9 22 6 22 H 18 C 19.1 22 20 21.1 20 20 V 4 C 20 2.9 19.1 2 18 2 Z M 18 20 H 6 V 4 H 18 V 20 Z");
+            emptyIcon.setScaleX(1.4);
+            emptyIcon.setScaleY(1.4);
+            emptyIcon.setFill(javafx.scene.paint.Color.web("#555555"));
 
             Label emptyTitle = new Label("Bàn lưu hành hiện đang trống");
             emptyTitle.getStyleClass().add("desk-empty-title");
@@ -688,7 +691,7 @@ public class BorrowReturnController implements Initializable {
             }
         }
         if (!imageLoaded) {
-            Label iconLbl = new Label("📖");
+            Label iconLbl = new Label("•");
             iconLbl.setStyle("-fx-font-size: 18px;");
             thumbBox.getChildren().add(iconLbl);
         }

@@ -37,6 +37,9 @@ public class HomeController implements Initializable {
     @FXML private Label lblBorrowedBooks;
     @FXML private Label lblTotalReaders;
 
+    @FXML private HBox statsCardsContainer;
+    @FXML private Button btnToggleStats;
+
     @FXML private HBox featuredBooksContainer;
 
     @FXML private TableView<BorrowTransaction> transactionsTable;
@@ -138,17 +141,18 @@ public class HomeController implements Initializable {
         // Status Badge
         Label lblBadge = new Label(book.getStatus());
         String status = book.getStatus();
-        if ("Available".equalsIgnoreCase(status)) {
+        if ("Available".equalsIgnoreCase(status) || "Có sẵn".equalsIgnoreCase(status) || "Khả dụng".equalsIgnoreCase(status)) {
             lblBadge.getStyleClass().add("badge-available");
-            lblBadge.setText("Available");
-        } else if ("Borrowed".equalsIgnoreCase(status)) {
+            lblBadge.setText("Khả dụng");
+        } else if ("Borrowed".equalsIgnoreCase(status) || "Đang mượn".equalsIgnoreCase(status)) {
             lblBadge.getStyleClass().add("badge-borrowed");
-            lblBadge.setText("Borrowed");
-        } else if ("On Hold".equalsIgnoreCase(status)) {
+            lblBadge.setText("Đang mượn");
+        } else if ("On Hold".equalsIgnoreCase(status) || "Đang giữ".equalsIgnoreCase(status)) {
             lblBadge.getStyleClass().add("badge-onhold");
-            lblBadge.setText("On Hold");
+            lblBadge.setText("Đang giữ");
         } else {
             lblBadge.getStyleClass().add("badge-returned");
+            lblBadge.setText("Đã trả");
         }
 
         HBox badgeBox = new HBox(lblBadge);
@@ -161,7 +165,7 @@ public class HomeController implements Initializable {
 
         card.setOnMouseClicked(event -> {
             if (mainController != null) {
-                mainController.showBookView();
+                mainController.showBookViewWithSelection(book);
             }
         });
 
@@ -272,6 +276,17 @@ public class HomeController implements Initializable {
     public void handleNewBorrow() {
         if (mainController != null) {
             mainController.showBorrowReturnView(0);
+        }
+    }
+
+    @FXML
+    public void handleToggleStats() {
+        if (statsCardsContainer == null) return;
+        boolean isVisible = !statsCardsContainer.isVisible();
+        statsCardsContainer.setVisible(isVisible);
+        statsCardsContainer.setManaged(isVisible);
+        if (btnToggleStats != null) {
+            btnToggleStats.setText(isVisible ? "Thu gọn chỉ số ▴" : "Mở rộng chỉ số ▾");
         }
     }
 }

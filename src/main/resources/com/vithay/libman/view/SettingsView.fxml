@@ -8,85 +8,85 @@
             fx:controller="com.vithay.libman.controller.SettingsController"
             fitToWidth="true" styleClass="bg-dark" stylesheets="@../css/style.css">
 
-    <VBox spacing="24" styleClass="bg-dark">
+    <VBox spacing="16" styleClass="bg-dark">
         <padding>
-            <Insets top="24" right="32" bottom="32" left="32"/>
+            <Insets top="18" right="24" bottom="24" left="24"/>
         </padding>
 
         <!-- Header -->
-        <VBox spacing="4">
-            <Label text="Cài Đặt Quy Định Thư Viện" styleClass="title-large"/>
-            <Label text="Tùy biến các quy chế mượn - trả, định mức giới hạn và mức chế tài theo yêu cầu vận hành (SRS Mục 6.1)" styleClass="text-muted"/>
+        <VBox spacing="2">
+            <Label text="Cài Đặt Quy Định Thư Viện" styleClass="title-medium" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+            <Label text="Tùy biến các quy chế mượn - trả, định mức giới hạn và mức chế tài theo yêu cầu vận hành (SRS Mục 6.1)" styleClass="text-muted" style="-fx-font-size: 12px;"/>
         </VBox>
 
         <!-- Main Form Container -->
-        <VBox spacing="20" styleClass="bg-surface" maxWidth="800">
+        <VBox spacing="14" styleClass="bg-surface" maxWidth="600">
             <padding>
-                <Insets top="24" right="28" bottom="24" left="28"/>
+                <Insets top="16" right="20" bottom="16" left="20"/>
             </padding>
 
-            <Label text="1. Định Mức Mượn Sách &amp; Thời Hạn" styleClass="title-medium"/>
+            <Label text="1. Định Mức Mượn Sách &amp; Thời Hạn" styleClass="title-medium" style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
 
-            <GridPane hgap="20" vgap="16">
+            <GridPane hgap="16" vgap="10">
                 <columnConstraints>
-                    <ColumnConstraints minWidth="260" prefWidth="300"/>
-                    <ColumnConstraints hgrow="ALWAYS" minWidth="200"/>
+                    <ColumnConstraints minWidth="240" prefWidth="270"/>
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="150"/>
                 </columnConstraints>
 
-                <Label text="Số sách mượn tối đa / 1 độc giả:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <Spinner fx:id="spnMaxBooks" prefWidth="140" styleClass="form-control" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <Label text="Số sách mượn tối đa / 1 độc giả:" styleClass="form-label" style="-fx-font-size: 12px;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <Spinner fx:id="spnMaxBooks" prefWidth="130" prefHeight="28" styleClass="form-control" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-                <Label text="Thời gian mượn tối đa mang về (ngày):" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <Spinner fx:id="spnMaxDaysHome" prefWidth="140" styleClass="form-control" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <Label text="Thời gian mượn tối đa mang về (ngày):" styleClass="form-label" style="-fx-font-size: 12px;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <Spinner fx:id="spnMaxDaysHome" prefWidth="130" prefHeight="28" styleClass="form-control" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                <Label text="Thời gian mượn tối đa tại chỗ (ngày):" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <Spinner fx:id="spnMaxDaysOnsite" prefWidth="140" styleClass="form-control" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                <Label text="Thời gian mượn tối đa tại chỗ (ngày):" styleClass="form-label" style="-fx-font-size: 12px;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <Spinner fx:id="spnMaxDaysOnsite" prefWidth="130" prefHeight="28" styleClass="form-control" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-                <Label text="Thời hạn hiệu lực thẻ độc giả (tháng):" styleClass="form-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                <Spinner fx:id="spnCardValidity" prefWidth="140" styleClass="form-control" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                <Label text="Thời hạn hiệu lực thẻ độc giả (tháng):" styleClass="form-label" style="-fx-font-size: 12px;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <Spinner fx:id="spnCardValidity" prefWidth="130" prefHeight="28" styleClass="form-control" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
             </GridPane>
 
             <Separator style="-fx-background-color: #282828;"/>
 
-            <Label text="2. Mức Phạt Quá Hạn &amp; Bồi Hoàn" styleClass="title-medium"/>
+            <Label text="2. Mức Phạt Quá Hạn &amp; Bồi Hoàn" styleClass="title-medium" style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
 
-            <GridPane hgap="20" vgap="16">
+            <GridPane hgap="16" vgap="10">
                 <columnConstraints>
-                    <ColumnConstraints minWidth="260" prefWidth="300"/>
-                    <ColumnConstraints hgrow="ALWAYS" minWidth="200"/>
+                    <ColumnConstraints minWidth="240" prefWidth="270"/>
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="150"/>
                 </columnConstraints>
 
-                <Label text="Tiền phạt quá hạn / ngày / cuốn (VNĐ):" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtFinePerDay" prefWidth="200" styleClass="form-control" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <Label text="Tiền phạt quá hạn / ngày / cuốn (VNĐ):" styleClass="form-label" style="-fx-font-size: 12px;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtFinePerDay" prefWidth="160" prefHeight="28" styleClass="form-control" style="-fx-font-size: 12px;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-                <Label text="Hệ số đền bù sách mất / hỏng (lần giá bìa):" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtLostMultiplier" prefWidth="200" styleClass="form-control" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <Label text="Hệ số đền bù sách mất / hỏng (lần):" styleClass="form-label" style="-fx-font-size: 12px;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtLostMultiplier" prefWidth="160" prefHeight="28" styleClass="form-control" style="-fx-font-size: 12px;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                <Label text="Lệ phí xử lý kỹ thuật sách mất (VNĐ):" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtProcessingFee" prefWidth="200" styleClass="form-control" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                <Label text="Lệ phí xử lý kỹ thuật sách mất (VNĐ):" styleClass="form-label" style="-fx-font-size: 12px;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtProcessingFee" prefWidth="160" prefHeight="28" styleClass="form-control" style="-fx-font-size: 12px;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
             </GridPane>
 
             <Separator style="-fx-background-color: #282828;"/>
 
-            <Label text="3. Giao Diện &amp; Chủ Đề Ứng Dụng (Theme)" styleClass="title-medium"/>
+            <Label text="3. Giao Diện &amp; Chủ Đề Ứng Dụng (Theme)" styleClass="title-medium" style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
 
-            <VBox spacing="10">
-                <HBox spacing="24" alignment="CENTER_LEFT">
-                    <RadioButton fx:id="radioDarkTheme" text="🌙 Spotify Dark Theme (Chế độ Tối)" styleClass="form-label" onAction="#handleThemeRadioChange">
+            <VBox spacing="8">
+                <HBox spacing="20" alignment="CENTER_LEFT">
+                    <RadioButton fx:id="radioDarkTheme" text="Chế độ Tối (Dark Mode)" styleClass="form-label" style="-fx-font-size: 12px;" onAction="#handleThemeRadioChange">
                         <toggleGroup>
                             <ToggleGroup fx:id="themeToggleGroup"/>
                         </toggleGroup>
                     </RadioButton>
-                    <RadioButton fx:id="radioPinkLightTheme" text="🌸 Modern Bright Pink Theme (Chế độ Sáng - Soft Rose Blush)" toggleGroup="$themeToggleGroup" styleClass="form-label" onAction="#handleThemeRadioChange"/>
+                    <RadioButton fx:id="radioPinkLightTheme" text="Chế độ Sáng (Modern Pink)" toggleGroup="$themeToggleGroup" styleClass="form-label" style="-fx-font-size: 12px;" onAction="#handleThemeRadioChange"/>
                 </HBox>
                 <Label text="* Màu chủ đạo: #FB7185 (Rose Neon), Nền Canvas: #FFF1F2, Viền &amp; Bề mặt: #FFFFFF / #FECDD3" style="-fx-text-fill: #727272; -fx-font-size: 11px;"/>
             </VBox>
 
-            <Label fx:id="lblSettingsMsg" text="" style="-fx-font-weight: bold;"/>
+            <Label fx:id="lblSettingsMsg" text="" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
 
-            <HBox spacing="16">
-                <Button text="Lưu Quy Định Mới" onAction="#handleSaveSettings" styleClass="btn-primary"/>
-                <Button text="Khôi Phục Mặc Định" onAction="#handleResetDefaults" styleClass="btn-secondary"/>
+            <HBox spacing="12">
+                <Button text="Lưu Quy Định Mới" onAction="#handleSaveSettings" styleClass="btn-primary" style="-fx-font-size: 12px; -fx-padding: 6 16;"/>
+                <Button text="Khôi Phục Mặc Định" onAction="#handleResetDefaults" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 14;"/>
             </HBox>
         </VBox>
     </VBox>

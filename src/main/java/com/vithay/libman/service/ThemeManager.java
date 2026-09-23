@@ -13,8 +13,8 @@ public class ThemeManager {
     private static ThemeManager instance;
 
     public enum Theme {
-        DARK("DARK", "Spotify Dark Theme"),
-        PINK_LIGHT("PINK_LIGHT", "Modern Bright Pink Theme (Light Mode)");
+        DARK("DARK", "Giao diện Tối (Mặc định)"),
+        PINK_LIGHT("PINK_LIGHT", "Giao diện Sáng (Modern Pink)");
 
         private final String code;
         private final String displayName;
