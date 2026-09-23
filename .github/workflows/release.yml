@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Release tag name (e.g. v1.0.0)'
+        description: 'Release tag name (e.g. v1.1.0)'
         required: true
-        default: 'v1.0.0'
+        default: 'v1.1.0'
 
 permissions:
   contents: write
@@ -35,7 +35,7 @@ jobs:
 
       - name: Build Self-Contained Windows Portable Package (jpackage)
         run: |
-          jpackage --type app-image --name LibMan --input target --main-jar libman-1.0.0.jar --main-class com.vithay.libman.Launcher --icon src/main/resources/com/vithay/libman/images/app_icon.ico --app-version 1.0.0 --vendor "ViThay"
+          jpackage --type app-image --name LibMan --input target --main-jar libman-1.0.0.jar --main-class com.vithay.libman.Launcher --icon src/main/resources/com/vithay/libman/images/app_icon.ico --app-version 1.1.0 --vendor "ViThay"
           Compress-Archive -Path LibMan -DestinationPath LibMan-Windows-Portable-x64.zip
 
       - name: Prepare Release Assets
@@ -49,26 +49,33 @@ jobs:
       - name: Create GitHub Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name != '' && startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.tag_name || 'v1.0.0' }}
-          name: "LibMan Desktop Release ${{ github.ref_name != '' && startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.tag_name || 'v1.0.0' }}"
+          tag_name: ${{ github.ref_name != '' && startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.tag_name || 'v1.1.0' }}
+          name: "LibMan Desktop Release ${{ github.ref_name != '' && startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.tag_name || 'v1.1.0' }}"
           draft: false
           prerelease: false
           generate_release_notes: true
           body: |
-            ## 🚀 LibMan - Hệ Thống Quản Lý Thư Viện Hiện Đại (v1.0.0)
+            ## 🚀 LibMan - Hệ Thống Quản Lý Thư Viện Hiện Đại (v1.1.0)
 
-            Ứng dụng Quản Lý Thư Viện LibMan tương thích hoàn toàn với **Windows 11 / 10** và **Linux (Fedora 44, Ubuntu...)**.
+            Bản phát hành **v1.1.0** tích hợp toàn diện **7 Mẫu Thiết Kế Cấu Trúc Vật Lý & Thông Tin (Interaction Design Patterns - Jenifer Tidwell)**:
+            - **Two-Panel Selector:** Master-Detail SplitPane với Detail Inspector thời gian thực trong Kho Sách.
+            - **Canvas Plus Palette:** Bàn Lưu Hành trực quan gồm Palette chọn sách (30%) và Canvas cấu hình mượn trả (70%).
+            - **One-Window Drilldown:** Breadcrumb phân cấp và tra cứu lịch sử mượn trả in-place không cần mở modal.
+            - **Alternative Views:** Chuyển đổi linh hoạt giữa Chế độ Bảng (Table) và Chế độ Thẻ Spotify Card Grid.
+            - **Wizard:** Trợ lý lập phiếu mượn 4 bước tuần tự với chốt chặn kiểm soát thẻ & trần hạn ngạch 5 cuốn (SRS 6.1).
+            - **Extras on Demand:** Khung lọc nâng cao và ngăn tra cứu quy chế/chế tài thu gọn linh hoạt.
+            - **Intriguing Branches:** Gợi ý sách cùng kệ/cùng tác giả & banner cảnh báo hạn trả tự động.
 
             ---
 
-            ### 📦 Các Bản Tải Về Cho Windows & Linux:
+            ### 📦 Các Bản Tải Về Cho Windows 11 / 10 & Linux:
 
             1. **`LibMan-Windows-Portable-x64.zip` (Khuyên Dùng Cho Windows 11 / 10):**
                - **Đã tích hợp sẵn Java Runtime (JRE 21)** bên trong.
                - Không cần cài thêm Java vào máy tính.
                - Cách dùng: Tải về, giải nén thư mục `LibMan` và nhấp đúp file **`LibMan.exe`** để chạy ngay.
 
-            2. **`LibMan.exe` (File Thực Thi Độc Lập):**
+            2. **`LibMan.exe` (File Thực Thi Độc Lập Cho Windows):**
                - Dành cho máy tính Windows 11 / 10 đã có sẵn Java 17+.
                - Nhấp đúp trực tiếp để mở giao diện ứng dụng.
 
@@ -82,10 +89,11 @@ jobs:
 
             ### ✨ Tính Năng Nổi Bật:
             - **2 Giao diện linh hoạt:** Spotify Dark Theme (mặc định) & Modern Bright Pink Theme (Light Mode).
-            - **Phân quyền người dùng (RBAC):** Quản Trị, Thủ Thư, Độc Giả.
+            - **Phân quyền người dùng (RBAC):** Giám Đốc, Thủ Thư, Độc Giả.
             - **Tra cứu và tìm kiếm thông minh:** Hỗ trợ bộ gõ tiếng Việt Telex/VNI có dấu và gợi ý nhanh tức thì.
             - **Bộ lọc kho sách đa chiều:** Lọc theo thể loại, tác giả và trạng thái mượn sách.
             - **Cơ sở dữ liệu SQLite cục bộ:** Tự khởi tạo và lưu trữ an toàn, độc lập.
+            - **Kiểm thử tự động:** 39 bài test tự động JUnit 5 đạt tỷ lệ vượt qua 100%.
           files: |
             release-assets/LibMan-Windows-Portable-x64.zip
             release-assets/LibMan.exe
