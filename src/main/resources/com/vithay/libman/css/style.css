@@ -1596,4 +1596,58 @@
     -fx-text-fill: #FB7185;
 }
 
+/* Two-Tier Book Detail: Preview (1/4) & Discussion (3/4) */
+.full-detail-description {
+    -fx-font-size: 14px;
+    -fx-line-spacing: 5px;
+    -fx-text-fill: #D1D5DB;
+}
+.theme-pink-light .full-detail-description {
+    -fx-text-fill: #1F2937;
+}
+
+.discussion-card {
+    -fx-background-color: #222222;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 16px;
+    -fx-border-color: #2E2E2E;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+}
+.theme-pink-light .discussion-card {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #FECDD3;
+}
+
+.discussion-author {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: #FFFFFF;
+}
+.theme-pink-light .discussion-author {
+    -fx-text-fill: #1E1B1D;
+}
+
+.discussion-stars {
+    -fx-text-fill: #EAB308;
+    -fx-font-size: 13px;
+}
+
+.discussion-content {
+    -fx-font-size: 13px;
+    -fx-text-fill: #CCCCCC;
+}
+.theme-pink-light .discussion-content {
+    -fx-text-fill: #4B5563;
+}
+
+.discussion-date {
+    -fx-font-size: 11px;
+    -fx-text-fill: #777777;
+}
+.theme-pink-light .discussion-date {
+    -fx-text-fill: #9CA3AF;
+}
+
+
 
