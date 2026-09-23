@@ -964,14 +964,8 @@ public class BorrowReturnController implements Initializable {
 
     public void loadActiveTransactionsForReturn() {
         if (comboReturnTransaction == null) return;
-        List<BorrowTransaction> list = borrowService.getAllTransactions();
-        ObservableList<BorrowTransaction> activeList = FXCollections.observableArrayList();
-        for (BorrowTransaction tx : list) {
-            if ("Đang Mượn".equalsIgnoreCase(tx.getStatus())) {
-                activeList.add(tx);
-            }
-        }
-        comboReturnTransaction.setItems(activeList);
+        List<BorrowTransaction> activeList = borrowService.getActiveTransactions();
+        comboReturnTransaction.setItems(FXCollections.observableArrayList(activeList));
         if (!activeList.isEmpty()) {
             comboReturnTransaction.getSelectionModel().selectFirst();
             handleSelectReturnTransaction();
