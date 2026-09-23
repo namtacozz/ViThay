@@ -803,6 +803,24 @@ public class BookManagementController implements Initializable {
         this.mainController = mainController;
     }
 
+    public void selectAndInspectBook(Book book) {
+        if (book == null) return;
+        Book target = null;
+        for (Book b : bookMasterList) {
+            if (b.getId() != null && b.getId().equals(book.getId())) {
+                target = b;
+                break;
+            }
+        }
+        if (target == null) target = book;
+        this.currentSelectedBook = target;
+        if (booksTable != null) {
+            booksTable.getSelectionModel().select(target);
+            booksTable.scrollTo(target);
+        }
+        showBookDetail(target);
+    }
+
     public void showBookDetail(Book book) {
         if (book != null && isCirculationMode && circulationBook != null && !java.util.Objects.equals(circulationBook.getId(), book.getId())) {
             exitCirculationMode();

@@ -37,6 +37,9 @@ public class HomeController implements Initializable {
     @FXML private Label lblBorrowedBooks;
     @FXML private Label lblTotalReaders;
 
+    @FXML private HBox statsCardsContainer;
+    @FXML private Button btnToggleStats;
+
     @FXML private HBox featuredBooksContainer;
 
     @FXML private TableView<BorrowTransaction> transactionsTable;
@@ -162,7 +165,7 @@ public class HomeController implements Initializable {
 
         card.setOnMouseClicked(event -> {
             if (mainController != null) {
-                mainController.showBookView();
+                mainController.showBookViewWithSelection(book);
             }
         });
 
@@ -273,6 +276,17 @@ public class HomeController implements Initializable {
     public void handleNewBorrow() {
         if (mainController != null) {
             mainController.showBorrowReturnView(0);
+        }
+    }
+
+    @FXML
+    public void handleToggleStats() {
+        if (statsCardsContainer == null) return;
+        boolean isVisible = !statsCardsContainer.isVisible();
+        statsCardsContainer.setVisible(isVisible);
+        statsCardsContainer.setManaged(isVisible);
+        if (btnToggleStats != null) {
+            btnToggleStats.setText(isVisible ? "Thu gọn chỉ số ▴" : "Mở rộng chỉ số ▾");
         }
     }
 }

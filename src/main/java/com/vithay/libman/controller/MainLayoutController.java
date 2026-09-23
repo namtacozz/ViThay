@@ -470,6 +470,13 @@ public class MainLayoutController implements Initializable {
         }
     }
 
+    public void showBookViewWithSelection(Book book) {
+        showBookView();
+        if (bookController != null && book != null) {
+            bookController.selectAndInspectBook(book);
+        }
+    }
+
     @FXML
     public void handleNavBooks() {
         showBookView();
