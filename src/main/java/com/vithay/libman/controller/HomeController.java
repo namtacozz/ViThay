@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
@@ -38,6 +39,10 @@ public class HomeController implements Initializable {
     @FXML private Label lblTotalReaders;
 
     @FXML private HBox statsCardsContainer;
+    @FXML private VBox cardTotalBooks;
+    @FXML private VBox cardAvailableBooks;
+    @FXML private VBox cardBorrowedBooks;
+    @FXML private VBox cardTotalReaders;
     @FXML private Button btnToggleStats;
 
     @FXML private HBox featuredBooksContainer;
@@ -95,6 +100,7 @@ public class HomeController implements Initializable {
     private VBox createBookCard(Book book) {
         VBox card = new VBox(8);
         card.getStyleClass().add("bg-card");
+        card.setCursor(Cursor.HAND);
         card.setPrefWidth(180);
         card.setMinWidth(180);
         card.setMaxWidth(180);
@@ -287,6 +293,34 @@ public class HomeController implements Initializable {
         statsCardsContainer.setManaged(isVisible);
         if (btnToggleStats != null) {
             btnToggleStats.setText(isVisible ? "Thu gọn chỉ số ▴" : "Mở rộng chỉ số ▾");
+        }
+    }
+
+    @FXML
+    public void handleCardTotalBooks() {
+        if (mainController != null) {
+            mainController.showBookView();
+        }
+    }
+
+    @FXML
+    public void handleCardAvailableBooks() {
+        if (mainController != null) {
+            mainController.showBookView();
+        }
+    }
+
+    @FXML
+    public void handleCardBorrowedBooks() {
+        if (mainController != null) {
+            mainController.showBorrowReturnView(2);
+        }
+    }
+
+    @FXML
+    public void handleCardTotalReaders() {
+        if (mainController != null) {
+            mainController.showReaderView();
         }
     }
 }

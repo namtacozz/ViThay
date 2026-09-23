@@ -4,6 +4,7 @@ import com.vithay.libman.model.Book;
 import com.vithay.libman.model.User;
 import com.vithay.libman.service.AuthService;
 import com.vithay.libman.service.BookService;
+import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.PauseTransition;
@@ -106,6 +107,7 @@ public class MainLayoutController implements Initializable {
     // Section Labels & Sidebar Brave Vertical Tabs
     @FXML private VBox sidebarContainer;
     @FXML private HBox sidebarHeaderBox;
+    @FXML private Region sidebarHeaderSpacer;
     @FXML private Label lblSidebarTitle;
     @FXML private Button btnPinSidebar;
     @FXML private SVGPath pinIconPath;
@@ -118,7 +120,9 @@ public class MainLayoutController implements Initializable {
     @FXML private HBox sidebarRoleBox;
 
     private boolean isSidebarPinned = false;
-    private final Map<Button, String> navButtonOriginalTexts = new HashMap<>();
+    private boolean isSidebarExpanded = false;
+    private Timeline sidebarTimeline;
+    private final PauseTransition sidebarCollapseDebounce = new PauseTransition(Duration.millis(250));
 
     // Views & Sub-Controllers
     private Node homeView;
@@ -384,8 +388,8 @@ public class MainLayoutController implements Initializable {
             btnNavReaders.setVisible(isLibrarian);
             btnNavReaders.setManaged(isLibrarian);
             if (lblSecReaders != null) {
-                lblSecReaders.setVisible(isLibrarian);
-                lblSecReaders.setManaged(isLibrarian);
+                lblSecReaders.setVisible(isLibrarian && isSidebarExpanded);
+                lblSecReaders.setManaged(isLibrarian && isSidebarExpanded);
             }
 
             btnNavBorrowReturn.setVisible(isLibrarian);
@@ -393,15 +397,15 @@ public class MainLayoutController implements Initializable {
             btnNavTransactions.setVisible(isLibrarian || isReader);
             btnNavTransactions.setManaged(isLibrarian || isReader);
             if (lblSecBorrow != null) {
-                lblSecBorrow.setVisible(isLibrarian || isReader);
-                lblSecBorrow.setManaged(isLibrarian || isReader);
+                lblSecBorrow.setVisible((isLibrarian || isReader) && isSidebarExpanded);
+                lblSecBorrow.setManaged((isLibrarian || isReader) && isSidebarExpanded);
             }
 
             btnNavStats.setVisible(isLibrarian);
             btnNavStats.setManaged(isLibrarian);
             if (lblSecAdmin != null) {
-                lblSecAdmin.setVisible(isLibrarian);
-                lblSecAdmin.setManaged(isLibrarian);
+                lblSecAdmin.setVisible(isLibrarian && isSidebarExpanded);
+                lblSecAdmin.setManaged(isLibrarian && isSidebarExpanded);
             }
         } else {
             // Chế độ chưa đăng nhập (Guest Mode)
@@ -902,41 +906,45 @@ public class MainLayoutController implements Initializable {
     private void setupBraveVerticalSidebar() {
         if (sidebarContainer == null) return;
 
-        Button[] navButtons = {
-                btnNavHome, btnNavBooks, btnNavCategories,
-                btnNavReaders, btnNavBorrowReturn, btnNavTransactions, btnNavStats,
-                btnNavRecycleBin, btnNavSettings, btnHelp
-        };
-        for (Button btn : navButtons) {
-            if (btn != null && btn.getText() != null) {
-                navButtonOriginalTexts.put(btn, btn.getText());
-            }
-        }
+        sidebarContainer.setMinWidth(64);
+        sidebarContainer.setMaxWidth(250);
 
-        // Hover expand/collapse when not pinned
+        sidebarCollapseDebounce.setOnFinished(e -> {
+            if (!isSidebarPinned && isSidebarExpanded) {
+                collapseSidebar();
+            }
+        });
+
+        // Hover expand/collapse when not pinned with debounce
         sidebarContainer.setOnMouseEntered(e -> {
-            if (!isSidebarPinned) {
+            sidebarCollapseDebounce.stop();
+            if (!isSidebarPinned && !isSidebarExpanded) {
                 expandSidebar();
             }
         });
 
         sidebarContainer.setOnMouseExited(e -> {
-            if (!isSidebarPinned) {
-                collapseSidebar();
+            if (!isSidebarPinned && isSidebarExpanded) {
+                sidebarCollapseDebounce.playFromStart();
             }
         });
 
         // Initialize state (unpinned -> collapsed by default)
         if (isSidebarPinned) {
-            expandSidebar();
+            isSidebarExpanded = true;
+            sidebarContainer.setPrefWidth(250);
+            applyExpandedState();
         } else {
-            collapseSidebar();
+            isSidebarExpanded = false;
+            sidebarContainer.setPrefWidth(64);
+            applyCollapsedState();
         }
     }
 
     @FXML
     public void handleTogglePinSidebar() {
         isSidebarPinned = !isSidebarPinned;
+        sidebarCollapseDebounce.stop();
         if (isSidebarPinned) {
             expandSidebar();
             if (btnPinSidebar != null) {
@@ -958,20 +966,45 @@ public class MainLayoutController implements Initializable {
 
     private void collapseSidebar() {
         if (sidebarContainer == null) return;
-        Timeline timeline = new Timeline(
-                new KeyFrame(Duration.millis(140),
-                        new KeyValue(sidebarContainer.prefWidthProperty(), 64),
-                        new KeyValue(sidebarContainer.minWidthProperty(), 64),
-                        new KeyValue(sidebarContainer.maxWidthProperty(), 64)
+        if (!isSidebarExpanded) return;
+        isSidebarExpanded = false;
+
+        if (sidebarTimeline != null) {
+            sidebarTimeline.stop();
+        }
+        sidebarTimeline = new Timeline(
+                new KeyFrame(Duration.millis(160),
+                        new KeyValue(sidebarContainer.prefWidthProperty(), 64, Interpolator.EASE_OUT)
                 )
         );
-        timeline.play();
+        sidebarTimeline.play();
 
-        for (Map.Entry<Button, String> entry : navButtonOriginalTexts.entrySet()) {
-            Button btn = entry.getKey();
-            btn.setText("");
-            btn.setAlignment(Pos.CENTER);
-            btn.setStyle("-fx-padding: 8 0;");
+        applyCollapsedState();
+    }
+
+    private void applyCollapsedState() {
+        if (!sidebarContainer.getStyleClass().contains("sidebar-collapsed")) {
+            sidebarContainer.getStyleClass().add("sidebar-collapsed");
+        }
+
+        Button[] navButtons = {
+                btnNavHome, btnNavBooks, btnNavCategories,
+                btnNavReaders, btnNavBorrowReturn, btnNavTransactions, btnNavStats,
+                btnNavRecycleBin, btnNavSettings, btnHelp
+        };
+        for (Button btn : navButtons) {
+            if (btn != null) {
+                btn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                btn.setAlignment(Pos.CENTER);
+            }
+        }
+
+        if (sidebarHeaderSpacer != null) {
+            sidebarHeaderSpacer.setManaged(false);
+            sidebarHeaderSpacer.setVisible(false);
+        }
+        if (sidebarHeaderBox != null) {
+            sidebarHeaderBox.setAlignment(Pos.CENTER);
         }
 
         Label[] sectionLabels = {lblSecMenu, lblSecBooks, lblSecReaders, lblSecBorrow, lblSecAdmin};
@@ -1001,27 +1034,51 @@ public class MainLayoutController implements Initializable {
 
     private void expandSidebar() {
         if (sidebarContainer == null) return;
-        Timeline timeline = new Timeline(
-                new KeyFrame(Duration.millis(140),
-                        new KeyValue(sidebarContainer.prefWidthProperty(), 250),
-                        new KeyValue(sidebarContainer.minWidthProperty(), 250),
-                        new KeyValue(sidebarContainer.maxWidthProperty(), 250)
+        if (isSidebarExpanded) return;
+        isSidebarExpanded = true;
+
+        if (sidebarTimeline != null) {
+            sidebarTimeline.stop();
+        }
+        sidebarTimeline = new Timeline(
+                new KeyFrame(Duration.millis(160),
+                        new KeyValue(sidebarContainer.prefWidthProperty(), 250, Interpolator.EASE_OUT)
                 )
         );
-        timeline.play();
+        sidebarTimeline.play();
 
-        for (Map.Entry<Button, String> entry : navButtonOriginalTexts.entrySet()) {
-            Button btn = entry.getKey();
-            btn.setText(entry.getValue());
-            btn.setAlignment(Pos.CENTER_LEFT);
-            btn.setStyle("");
+        applyExpandedState();
+    }
+
+    private void applyExpandedState() {
+        sidebarContainer.getStyleClass().remove("sidebar-collapsed");
+
+        Button[] navButtons = {
+                btnNavHome, btnNavBooks, btnNavCategories,
+                btnNavReaders, btnNavBorrowReturn, btnNavTransactions, btnNavStats,
+                btnNavRecycleBin, btnNavSettings, btnHelp
+        };
+        for (Button btn : navButtons) {
+            if (btn != null) {
+                btn.setContentDisplay(ContentDisplay.LEFT);
+                btn.setAlignment(Pos.CENTER_LEFT);
+            }
+        }
+
+        if (sidebarHeaderSpacer != null) {
+            sidebarHeaderSpacer.setManaged(true);
+            sidebarHeaderSpacer.setVisible(true);
+        }
+        if (sidebarHeaderBox != null) {
+            sidebarHeaderBox.setAlignment(Pos.CENTER_LEFT);
         }
 
         Label[] sectionLabels = {lblSecMenu, lblSecBooks, lblSecReaders, lblSecBorrow, lblSecAdmin};
         for (Label lbl : sectionLabels) {
             if (lbl != null) {
-                lbl.setManaged(true);
-                lbl.setVisible(true);
+                boolean show = shouldSectionBeVisible(lbl);
+                lbl.setManaged(show);
+                lbl.setVisible(show);
             }
         }
         if (lblSidebarTitle != null) {
@@ -1036,5 +1093,19 @@ public class MainLayoutController implements Initializable {
             sidebarRoleBox.setManaged(true);
             sidebarRoleBox.setVisible(true);
         }
+    }
+
+    private boolean shouldSectionBeVisible(Label lbl) {
+        User u = authService.getCurrentUser();
+        if (u == null) {
+            return lbl == lblSecMenu || lbl == lblSecBooks;
+        }
+        boolean isLibrarian = authService.isLibrarian();
+        boolean isReader = authService.isReader();
+        if (lbl == lblSecMenu || lbl == lblSecBooks) return true;
+        if (lbl == lblSecReaders) return isLibrarian;
+        if (lbl == lblSecBorrow) return isLibrarian || isReader;
+        if (lbl == lblSecAdmin) return isLibrarian;
+        return true;
     }
 }
