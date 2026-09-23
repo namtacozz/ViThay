@@ -139,6 +139,7 @@ public class BookManagementController implements Initializable {
     private final BorrowTransactionDao borrowTransactionDao = new BorrowTransactionDao();
 
     private final ObservableList<Book> bookMasterList = FXCollections.observableArrayList();
+    private boolean isUpdatingFilterUI = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -155,48 +156,70 @@ public class BookManagementController implements Initializable {
     }
 
     private void setupFilters() {
-        statusFilterCombo.setItems(FXCollections.observableArrayList(
-                "Tất cả", "Available", "Borrowed", "On Hold"
-        ));
-        statusFilterCombo.getSelectionModel().selectFirst();
-        refreshAuthorFilterOptions();
+        isUpdatingFilterUI = true;
+        try {
+            statusFilterCombo.setItems(FXCollections.observableArrayList(
+                    "Tất cả", "Available", "Borrowed", "On Hold"
+            ));
+            statusFilterCombo.getSelectionModel().selectFirst();
+            refreshAuthorFilterOptions();
+        } finally {
+            isUpdatingFilterUI = false;
+        }
     }
 
     private void setupAdvancedFilters() {
-        if (comboAdvStockStatus != null) {
-            comboAdvStockStatus.setItems(FXCollections.observableArrayList(
-                    "Tất cả", "Còn sách (In Stock)", "Hết sách (Out of Stock)"
-            ));
-            comboAdvStockStatus.getSelectionModel().selectFirst();
+        isUpdatingFilterUI = true;
+        try {
+            if (comboAdvStockStatus != null) {
+                comboAdvStockStatus.setItems(FXCollections.observableArrayList(
+                        "Tất cả", "Còn sách (In Stock)", "Hết sách (Out of Stock)"
+                ));
+                comboAdvStockStatus.getSelectionModel().selectFirst();
+            }
+            refreshAdvancedFilterOptions();
+        } finally {
+            isUpdatingFilterUI = false;
         }
-        refreshAdvancedFilterOptions();
+        if (comboAdvShelf != null) {
+            comboAdvShelf.getEditor().textProperty().addListener((obs, oldV, newV) -> {
+                if (!isUpdatingFilterUI) {
+                    applyFilters();
+                }
+            });
+        }
     }
 
     private void refreshAdvancedFilterOptions() {
-        if (comboAdvCategory != null) {
-            ObservableList<String> categories = FXCollections.observableArrayList("Tất cả");
-            for (Category c : categoryService.getAllCategories()) {
-                categories.add(c.getName());
-            }
-            comboAdvCategory.setItems(categories);
-            if (comboAdvCategory.getValue() == null) {
-                comboAdvCategory.getSelectionModel().selectFirst();
-            }
-        }
-
-        if (comboAdvShelf != null) {
-            ObservableList<String> shelves = FXCollections.observableArrayList("Tất cả");
-            java.util.Set<String> uniqueShelves = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-            for (Book b : bookMasterList) {
-                if (b.getShelfLocation() != null && !b.getShelfLocation().trim().isEmpty()) {
-                    uniqueShelves.add(b.getShelfLocation().trim());
+        isUpdatingFilterUI = true;
+        try {
+            if (comboAdvCategory != null) {
+                ObservableList<String> categories = FXCollections.observableArrayList("Tất cả");
+                for (Category c : categoryService.getAllCategories()) {
+                    categories.add(c.getName());
+                }
+                comboAdvCategory.setItems(categories);
+                if (comboAdvCategory.getValue() == null) {
+                    comboAdvCategory.getSelectionModel().selectFirst();
                 }
             }
-            shelves.addAll(uniqueShelves);
-            comboAdvShelf.setItems(shelves);
-            if (comboAdvShelf.getValue() == null) {
-                comboAdvShelf.getSelectionModel().selectFirst();
+
+            if (comboAdvShelf != null) {
+                ObservableList<String> shelves = FXCollections.observableArrayList("Tất cả");
+                java.util.Set<String> uniqueShelves = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+                for (Book b : bookMasterList) {
+                    if (b.getShelfLocation() != null && !b.getShelfLocation().trim().isEmpty()) {
+                        uniqueShelves.add(b.getShelfLocation().trim());
+                    }
+                }
+                shelves.addAll(uniqueShelves);
+                comboAdvShelf.setItems(shelves);
+                if (comboAdvShelf.getValue() == null) {
+                    comboAdvShelf.getSelectionModel().selectFirst();
+                }
             }
+        } finally {
+            isUpdatingFilterUI = false;
         }
     }
 
@@ -261,17 +284,22 @@ public class BookManagementController implements Initializable {
 
     private void refreshAuthorFilterOptions() {
         if (authorFilterCombo == null) return;
-        ObservableList<String> items = FXCollections.observableArrayList("Tất cả");
-        java.util.Set<String> uniqueAuthors = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        for (Book b : bookMasterList) {
-            if (b.getAuthor() != null && !b.getAuthor().trim().isEmpty()) {
-                uniqueAuthors.add(b.getAuthor().trim());
+        isUpdatingFilterUI = true;
+        try {
+            ObservableList<String> items = FXCollections.observableArrayList("Tất cả");
+            java.util.Set<String> uniqueAuthors = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+            for (Book b : bookMasterList) {
+                if (b.getAuthor() != null && !b.getAuthor().trim().isEmpty()) {
+                    uniqueAuthors.add(b.getAuthor().trim());
+                }
             }
-        }
-        items.addAll(uniqueAuthors);
-        authorFilterCombo.setItems(items);
-        if (authorFilterCombo.getValue() == null || !items.contains(authorFilterCombo.getValue())) {
-            authorFilterCombo.getSelectionModel().selectFirst();
+            items.addAll(uniqueAuthors);
+            authorFilterCombo.setItems(items);
+            if (authorFilterCombo.getValue() == null || !items.contains(authorFilterCombo.getValue())) {
+                authorFilterCombo.getSelectionModel().selectFirst();
+            }
+        } finally {
+            isUpdatingFilterUI = false;
         }
     }
 
@@ -376,9 +404,38 @@ public class BookManagementController implements Initializable {
         applySecurityPermissions();
         List<Book> list = bookService.getAllBooks();
         bookMasterList.setAll(list);
-        refreshAuthorFilterOptions();
-        refreshAdvancedFilterOptions();
+        isUpdatingFilterUI = true;
+        try {
+            refreshAuthorFilterOptions();
+            refreshAdvancedFilterOptions();
+        } finally {
+            isUpdatingFilterUI = false;
+        }
         applyFilters();
+    }
+
+    @FXML
+    public void handleRefreshAllBooks() {
+        isUpdatingFilterUI = true;
+        try {
+            this.drilldownAuthor = null;
+            this.drilldownShelf = null;
+            this.currentCategoryFilter = "Tất cả";
+            if (authorFilterCombo != null) authorFilterCombo.getSelectionModel().selectFirst();
+            if (statusFilterCombo != null) statusFilterCombo.getSelectionModel().selectFirst();
+            if (comboAdvCategory != null) comboAdvCategory.getSelectionModel().selectFirst();
+            if (comboAdvShelf != null) comboAdvShelf.setValue("Tất cả");
+            if (txtAdvMinPrice != null) txtAdvMinPrice.clear();
+            if (txtAdvMaxPrice != null) txtAdvMaxPrice.clear();
+            if (comboAdvStockStatus != null) comboAdvStockStatus.getSelectionModel().selectFirst();
+            if (txtSearchBook != null) txtSearchBook.clear();
+        } finally {
+            isUpdatingFilterUI = false;
+        }
+        if (isCirculationMode) {
+            exitCirculationMode();
+        }
+        loadBooks();
     }
 
     public void applySecurityPermissions() {
@@ -406,12 +463,14 @@ public class BookManagementController implements Initializable {
 
     @FXML
     public void handleAuthorFilter() {
+        if (isUpdatingFilterUI) return;
         this.drilldownAuthor = null;
         applyFilters();
     }
 
     @FXML
     public void handleStatusFilter() {
+        if (isUpdatingFilterUI) return;
         applyFilters();
     }
 
@@ -436,18 +495,28 @@ public class BookManagementController implements Initializable {
 
     @FXML
     public void handleAdvancedFilterChanged() {
+        if (isUpdatingFilterUI) return;
+        if (comboAdvCategory != null && comboAdvCategory.getValue() != null) {
+            this.currentCategoryFilter = comboAdvCategory.getValue();
+        }
         applyFilters();
     }
 
     @FXML
     public void handleResetAdvancedFilter() {
-        if (comboAdvCategory != null) comboAdvCategory.getSelectionModel().selectFirst();
-        if (comboAdvShelf != null) comboAdvShelf.setValue("Tất cả");
-        if (txtAdvMinPrice != null) txtAdvMinPrice.clear();
-        if (txtAdvMaxPrice != null) txtAdvMaxPrice.clear();
-        if (comboAdvStockStatus != null) comboAdvStockStatus.getSelectionModel().selectFirst();
-        this.drilldownAuthor = null;
-        this.drilldownShelf = null;
+        isUpdatingFilterUI = true;
+        try {
+            if (comboAdvCategory != null) comboAdvCategory.getSelectionModel().selectFirst();
+            if (comboAdvShelf != null) comboAdvShelf.setValue("Tất cả");
+            if (txtAdvMinPrice != null) txtAdvMinPrice.clear();
+            if (txtAdvMaxPrice != null) txtAdvMaxPrice.clear();
+            if (comboAdvStockStatus != null) comboAdvStockStatus.getSelectionModel().selectFirst();
+            this.currentCategoryFilter = "Tất cả";
+            this.drilldownAuthor = null;
+            this.drilldownShelf = null;
+        } finally {
+            isUpdatingFilterUI = false;
+        }
         applyFilters();
     }
 
@@ -464,8 +533,17 @@ public class BookManagementController implements Initializable {
         } else {
             this.currentCategoryFilter = categoryName.trim();
         }
-        if (comboAdvCategory != null && comboAdvCategory.getItems().contains(this.currentCategoryFilter)) {
-            comboAdvCategory.setValue(this.currentCategoryFilter);
+        isUpdatingFilterUI = true;
+        try {
+            if (comboAdvCategory != null) {
+                if (comboAdvCategory.getItems().contains(this.currentCategoryFilter)) {
+                    comboAdvCategory.setValue(this.currentCategoryFilter);
+                } else {
+                    comboAdvCategory.setValue("Tất cả");
+                }
+            }
+        } finally {
+            isUpdatingFilterUI = false;
         }
         if (isCirculationMode) {
             exitCirculationMode();
@@ -504,27 +582,32 @@ public class BookManagementController implements Initializable {
                     ? currentCategoryFilter
                     : (advCategory != null && !"Tất cả".equalsIgnoreCase(advCategory) ? advCategory : null);
 
-            if (activeCategory != null) {
+            if (activeCategory != null && !"Tất cả".equalsIgnoreCase(activeCategory)) {
                 String cat = b.getCategory() != null ? b.getCategory() : "";
-                matchesCategory = VietnameseUtils.matches(cat, activeCategory) ||
+                matchesCategory = cat.equalsIgnoreCase(activeCategory) ||
+                        VietnameseUtils.matches(cat, activeCategory) ||
                         VietnameseUtils.matches(activeCategory, cat) ||
                         (activeCategory.toLowerCase().contains("toán") && cat.toLowerCase().contains("toán"));
             }
 
             // 2. Author Filter (from combo or drilldown)
             boolean matchesAuthor = true;
-            if (drilldownAuthor != null && !drilldownAuthor.isBlank()) {
-                matchesAuthor = b.getAuthor() != null && VietnameseUtils.matches(b.getAuthor(), drilldownAuthor);
-            } else if (selectedAuthor != null && !"Tất cả".equalsIgnoreCase(selectedAuthor)) {
-                matchesAuthor = b.getAuthor() != null && VietnameseUtils.matches(b.getAuthor(), selectedAuthor);
+            String authorToFilter = (drilldownAuthor != null && !drilldownAuthor.isBlank())
+                    ? drilldownAuthor
+                    : (selectedAuthor != null && !"Tất cả".equalsIgnoreCase(selectedAuthor) ? selectedAuthor : null);
+
+            if (authorToFilter != null) {
+                matchesAuthor = b.getAuthor() != null && b.getAuthor().trim().equalsIgnoreCase(authorToFilter.trim());
             }
 
             // 3. Shelf Filter (from combo or drilldown)
             boolean matchesShelf = true;
-            if (drilldownShelf != null && !drilldownShelf.isBlank()) {
-                matchesShelf = b.getShelfLocation() != null && VietnameseUtils.matches(b.getShelfLocation(), drilldownShelf);
-            } else if (advShelf != null && !"Tất cả".equalsIgnoreCase(advShelf) && !advShelf.isBlank()) {
-                matchesShelf = b.getShelfLocation() != null && VietnameseUtils.matches(b.getShelfLocation(), advShelf);
+            String shelfToFilter = (drilldownShelf != null && !drilldownShelf.isBlank())
+                    ? drilldownShelf
+                    : (advShelf != null && !"Tất cả".equalsIgnoreCase(advShelf) && !advShelf.isBlank() ? advShelf : null);
+
+            if (shelfToFilter != null) {
+                matchesShelf = b.getShelfLocation() != null && VietnameseUtils.matches(b.getShelfLocation(), shelfToFilter);
             }
 
             // 4. Status Filter
@@ -1035,8 +1118,13 @@ public class BookManagementController implements Initializable {
         if (shelf == null || shelf.trim().isEmpty()) return;
         this.drilldownShelf = shelf.trim();
         this.drilldownAuthor = null;
-        if (comboAdvShelf != null) {
-            comboAdvShelf.setValue(this.drilldownShelf);
+        isUpdatingFilterUI = true;
+        try {
+            if (comboAdvShelf != null) {
+                comboAdvShelf.setValue(this.drilldownShelf);
+            }
+        } finally {
+            isUpdatingFilterUI = false;
         }
         if (isCirculationMode) {
             exitCirculationMode();
@@ -1048,8 +1136,13 @@ public class BookManagementController implements Initializable {
         if (author == null || author.trim().isEmpty()) return;
         this.drilldownAuthor = author.trim();
         this.drilldownShelf = null;
-        if (authorFilterCombo != null && authorFilterCombo.getItems().contains(this.drilldownAuthor)) {
-            authorFilterCombo.setValue(this.drilldownAuthor);
+        isUpdatingFilterUI = true;
+        try {
+            if (authorFilterCombo != null && authorFilterCombo.getItems().contains(this.drilldownAuthor)) {
+                authorFilterCombo.setValue(this.drilldownAuthor);
+            }
+        } finally {
+            isUpdatingFilterUI = false;
         }
         if (isCirculationMode) {
             exitCirculationMode();
@@ -1116,17 +1209,22 @@ public class BookManagementController implements Initializable {
     }
 
     public void resetAllDrilldownAndFilters() {
-        this.drilldownAuthor = null;
-        this.drilldownShelf = null;
-        this.currentCategoryFilter = "Tất cả";
-        if (authorFilterCombo != null) authorFilterCombo.getSelectionModel().selectFirst();
-        if (statusFilterCombo != null) statusFilterCombo.getSelectionModel().selectFirst();
-        if (comboAdvCategory != null) comboAdvCategory.getSelectionModel().selectFirst();
-        if (comboAdvShelf != null) comboAdvShelf.setValue("Tất cả");
-        if (txtAdvMinPrice != null) txtAdvMinPrice.clear();
-        if (txtAdvMaxPrice != null) txtAdvMaxPrice.clear();
-        if (comboAdvStockStatus != null) comboAdvStockStatus.getSelectionModel().selectFirst();
-        if (txtSearchBook != null) txtSearchBook.clear();
+        isUpdatingFilterUI = true;
+        try {
+            this.drilldownAuthor = null;
+            this.drilldownShelf = null;
+            this.currentCategoryFilter = "Tất cả";
+            if (authorFilterCombo != null) authorFilterCombo.getSelectionModel().selectFirst();
+            if (statusFilterCombo != null) statusFilterCombo.getSelectionModel().selectFirst();
+            if (comboAdvCategory != null) comboAdvCategory.getSelectionModel().selectFirst();
+            if (comboAdvShelf != null) comboAdvShelf.setValue("Tất cả");
+            if (txtAdvMinPrice != null) txtAdvMinPrice.clear();
+            if (txtAdvMaxPrice != null) txtAdvMaxPrice.clear();
+            if (comboAdvStockStatus != null) comboAdvStockStatus.getSelectionModel().selectFirst();
+            if (txtSearchBook != null) txtSearchBook.clear();
+        } finally {
+            isUpdatingFilterUI = false;
+        }
         if (isCirculationMode) {
             exitCirculationMode();
         }

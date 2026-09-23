@@ -25,7 +25,7 @@
             <Region HBox.hgrow="ALWAYS"/>
             <Button fx:id="btnExportBooks" text="Xuất File CSV" onAction="#handleExportCsv" styleClass="btn-secondary"/>
             <Button fx:id="btnAddBook" text="+ Thêm Sách Mới" onAction="#handleOpenAddDialog" styleClass="btn-primary"/>
-            <Button text="Làm Mới" onAction="#loadBooks" styleClass="btn-secondary"/>
+            <Button text="Làm Mới" onAction="#handleRefreshAllBooks" styleClass="btn-secondary"/>
         </HBox>
 
         <!-- Breadcrumb Navigation (One-Window Drilldown) -->
