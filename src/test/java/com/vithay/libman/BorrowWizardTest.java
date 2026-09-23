@@ -39,7 +39,15 @@ public class BorrowWizardTest {
 
         Reader blockedReader = new Reader("DG003", "Le Van C", "c@test.com", "0903", "125", "Da Nang",
                 LocalDate.now().minusYears(30), LocalDate.now().minusDays(10), LocalDate.now().plusMonths(6), "KHOA");
-        assertFalse(readerService.isCardValid(blockedReader), "Blocked reader must be invalid");
+        assertFalse(readerService.isCardValid(blockedReader), "Blocked reader (KHOA) must be invalid");
+
+        Reader diacriticBlockedReader1 = new Reader("DG004", "Pham Van D", "d@test.com", "0904", "126", "Da Nang",
+                LocalDate.now().minusYears(28), LocalDate.now().minusDays(10), LocalDate.now().plusMonths(6), "Khóa");
+        assertFalse(readerService.isCardValid(diacriticBlockedReader1), "Reader with status 'Khóa' must be invalid");
+
+        Reader diacriticBlockedReader2 = new Reader("DG005", "Vu Van E", "e@test.com", "0905", "127", "Da Nang",
+                LocalDate.now().minusYears(22), LocalDate.now().minusDays(10), LocalDate.now().plusMonths(6), "Bị khóa");
+        assertFalse(readerService.isCardValid(diacriticBlockedReader2), "Reader with status 'Bị khóa' must be invalid");
     }
 
     @Test

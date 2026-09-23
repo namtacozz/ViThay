@@ -1637,8 +1637,22 @@ public class BorrowReturnController implements Initializable {
             } catch (Exception e) {
                 logger.warn("Could not show receipt dialog: {}", e.getMessage());
             }
-            resetWizard();
+
+            // Remove only successfully checked-out books from wizard selection
+            for (BorrowTransaction tx : createdTransactions) {
+                wizardSelectedBooks.removeIf(b -> b.getId().equals(tx.getBookId()));
+            }
+
             loadAllData();
+
+            // If all selected books were checked out successfully, reset wizard to step 1
+            if (wizardSelectedBooks.isEmpty()) {
+                resetWizard();
+            } else {
+                // Some books failed; return to step 2 so user can review/adjust remaining items
+                updateWizardStep2Ui();
+                goToWizardStep(2);
+            }
             return true;
         }
         return false;

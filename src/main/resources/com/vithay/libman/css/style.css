@@ -1400,3 +1400,60 @@
     -fx-text-fill: #1DB954;
 }
 
+.wizard-card-container {
+    -fx-background-color: #181818;
+    -fx-background-radius: 8px;
+    -fx-padding: 16px;
+}
+
+.wizard-info-callout {
+    -fx-background-color: #242424;
+    -fx-background-radius: 6px;
+    -fx-padding: 12px 16px;
+}
+
+.wizard-slip-preview {
+    -fx-font-family: monospace;
+    -fx-font-size: 12px;
+    -fx-text-fill: #FFFFFF;
+    -fx-control-inner-background: #121212;
+}
+
+/* Light Theme overrides for Wizard */
+.theme-pink-light .wizard-stepper-bar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #F1D4DB;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+}
+.theme-pink-light .wizard-step-node {
+    -fx-background-color: #F8E7EB;
+    -fx-text-fill: #6B7280;
+}
+.theme-pink-light .wizard-step-active {
+    -fx-background-color: #E11D48;
+    -fx-text-fill: #FFFFFF;
+}
+.theme-pink-light .wizard-step-done {
+    -fx-background-color: #D1FAE5;
+    -fx-text-fill: #065F46;
+}
+.theme-pink-light .wizard-card-container {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #F1D4DB;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+}
+.theme-pink-light .wizard-info-callout {
+    -fx-background-color: #FFF1F2;
+    -fx-border-color: #FECDD3;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+}
+.theme-pink-light .wizard-slip-preview {
+    -fx-text-fill: #1E1B1D;
+    -fx-control-inner-background: #FFFFFF;
+    -fx-border-color: #F1D4DB;
+    -fx-border-width: 1px;
+}
+

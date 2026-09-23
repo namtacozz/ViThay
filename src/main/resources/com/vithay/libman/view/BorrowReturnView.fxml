@@ -135,7 +135,7 @@
                                 <Button text="Làm Mới" onAction="#handleRefreshWizardReader" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
                             </HBox>
 
-                            <VBox spacing="12" style="-fx-background-color: #181818; -fx-background-radius: 8px; -fx-padding: 16;">
+                            <VBox spacing="12" styleClass="wizard-card-container">
                                 <GridPane hgap="20" vgap="10">
                                     <columnConstraints>
                                         <ColumnConstraints minWidth="140" prefWidth="160"/>
@@ -218,7 +218,7 @@
                                 <Label text="Chọn hình thức mượn (đọc tại chỗ hoặc mang về) và thời hạn trả theo quy chế thư viện." styleClass="text-muted" style="-fx-font-size: 12px;"/>
                             </VBox>
 
-                            <GridPane hgap="24" vgap="16" style="-fx-background-color: #181818; -fx-background-radius: 8px; -fx-padding: 16;">
+                            <GridPane hgap="24" vgap="16" styleClass="wizard-card-container">
                                 <columnConstraints>
                                     <ColumnConstraints minWidth="180" prefWidth="200"/>
                                     <ColumnConstraints hgrow="ALWAYS" minWidth="300"/>
@@ -247,7 +247,7 @@
                                 <TextField fx:id="txtWizardNotes" promptText="Ghi chú lập phiếu (tùy chọn)..." styleClass="form-control" prefWidth="350" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
                             </GridPane>
 
-                            <VBox spacing="6" style="-fx-background-color: #242424; -fx-background-radius: 6px; -fx-padding: 12 16;">
+                            <VBox spacing="6" styleClass="wizard-info-callout">
                                 <Label text="📌 Quy Định Lưu Hành Áp Dụng (SRS Mục 6.1):" style="-fx-font-weight: bold; -fx-text-fill: #FFFFFF; -fx-font-size: 12px;"/>
                                 <Label text="• Mượn mang về nhà: Tối đa 14 ngày, không quá 5 cuốn cùng lúc." styleClass="text-muted" style="-fx-font-size: 11px;"/>
                                 <Label text="• Mượn tại chỗ: Phải hoàn trả trước giờ đóng cửa cùng ngày." styleClass="text-muted" style="-fx-font-size: 11px;"/>
@@ -267,7 +267,7 @@
                             </HBox>
 
                             <TextArea fx:id="txtWizardSlipPreview" VBox.vgrow="ALWAYS" editable="false" prefHeight="320"
-                                      style="-fx-font-family: monospace; -fx-font-size: 12px; -fx-text-fill: #FFFFFF; -fx-control-inner-background: #121212;"/>
+                                      styleClass="wizard-slip-preview"/>
                         </VBox>
                     </StackPane>
 

@@ -16,6 +16,11 @@ public class CssThemeSanityTest {
             assertTrue(css.contains(".book-grid-card"), "Must contain book-grid-card");
             assertTrue(css.contains(".desk-canvas-zone"), "Must contain desk-canvas-zone");
             assertTrue(css.contains(".wizard-stepper-bar"), "Must contain wizard-stepper-bar");
+            assertTrue(css.contains(".wizard-card-container"), "Must contain wizard-card-container");
+            assertTrue(css.contains(".wizard-info-callout"), "Must contain wizard-info-callout");
+            assertTrue(css.contains(".wizard-slip-preview"), "Must contain wizard-slip-preview");
+            assertTrue(css.contains(".theme-pink-light .wizard-stepper-bar"), "Must contain light theme wizard stepper bar");
+            assertTrue(css.contains(".theme-pink-light .wizard-card-container"), "Must contain light theme wizard card container");
         }
     }
 }

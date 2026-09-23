@@ -78,7 +78,8 @@ public class ReaderService {
             return false;
         }
         String s = status.trim().toUpperCase();
-        if (s.contains("BLOCK") || s.contains("KHOA") || s.contains("CHO") || s.contains("CHỜ") || s.contains("EXPIRE") || s.contains("HET")) {
+        if (s.contains("BLOCK") || s.contains("KHOA") || s.contains("KHÓA") || s.contains("BỊ KHÓA") ||
+                s.contains("CHO") || s.contains("CHỜ") || s.contains("EXPIRE") || s.contains("HET") || s.contains("HẾT")) {
             return false;
         }
         LocalDate expiry = reader.getNgayHetHan();
