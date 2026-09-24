@@ -405,21 +405,28 @@
 
                     <Separator style="-fx-background-color: #282828; -fx-padding: 4 0;"/>
 
-                    <Label text="ĐỔI MẬT KHẨU (Bỏ trống nếu không đổi)" style="-fx-text-fill: #B3B3B3; -fx-font-weight: bold; -fx-font-size: 11px;"/>
-                    <GridPane hgap="10" vgap="10">
-                        <columnConstraints>
-                            <ColumnConstraints minWidth="110"/>
-                            <ColumnConstraints hgrow="ALWAYS" minWidth="180"/>
-                        </columnConstraints>
-                        <Label text="Mật Khẩu Cũ:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                        <PasswordField fx:id="txtProfileOldPass" promptText="Mật khẩu hiện tại" styleClass="form-control" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="BẢO MẬT &amp; MẬT KHẨU" style="-fx-text-fill: #B3B3B3; -fx-font-weight: bold; -fx-font-size: 11px;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="btnToggleChangePassword" id="btnToggleChangePassword" text="🔑 Đổi mật khẩu ▾" onAction="#handleToggleChangePassword" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 3 8;"/>
+                    </HBox>
 
-                        <Label text="Mật Khẩu Mới:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <PasswordField fx:id="txtProfileNewPass" promptText="Mật khẩu mới" styleClass="form-control" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    <VBox fx:id="passwordChangeBox" id="passwordChangeBox" visible="false" managed="false" spacing="8" style="-fx-background-color: #1a1a1a; -fx-padding: 10; -fx-background-radius: 6px;">
+                        <GridPane hgap="10" vgap="10">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="110"/>
+                                <ColumnConstraints hgrow="ALWAYS" minWidth="180"/>
+                            </columnConstraints>
+                            <Label text="Mật Khẩu Cũ:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <PasswordField fx:id="txtProfileOldPass" promptText="Mật khẩu hiện tại" styleClass="form-control" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-                        <Label text="Xác Nhận:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                        <PasswordField fx:id="txtProfileConfirmPass" promptText="Nhập lại mật khẩu mới" styleClass="form-control" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                    </GridPane>
+                            <Label text="Mật Khẩu Mới:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <PasswordField fx:id="txtProfileNewPass" promptText="Mật khẩu mới" styleClass="form-control" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Xác Nhận:" styleClass="form-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <PasswordField fx:id="txtProfileConfirmPass" promptText="Nhập lại mật khẩu mới" styleClass="form-control" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        </GridPane>
+                    </VBox>
                 </VBox>
             </ScrollPane>
 
@@ -431,6 +438,90 @@
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button text="Đăng Xuất" onAction="#handleExecuteLogout" styleClass="btn-danger"/>
                 <Button text="Đóng" onAction="#closeAuthPopup" styleClass="btn-secondary"/>
+            </HBox>
+        </VBox>
+
+        <!-- CARD 3: IN-APP SRS HELP MODAL (PROFESSIONAL CARDS & TYPOGRAPHY) -->
+        <VBox fx:id="helpModalBox" id="helpModalBox" maxWidth="700" maxHeight="640" styleClass="auth-modal" spacing="16" visible="false" managed="false">
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT">
+                <VBox spacing="2">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="Cẩm Nang Vận Hành Hệ Thống (SRS)" styleClass="title-large" style="-fx-font-size: 17px;"/>
+                        <Label text="Phiên bản 1.3" styleClass="badge-available" style="-fx-font-size: 10px;"/>
+                    </HBox>
+                    <Label text="Quy chuẩn nghiệp vụ thư viện &amp; Phân quyền người dùng LibMan" styleClass="text-muted"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="✕" onAction="#closeAuthPopup" styleClass="btn-secondary" style="-fx-padding: 4 10; -fx-background-radius: 50%;"/>
+            </HBox>
+
+            <!-- Scrollable Guide Content in Modern Cards -->
+            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" maxHeight="500">
+                <VBox spacing="14" style="-fx-padding: 0 4 0 0;">
+                    <!-- Section 1: Phân Quyền RBAC -->
+                    <VBox spacing="8" style="-fx-background-color: #1e1e1e; -fx-padding: 14; -fx-background-radius: 8px; -fx-border-color: #2a2a2a; -fx-border-radius: 8px;">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label text="1. PHÂN QUYỀN NGƯỜI DÙNG (RBAC - SRS Mục 6.3)" style="-fx-text-fill: #1DB954; -fx-font-weight: bold; -fx-font-size: 13px;"/>
+                        </HBox>
+                        <VBox spacing="6" style="-fx-padding: 0 0 0 8;">
+                            <HBox spacing="6">
+                                <Label text="•" style="-fx-text-fill: #EF4444; -fx-font-weight: bold;"/>
+                                <Label text="Giám Đốc (Quản Trị):" style="-fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
+                                <Label text="Toàn quyền cấu hình quy chế thư viện, biểu phí phạt, phân quyền tài khoản và dọn thùng rác." styleClass="text-muted" wrapText="true"/>
+                            </HBox>
+                            <HBox spacing="6">
+                                <Label text="•" style="-fx-text-fill: #3B82F6; -fx-font-weight: bold;"/>
+                                <Label text="Thủ Thư:" style="-fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
+                                <Label text="Biên mục và quản lý vị trí kệ sách, lập và gia hạn thẻ độc giả, thực hiện lưu hành mượn-trả, xuất báo cáo CSV và in phiếu." styleClass="text-muted" wrapText="true"/>
+                            </HBox>
+                            <HBox spacing="6">
+                                <Label text="•" style="-fx-text-fill: #10B981; -fx-font-weight: bold;"/>
+                                <Label text="Độc Giả:" style="-fx-font-weight: bold; -fx-text-fill: #FFFFFF;"/>
+                                <Label text="Tra cứu danh mục sách, lọc theo thể loại/vị trí kệ, xem lịch sử phiếu mượn và tình trạng sẵn sàng của tài liệu." styleClass="text-muted" wrapText="true"/>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+
+                    <!-- Section 2: Quản Lý Sách & Biên Mục -->
+                    <VBox spacing="8" style="-fx-background-color: #1e1e1e; -fx-padding: 14; -fx-background-radius: 8px; -fx-border-color: #2a2a2a; -fx-border-radius: 8px;">
+                        <Label text="2. QUẢN LÝ KHO SÁCH &amp; BIÊN MỤC (SRS Mục 5.3)" style="-fx-text-fill: #1DB954; -fx-font-weight: bold; -fx-font-size: 13px;"/>
+                        <VBox spacing="4" style="-fx-padding: 0 0 0 8;">
+                            <Label text="• Thêm &amp; Biên mục: Ghi nhận mã sách, tên sách, tác giả, thể loại, đơn giá, năm XB và vị trí kệ sách (Khu / Kệ)." styleClass="text-muted" wrapText="true"/>
+                            <Label text="• Chế độ hiển thị kép: Chuyển đổi linh hoạt giữa Dạng Bảng (Table View) và Dạng Lưới Card (Grid View)." styleClass="text-muted" wrapText="true"/>
+                            <Label text="• Xem nhanh &amp; Toàn màn hình: Click 1 lần để xem trước tại thanh Inspector; Click đúp để mở chế độ toàn màn hình chi tiết." styleClass="text-muted" wrapText="true"/>
+                            <Label text="• Xuất dữ liệu: Nhấn 'Xuất File CSV' để trích xuất danh sách phục vụ kiểm kê kho định kỳ." styleClass="text-muted" wrapText="true"/>
+                            <Label text="• An toàn xóa: Sách bị xóa sẽ đưa vào Thùng Rác, cho phép Khôi phục hoặc Hủy vĩnh viễn an toàn." styleClass="text-muted" wrapText="true"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- Section 3: Quản Lý Độc Giả -->
+                    <VBox spacing="8" style="-fx-background-color: #1e1e1e; -fx-padding: 14; -fx-background-radius: 8px; -fx-border-color: #2a2a2a; -fx-border-radius: 8px;">
+                        <Label text="3. QUẢN LÝ ĐỘC GIẢ &amp; THẺ THƯ VIỆN (SRS Mục 5.4)" style="-fx-text-fill: #1DB954; -fx-font-weight: bold; -fx-font-size: 13px;"/>
+                        <VBox spacing="4" style="-fx-padding: 0 0 0 8;">
+                            <Label text="• Hồ sơ chuẩn hóa: Họ tên, Ngày sinh, CCCD (12 số chuẩn quốc gia), Số điện thoại, Email, Địa chỉ." styleClass="text-muted" wrapText="true"/>
+                            <Label text="• Đăng ký online: Độc giả đăng ký trực tuyến sẽ ở trạng thái 'Chờ Cấp Thẻ' và được kích hoạt tại quầy." styleClass="text-muted" wrapText="true"/>
+                            <Label text="• Tự động quét quá hạn: Hệ thống tự động phát hiện và chuyển trạng thái các thẻ thư viện quá hạn hiệu lực." styleClass="text-muted" wrapText="true"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- Section 4: Mượn - Trả & Biểu Phí Phạt -->
+                    <VBox spacing="8" style="-fx-background-color: #1e1e1e; -fx-padding: 14; -fx-background-radius: 8px; -fx-border-color: #2a2a2a; -fx-border-radius: 8px;">
+                        <Label text="4. LƯU HÀNH MƯỢN - TRẢ &amp; BIỂU PHÍ PHẠT (SRS Mục 1 &amp; 5.5)" style="-fx-text-fill: #1DB954; -fx-font-weight: bold; -fx-font-size: 13px;"/>
+                        <VBox spacing="4" style="-fx-padding: 0 0 0 8;">
+                            <Label text="• Hai hình thức mượn: 'Mượn đọc tại chỗ' (trong ngày) và 'Mang về nhà' (tối đa 14 ngày, có thể tùy biến)." styleClass="text-muted" wrapText="true"/>
+                            <Label text="• Hạn mức: Mỗi độc giả mượn tối đa 5 cuốn cùng lúc. Độc giả bị khóa hoặc thẻ hết hạn không thể mượn sách." styleClass="text-muted" wrapText="true"/>
+                            <Label text="• Phạt quá hạn: 2.000 VNĐ / ngày quá hạn / cuốn sách." styleClass="text-muted" wrapText="true"/>
+                            <Label text="• Bồi hoàn mất/hỏng: 200% đơn giá sách + 20.000 VNĐ lệ phí xử lý kỹ thuật." styleClass="text-muted" wrapText="true"/>
+                            <Label text="• In phiếu mượn: Xuất phiếu mượn chuẩn chính thức để ký xác nhận giữa Thủ Thư và Độc Giả." styleClass="text-muted" wrapText="true"/>
+                        </VBox>
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+
+            <!-- Footer Action -->
+            <HBox alignment="CENTER_RIGHT" spacing="12">
+                <Button text="Đã Hiểu &amp; Đóng" onAction="#closeAuthPopup" styleClass="btn-primary" style="-fx-padding: 8 20;"/>
             </HBox>
         </VBox>
     </StackPane>

@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -20,6 +21,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import com.vithay.libman.model.User;
+import com.vithay.libman.service.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,9 +77,28 @@ public class HomeController implements Initializable {
     }
 
     public void refreshData() {
+        updateGreeting();
         loadStats();
         loadFeaturedBooks();
         loadTransactions();
+    }
+
+    public void updateGreeting() {
+        if (lblGreeting == null) return;
+        User u = AuthService.getInstance().getCurrentUser();
+        if (u != null && u.getFullName() != null && !u.getFullName().trim().isEmpty()) {
+            lblGreeting.setText("Xin chào, " + u.getFullName().trim() + "!");
+        } else {
+            lblGreeting.setText("Xin chào!");
+        }
+    }
+
+    public Label getLblGreeting() {
+        return lblGreeting;
+    }
+
+    public HBox getFeaturedBooksContainer() {
+        return featuredBooksContainer;
     }
 
     private void loadStats() {
@@ -90,9 +112,9 @@ public class HomeController implements Initializable {
     private void loadFeaturedBooks() {
         featuredBooksContainer.getChildren().clear();
         List<Book> books = bookService.getAllBooks();
-
-        for (Book book : books) {
-            VBox card = createBookCard(book);
+        int limit = Math.min(15, books.size());
+        for (int i = 0; i < limit; i++) {
+            VBox card = createBookCard(books.get(i));
             featuredBooksContainer.getChildren().add(card);
         }
     }
@@ -106,6 +128,8 @@ public class HomeController implements Initializable {
         card.setMaxWidth(180);
         card.setPadding(new Insets(12));
         card.setAlignment(Pos.TOP_LEFT);
+        card.setCache(true);
+        card.setCacheHint(CacheHint.SPEED);
 
         // Book Cover Image
         ImageView imageView = new ImageView();

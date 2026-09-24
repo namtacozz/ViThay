@@ -78,6 +78,11 @@ public class MainLayoutController implements Initializable {
     @FXML private PasswordField txtProfileNewPass;
     @FXML private PasswordField txtProfileConfirmPass;
     @FXML private Label lblProfileMsg;
+    @FXML private VBox passwordChangeBox;
+    @FXML private Button btnToggleChangePassword;
+
+    // In-window SRS Help Modal
+    @FXML private VBox helpModalBox;
 
     // Navigation Buttons
     @FXML private Button btnNavHome;
@@ -445,6 +450,9 @@ public class MainLayoutController implements Initializable {
                 lblSecAdmin.setManaged(false);
             }
         }
+        if (homeController != null) {
+            homeController.updateGreeting();
+        }
     }
 
     private void setActiveNavButton(Button activeButton) {
@@ -649,7 +657,47 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     public void handleHelpClick() {
-        HelpDialog.showHelp();
+        showHelpPopup();
+    }
+
+    public void showHelpPopup() {
+        hideSearchDropdown();
+        authModalBox.setVisible(false);
+        authModalBox.setManaged(false);
+        profileModalBox.setVisible(false);
+        profileModalBox.setManaged(false);
+
+        if (helpModalBox != null) {
+            helpModalBox.setVisible(true);
+            helpModalBox.setManaged(true);
+        }
+
+        authOverlayPane.setVisible(true);
+        authOverlayPane.setManaged(true);
+        mainContainer.setEffect(new GaussianBlur(14));
+    }
+
+    @FXML
+    public void handleToggleChangePassword() {
+        if (passwordChangeBox == null) return;
+        boolean isVis = !passwordChangeBox.isVisible();
+        passwordChangeBox.setVisible(isVis);
+        passwordChangeBox.setManaged(isVis);
+        if (btnToggleChangePassword != null) {
+            btnToggleChangePassword.setText(isVis ? "🔑 Đổi mật khẩu ▴" : "🔑 Đổi mật khẩu ▾");
+        }
+    }
+
+    public VBox getPasswordChangeBox() {
+        return passwordChangeBox;
+    }
+
+    public Button getBtnToggleChangePassword() {
+        return btnToggleChangePassword;
+    }
+
+    public VBox getHelpModalBox() {
+        return helpModalBox;
     }
 
     // MODAL POPUP (LOGIN, REGISTER & PROFILE SETTINGS)
@@ -668,6 +716,18 @@ public class MainLayoutController implements Initializable {
         if (u == null) {
             openAuthPopup();
             return;
+        }
+
+        if (helpModalBox != null) {
+            helpModalBox.setVisible(false);
+            helpModalBox.setManaged(false);
+        }
+        if (passwordChangeBox != null) {
+            passwordChangeBox.setVisible(false);
+            passwordChangeBox.setManaged(false);
+        }
+        if (btnToggleChangePassword != null) {
+            btnToggleChangePassword.setText("🔑 Đổi mật khẩu ▾");
         }
 
         authModalBox.setVisible(false);
@@ -693,6 +753,10 @@ public class MainLayoutController implements Initializable {
 
     public void openAuthPopup() {
         hideSearchDropdown();
+        if (helpModalBox != null) {
+            helpModalBox.setVisible(false);
+            helpModalBox.setManaged(false);
+        }
         profileModalBox.setVisible(false);
         profileModalBox.setManaged(false);
         authModalBox.setVisible(true);
@@ -708,6 +772,20 @@ public class MainLayoutController implements Initializable {
         authOverlayPane.setVisible(false);
         authOverlayPane.setManaged(false);
         mainContainer.setEffect(null);
+        if (helpModalBox != null) {
+            helpModalBox.setVisible(false);
+            helpModalBox.setManaged(false);
+        }
+        if (passwordChangeBox != null) {
+            passwordChangeBox.setVisible(false);
+            passwordChangeBox.setManaged(false);
+            if (btnToggleChangePassword != null) {
+                btnToggleChangePassword.setText("🔑 Đổi mật khẩu ▾");
+            }
+        }
+        lblLoginError.setText("");
+        lblRegError.setText("");
+        lblProfileMsg.setText("");
     }
 
     @FXML

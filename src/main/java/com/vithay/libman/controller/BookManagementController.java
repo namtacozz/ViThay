@@ -430,7 +430,7 @@ public class BookManagementController implements Initializable {
             row.setOnMouseClicked(event -> {
                 if (!row.isEmpty()) {
                     Book clickedBook = row.getItem();
-                    if (event.getClickCount() == 2 || (currentSelectedBook != null && java.util.Objects.equals(currentSelectedBook.getId(), clickedBook.getId()) && !isFullDetailMode)) {
+                    if (event.getClickCount() == 2) {
                         showFullBookDetailView(clickedBook);
                     }
                 }
@@ -805,13 +805,20 @@ public class BookManagementController implements Initializable {
         for (Book b : books) {
             boolean isSelected = selected != null && java.util.Objects.equals(selected.getId(), b.getId());
             VBox card = BookCardView.createCard(b, isSelected, clickedBook -> {
-                if (currentSelectedBook != null && java.util.Objects.equals(currentSelectedBook.getId(), clickedBook.getId()) && !isFullDetailMode) {
-                    showFullBookDetailView(clickedBook);
+                if (booksTable != null) {
+                    booksTable.getSelectionModel().select(clickedBook);
+                }
+                showBookDetail(clickedBook);
+                renderGridView(currentFilteredBooks);
+            });
+            card.setOnMouseClicked(e -> {
+                if (e.getClickCount() == 2) {
+                    showFullBookDetailView(b);
                 } else {
                     if (booksTable != null) {
-                        booksTable.getSelectionModel().select(clickedBook);
+                        booksTable.getSelectionModel().select(b);
                     }
-                    showBookDetail(clickedBook);
+                    showBookDetail(b);
                     renderGridView(currentFilteredBooks);
                 }
             });
