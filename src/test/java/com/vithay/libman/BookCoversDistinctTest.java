@@ -39,7 +39,7 @@ public class BookCoversDistinctTest {
             try (InputStream is = getClass().getResourceAsStream(coverPath)) {
                 assertNotNull(is, "Cover resource must exist on classpath: " + coverPath + " for " + b.getTitle());
                 byte[] bytes = is.readAllBytes();
-                assertTrue(bytes.length > 500, "Cover file must not be empty or truncated: " + coverPath);
+                assertTrue(bytes.length >= 15000, "Cover file must be an authentic high-resolution web image (>= 15KB): " + coverPath);
 
                 MessageDigest md = MessageDigest.getInstance("MD5");
                 byte[] digest = md.digest(bytes);
