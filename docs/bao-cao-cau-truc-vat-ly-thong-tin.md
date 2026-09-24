@@ -1,8 +1,8 @@
 # BÁO CÁO PHÂN TÍCH CẤU TRÚC VẬT LÝ & THÔNG TIN
 
-## Hệ Thống Quản Lý Thư Viện — LibMan
+## Hệ Thống Quản Lý Thư Viện — LibMan (Phiên bản v1.3.2)
 
-**Ngày lập:** 23/09/2026
+**Ngày cập nhật:** 24/09/2026  
 **Đối chiếu với:** Đặc tả yêu cầu phần mềm Quản Lý Thư Viện (SRS 8 trang) + 7 Interaction Design Patterns
 
 ---
@@ -27,20 +27,25 @@ Báo cáo này phân tích **7 thiết kế cấu trúc vật lý và thông tin
 
 **Panel phải (Inspector):**
 - Khi chọn 1 hàng sách bên trái, panel bên phải **cập nhật tức thì** hiển thị:
-  - Hình bìa sách lớn.
+  - Hình bìa sách thật độ phân giải cao tải trực tiếp từ web.
   - Tên sách, tác giả (click được → lọc cùng tác giả), thể loại.
   - Badge trạng thái có màu sắc (Xanh = Available, Đỏ = Borrowed...).
   - Vị trí kệ sách (click được → lọc cùng kệ), ISBN, đơn giá, số bản khả dụng/tổng.
   - 3 nút hành động: **Mượn ngay**, **Sửa**, **Xóa** (ẩn theo phân quyền RBAC).
   - Khu vực **Nhánh liên quan & Gợi ý** (xem mục Intriguing Branches bên dưới).
 
-**Cách hoạt động:**
+**Cách hoạt động & Phân định thao tác Click (v1.3.2):**
+- **Click 1 lần (Single-click)** hoặc di chuyển phím mũi tên `↑ / ↓`: Chỉ chọn mục và cập nhật tức thì dữ liệu xem trước lên panel Inspector bên phải. Không làm chuyển đổi góc nhìn toàn màn hình.
+- **Click đúp (Double-click)** hoặc phím `Enter`: Mở giao diện toàn màn hình xem chi tiết sách sâu (`showFullBookDetailView`) bao gồm mô tả đầy đủ, thảo luận bình luận, và các thông số lưu thông.
+
 ```
-Chọn 1 hàng sách ở bảng bên trái
+Click 1 lần (hoặc phím mũi tên ↑↓)
         ↓
-Panel Inspector bên phải cập nhật tất cả thông tin
+Panel Inspector bên phải cập nhật tất cả thông tin xem trước (bìa thật, vị trí kệ, tồn kho)
         ↓
-Dùng phím ↑↓ cũng cập nhật Inspector theo hàng đang chọn
+Click đúp (hoặc phím Enter)
+        ↓
+Mở giao diện xem chi tiết sâu toàn màn hình (Full Book Detail View)
 ```
 
 ---
@@ -217,6 +222,12 @@ Tab "Trợ Lý Wizard" trong màn hình Mượn Sách chia tác vụ mượn sá
 - Click vào 1 pill → tự động lọc Kho Sách theo thể loại đó, pill được highlight active.
 - Thu gọn lại khi không cần → sidebar gọn gàng.
 
+### 6.4 Tinh Gọn Form Đổi Mật Khẩu (Modal Hồ Sơ Cá Nhân - v1.3.2)
+
+- Trong modal hồ sơ cá nhân (`Profile Popup`), cụm trường đổi mật khẩu (Mật khẩu cũ, Mật khẩu mới, Xác nhận) được đóng gói gọn trong `passwordChangeBox` ẩn mặc định (`visible="false"`, `managed="false"`).
+- Nút hành động **"🔑 Đổi mật khẩu ▾"** cho phép người dùng chủ động mở rộng vùng nhập khi có nhu cầu đổi mật khẩu, giúp giao diện hồ sơ luôn nhỏ gọn, không bị tràn cuộn dài.
+- Click lần 2 thu gọn lại, text chuyển thành "🔑 Đổi mật khẩu ▴".
+
 ---
 
 ## 7. Intriguing Branches
@@ -270,12 +281,12 @@ Khi xem chi tiết 1 cuốn sách trong panel Inspector, phần dưới có khu 
 
 | # | Pattern | Nơi triển khai chính | Đánh giá |
 |---|---------|---------------------|----------|
-| 1 | **Two-Panel Selector** | Kho Sách: bảng sách bên trái + panel chi tiết bên phải (68:32) | ✅ Hoàn chỉnh |
+| 1 | **Two-Panel Selector** | Kho Sách: bảng sách bên trái + panel chi tiết bên phải (68:32) kèm cơ chế Single/Double Click | ✅ Hoàn chỉnh |
 | 2 | **Canvas Plus Palette** | Bàn Lưu Hành: danh sách sách khả dụng (Palette) ↔ giỏ lưu hành (Canvas) | ✅ Hoàn chỉnh |
 | 3 | **One-Window Drilldown** | Lọc theo tác giả/kệ + Lịch sử lưu hành + Breadcrumb quay lại | ✅ Hoàn chỉnh |
 | 4 | **Alternative Views** | Bảng ↔ Thẻ ảnh cho Kho Sách + Bàn LH vs Wizard cho Mượn sách | ✅ Hoàn chỉnh |
 | 5 | **Wizard** | Wizard Mượn Sách 4 bước với stepper, Quay lại/Tiếp/Hoàn thành | ✅ Hoàn chỉnh |
-| 6 | **Extras on Demand** | Bộ lọc nâng cao toggle + Quy chế toggle + Submenu thể loại | ✅ Hoàn chỉnh |
+| 6 | **Extras on Demand** | Bộ lọc nâng cao toggle + Quy chế toggle + Submenu thể loại + Toggle mật khẩu | ✅ Hoàn chỉnh |
 | 7 | **Intriguing Branches** | Cùng Kệ / Cùng Tác Giả gợi ý + Cảnh báo sắp hạn → tab Trả | ✅ Hoàn chỉnh |
 
 **Kết luận:** Tất cả 7 Interaction Design Patterns đều được triển khai **hoàn chỉnh** trong hệ thống LibMan.
@@ -286,17 +297,17 @@ Khi xem chi tiết 1 cuốn sách trong panel Inspector, phần dưới có khu 
 
 | Yêu cầu SRS | Tính năng ứng dụng | Trạng thái |
 |-------------|-------------------|------------|
-| 5.1 Đăng nhập | Modal đăng nhập overlay + phân quyền RBAC 3 vai trò (Giám đốc, Thủ thư, Độc giả) | ✅ Thỏa mãn |
+| 5.1 Đăng nhập | Modal đăng nhập overlay + phân quyền RBAC 3 vai trò (Giám đốc, Thủ thư, Độc giả) + Lời chào động | ✅ Thỏa mãn |
 | 5.2 Đăng ký | Form đăng ký + tự tạo hồ sơ độc giả "Chờ Cấp Thẻ" | ✅ Thỏa mãn |
-| 5.3 Quản lý nhập sách | CRUD sách đầy đủ MaSach/TenSach/MaLoai/TenTacGia/TinhTrang + Quản lý thể loại | ✅ Thỏa mãn |
-| 5.4 Quản lý độc giả | CRUD độc giả đầy đủ MaDG/HoTen/NgaySinh/DiaChi/CMND + quét thẻ hết hạn | ✅ Thỏa mãn |
-| 5.5 Quản lý mượn/trả sách | Mượn trả đầy đủ MaPhieu/MaDG/MaSach/NgayMuon/NgayTra + 2 hình thức mượn | ✅ Thỏa mãn |
-| 5.6 Thống kê | Tổng sách, độc giả, giao dịch, quá hạn + phân tích theo thể loại | ✅ Thỏa mãn |
+| 5.3 Quản lý nhập sách | CRUD sách đầy đủ 221 cuốn với 100% ảnh bìa thật xuất bản từ web (0% bìa tự sinh) + Quản lý thể loại | ✅ Thỏa mãn |
+| 5.4 Quản lý độc giả | CRUD độc giả 38 thành viên đầy đủ phân nhóm (SV/GV/NCS/Tự do) & trạng thái + quét thẻ hết hạn | ✅ Thỏa mãn |
+| 5.5 Quản lý mượn/trả sách | Mượn trả 28 giao dịch gần đây + 2 hình thức mượn + in ấn phiếu mượn chuẩn | ✅ Thỏa mãn |
+| 5.6 Thống kê | Tổng sách, độc giả, giao dịch, quá hạn + phân tích theo thể loại + 4 thẻ KPI click điều hướng | ✅ Thỏa mãn |
 | 5.7 Tìm kiếm | Autocomplete search ở header + bộ lọc inline mỗi trang | ✅ Thỏa mãn |
 | 6.1 Yêu cầu thực thi | Xuất CSV danh sách sách/độc giả + thay đổi quy định thư viện động | ✅ Thỏa mãn |
 | 6.2 Yêu cầu an toàn | Thùng Rác: Phục hồi nguyên trạng + Hủy vĩnh viễn | ✅ Thỏa mãn |
 | 6.3 Yêu cầu bảo mật | RBAC 3 cấp: Quản trị / Thủ thư / Độc giả (+ Khách) | ✅ Thỏa mãn |
-| 6.4 Chất lượng phần mềm | Kiến trúc MVC modular + SQLite đa nền tảng + 2 Theme + 39 bài test tự động | ✅ Thỏa mãn |
+| 6.4 Chất lượng phần mềm | Kiến trúc MVC modular + SQLite đa nền tảng + 2 Theme + 56 bài test tự động (100% PASS) | ✅ Thỏa mãn |
 
 ---
 

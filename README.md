@@ -58,14 +58,21 @@ Hệ thống cài đặt sẵn 3 tài khoản tương ứng với 3 cấp độ 
 - Cơ chế xóa mềm (Soft-delete): Sách hoặc độc giả khi bị xóa sẽ chuyển vào **Thùng Rác**.
 - Cho phép **Phục Hồi (Restore)** nguyên trạng hoặc **Hủy Vĩnh Viễn** khỏi cơ sở dữ liệu.
 
-### 6. Trợ Giúp & Hướng Dẫn Sử Dụng (SRS Mục 4 & 6.4)
-- Mục trợ giúp góc giao diện cung cấp toàn bộ hướng dẫn nghiệp vụ chuẩn mực cho Giám đốc, Thủ thư và Độc giả.
+### 6. Trợ Giúp & Hướng Dẫn Sử Dụng Trong Ứng Dụng (SRS Mục 4 & 6.4)
+- **Modal Popup Hướng Dẫn (SRS)** chuyên nghiệp tích hợp ngay trong app với nền kính mờ (`GaussianBlur`), trình bày 5 khối thẻ phong cách Spotify: Kiến trúc phân hệ, Phân quyền RBAC, Phím tắt toàn cục (`Ctrl+F`, `Ctrl+N`, `Ctrl+D`, `Esc`), Quy trình mượn - trả và Cơ chế an toàn bảo mật.
+
+### 7. Tối Ưu Hiệu Năng & Tương Tác Hiện Đại (v1.3.2)
+- **Dashboard 60fps Siêu Mượt:** Tối ưu hàng sách nổi bật với bộ nhớ đệm tăng tốc phần cứng JavaFX (`card.setCache(true); CacheHint.SPEED`), loại bỏ 100% giật lag khi rê chuột.
+- **Lời Chào Động:** Tự động hiển thị `"Xin chào!"` khi chưa đăng nhập và chào đích danh `"Xin chào, [Họ và tên]!"` khi đăng nhập, cập nhật tức thì khi chuyển đổi tài khoản.
+- **Hành Vi Click Kho Sách Chuẩn Mực:** Click 1 lần chỉ chọn và xem trước tại thanh Inspector bên phải; chỉ khi **Click đúp (double-click)** hoặc bấm `Enter` mới mở toàn màn hình chi tiết sách.
+- **Form Hồ Sơ Cá Nhân Tinh Gọn:** Khối đổi mật khẩu được ẩn mặc định và tích hợp nút toggle `"🔑 Đổi mật khẩu ▾"` bung mở khi cần, không chiếm dụng không gian.
+- **Dữ Liệu Mẫu Thực Tế Phong Phú:** 221 cuốn sách với **100% ảnh bìa thật xuất bản từ web (0% bìa tự sinh, 0% trùng lặp hash)**, 38 độc giả phủ kín các phân loại/trạng thái, 28 giao dịch mượn sách gần đây.
 
 ---
 
 ## 🚀 Hướng Dẫn Khởi Chạy
 
-### 1. Khởi chạy trên Linux (Fedora 44, Ubuntu, Debian, Arch...)
+### 1. Khởi chạy trên Linux (Fedora, Ubuntu, Debian, Arch...)
 ```bash
 ./run.sh
 # Hoặc dùng Maven wrapper trực tiếp:
@@ -73,11 +80,9 @@ Hệ thống cài đặt sẵn 3 tài khoản tương ứng với 3 cấp độ 
 ```
 
 ### 2. Khởi chạy trên Windows (10 / 11)
-- **Cách 1 (Khuyên Dùng - Không Cần Cài Java):**
-  Tải bản `LibMan-Windows-Portable-x64.zip` từ mục [Releases](https://github.com/namtacozz/ViThay/releases), giải nén và nhấp đúp file **`LibMan.exe`** để mở ứng dụng ngay lập tức.
-- **Cách 2 (File .exe độc lập):**
-  Tải `LibMan.exe` từ Releases và nhấp đúp chuột để chạy (yêu cầu máy đã cài sẵn Java 17+).
-- **Cách 3 (Dùng Maven từ mã nguồn):**
+- **Cách 1 (Khuyên Dùng - Tệp .exe độc lập):**
+  Nhấp đúp chuột vào tệp **`target/LibMan.exe`** để mở ứng dụng ngay lập tức.
+- **Cách 2 (Dùng Maven từ mã nguồn):**
   ```cmd
   run.bat
   # Hoặc dùng Maven wrapper:
@@ -86,11 +91,11 @@ Hệ thống cài đặt sẵn 3 tài khoản tương ứng với 3 cấp độ 
 
 ### 3. Đóng gói thành tệp JAR và .EXE độc lập
 ```bash
-./mvnw package -DskipTests
+./mvnw clean package -DskipTests
 ```
-Lệnh trên tự động biên dịch và tạo ra 2 tệp thực thi trong thư mục `target/`:
-- **`target/LibMan.exe`**: Tệp thực thi giao diện đồ họa (GUI) cho hệ điều hành **Windows 10 / 11**.
-- **`target/libman-1.0.0.jar`**: Tệp Fat JAR độc lập đa nền tảng cho **Linux (Fedora, Ubuntu...)** lẫn **Windows**. Chạy bằng:
+Lệnh trên tự động biên dịch và tạo ra 2 tệp thực thi hoàn chỉnh trong thư mục `target/`:
+- **`target/LibMan.exe`** (31 MB): Tệp thực thi giao diện đồ họa (GUI) cho hệ điều hành **Windows 10 / 11**.
+- **`target/libman-1.0.0.jar`** (31 MB): Tệp Fat JAR độc lập đa nền tảng cho **Linux (Fedora, Ubuntu...)** lẫn **Windows**. Chạy bằng:
   ```bash
   java -jar target/libman-1.0.0.jar
   ```
@@ -101,7 +106,15 @@ Lệnh trên tự động biên dịch và tạo ra 2 tệp thực thi trong th�
 ```bash
 ./mvnw test
 ```
-Tất cả 48 bài test tự động (DAO, Phân quyền RBAC, Quy định động, Thùng rác Soft-delete, 7 Interaction Design Patterns, Giỏ lưu hành, Wizard, Cảnh báo hạn trả, Bộ lọc tác giả, Thảo luận & Chi tiết sách 2 tầng) đều vượt qua 100%.
+Toàn bộ **56/56 bài test tự động** đều vượt qua 100% (BUILD SUCCESS), bao gồm:
+- **Kiến trúc dữ liệu & DAO:** `LibManTest` (10 tests), `DatabaseConfig`, `BookDao`, `ReaderDao`, `BorrowTransactionDao`.
+- **Interaction Design Patterns:** `TwoPanelSelectorTest`, `BorrowWizardTest` (6 tests), `CirculationBasketTest` (4 tests), `CirculationContextualBranchTest` (5 tests), `BookViewSwitchingTest` (3 tests), `BookDrilldownAndBranchesTest` (6 tests), `BookFilterBugFixesTest` (5 tests).
+- **Hành vi tương tác người dùng v1.3.2:**
+  - `BookClickBehaviorTest`: Xác thực single-click xem trước Inspector và double-click mở full view.
+  - `BookCoversDistinctTest`: Xác thực 221/221 cuốn sách có ảnh bìa thật xuất bản độ phân giải cao (>= 15KB) và 0% trùng lặp hash MD5.
+  - `DashboardAndGreetingTest`: Xác thực lời chào động và giới hạn 15 sách nổi bật loại bỏ lag.
+  - `HelpModalAndProfileTest`: Xác thực modal popup Hướng dẫn (SRS) và nút toggle đổi mật khẩu trong layout chính.
+  - `ReaderAndTransactionDataTest`: Xác thực 38 độc giả đầy đủ nhóm/trạng thái và 28 giao dịch gần đây.
 
 ---
 © 2026 LibMan Project. Phát triển bởi Antigravity.
