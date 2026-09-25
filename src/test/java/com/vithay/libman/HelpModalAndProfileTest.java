@@ -53,6 +53,21 @@ public class HelpModalAndProfileTest {
                 assertNotNull(btnToggle, "btnToggleChangePassword must exist in MainLayout");
                 assertTrue(btnToggle.getText().contains("Đổi mật khẩu"), "Button text should contain 'Đổi mật khẩu'");
 
+                // Check readerBorrowModalBox exists
+                VBox readerBorrowModalBox = controller.getReaderBorrowModalBox();
+                assertNotNull(readerBorrowModalBox, "readerBorrowModalBox must exist in MainLayout");
+                assertFalse(readerBorrowModalBox.isVisible(), "readerBorrowModalBox should be hidden by default");
+
+                // Check appNoticeModalBox exists for in-app popups
+                VBox appNoticeModalBox = controller.getAppNoticeModalBox();
+                assertNotNull(appNoticeModalBox, "appNoticeModalBox must exist for in-app popup notices");
+                assertFalse(appNoticeModalBox.isVisible(), "appNoticeModalBox should be hidden by default");
+
+                // Check separated circulation buttons (btnNavBorrowWizard merged into Desk tab)
+                assertNotNull(controller.getBtnNavReturnBook(), "btnNavReturnBook must exist");
+                assertNull(controller.getBtnNavBorrowWizard(), "btnNavBorrowWizard was removed from sidebar");
+                assertNotNull(controller.getBtnNavReaderBorrow(), "btnNavReaderBorrow must exist");
+
             } catch (Throwable t) {
                 error[0] = t;
             } finally {

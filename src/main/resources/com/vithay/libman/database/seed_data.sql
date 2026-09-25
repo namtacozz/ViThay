@@ -317,7 +317,8 @@ VALUES
 ('211200025', 'DG024', 'Lê Ngọc Hân', 'BK161', 'Giận (Anger: Wisdom for Cooling the Flames)', '2026-03-01', '2026-03-15', '2026-03-14', 'Mang về nhà', 'Đã Trả', 0.0, 'Đã trả, sách giữ gìn cẩn thận'),
 ('211200026', 'DG025', 'Dương Gia Bảo', 'BK144', 'Steve Jobs: Tiểu Sử', '2026-03-09', '2026-03-23', NULL, 'Mang về nhà', 'Đang Mượn', 0.0, 'Tiểu sử doanh nhân'),
 ('211200027', 'DG026', 'Chu Thị Kim Ngân', 'BK024', 'Oxford Advanced Learners Dictionary', '2026-03-05', '2026-03-05', '2026-03-05', 'Mượn đọc tại chỗ', 'Đã Trả', 0.0, 'Tra cứu từ điển tại chỗ'),
-('211200028', 'DG027', 'Tạ Quang Khải', 'BK179', 'Tiếu Ngạo Giang Hồ', '2026-03-12', '2026-03-26', NULL, 'Mang về nhà', 'Đang Mượn', 0.0, 'Mượn tiểu thuyết Kim Dung');
+('211200028', 'DG027', 'Tạ Quang Khải', 'BK179', 'Tiếu Ngạo Giang Hồ', '2026-03-12', '2026-03-26', NULL, 'Mang về nhà', 'Đang Mượn', 0.0, 'Mượn tiểu thuyết Kim Dung'),
+('211200029', 'DG001', 'Trần Văn An', 'BK132', 'Sapiens: Lược Sử Loài Người', '2026-03-15', '2026-03-29', NULL, 'Mang về nhà', 'Đang Mượn', 0.0, 'Mượn tài liệu khoa học lịch sử');
 
 -- Default Library Operational Settings
 INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)

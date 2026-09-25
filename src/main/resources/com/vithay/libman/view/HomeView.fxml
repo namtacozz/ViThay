@@ -86,7 +86,7 @@
         </ScrollPane>
 
         <!-- Recent Borrowing Transactions Section -->
-        <VBox spacing="12">
+        <VBox fx:id="recentTransactionsSection" spacing="12">
             <HBox alignment="CENTER_LEFT" spacing="12">
                 <VBox spacing="2">
                     <Label text="Giao Dịch Mượn Sách Gần Đây" styleClass="title-medium"/>

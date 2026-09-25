@@ -1,9 +1,15 @@
 package com.vithay.libman.controller;
 
 import com.vithay.libman.model.Book;
+import com.vithay.libman.model.Reader;
 import com.vithay.libman.model.User;
 import com.vithay.libman.service.AuthService;
 import com.vithay.libman.service.BookService;
+import com.vithay.libman.service.BorrowService;
+import com.vithay.libman.service.ReaderService;
+import com.vithay.libman.service.SettingService;
+import javafx.collections.FXCollections;
+import javafx.util.StringConverter;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -84,6 +90,27 @@ public class MainLayoutController implements Initializable {
     // In-window SRS Help Modal
     @FXML private VBox helpModalBox;
 
+    // Dedicated Reader Borrow Modal
+    @FXML private VBox readerBorrowModalBox;
+    @FXML private Label lblReaderBorrowName;
+    @FXML private Label lblReaderBorrowId;
+    @FXML private Label lblReaderBorrowStats;
+    @FXML private Label lblReaderBorrowStatus;
+    @FXML private VBox boxReaderBorrowBookSelect;
+    @FXML private ComboBox<Book> cmbReaderBorrowBook;
+    @FXML private HBox boxReaderBorrowBookSelected;
+    @FXML private Label lblReaderBorrowBookTitle;
+    @FXML private Label lblReaderBorrowBookAuthor;
+    @FXML private Label lblReaderBorrowBookCategory;
+    @FXML private Label lblReaderBorrowBookAvailable;
+    @FXML private Button btnReaderBorrowChangeBook;
+    @FXML private ComboBox<String> cmbReaderBorrowType;
+    @FXML private TextField txtReaderBorrowNotes;
+    @FXML private Label lblReaderBorrowMsg;
+    @FXML private Button btnReaderBorrowSubmit;
+
+    private Book currentReaderBorrowBook = null;
+
     // Navigation Buttons
     @FXML private Button btnNavHome;
     @FXML private Button btnNavBooks;
@@ -92,11 +119,32 @@ public class MainLayoutController implements Initializable {
     @FXML private Button btnNavCategories;
     @FXML private Button btnNavReaders;
     @FXML private Button btnNavBorrowReturn;
+    @FXML private Button btnNavReturnBook;
+    @FXML private Button btnNavReaderBorrow;
     @FXML private Button btnNavTransactions;
     @FXML private Button btnNavStats;
     @FXML private Button btnNavRecycleBin;
     @FXML private Button btnNavSettings;
     @FXML private Button btnHelp;
+
+    // CARD 5: IN-APP NOTICE / MODAL OVERLAY
+    @FXML private VBox appNoticeModalBox;
+    @FXML private Label lblNoticeIconBadge;
+    @FXML private Label lblNoticeTitle;
+    @FXML private Label lblNoticeMessage;
+    @FXML private TextArea txtNoticeDetails;
+    @FXML private HBox boxNoticeActions;
+    @FXML private Button btnNoticeCancel;
+    @FXML private Button btnNoticeConfirm;
+
+    private Runnable noticeConfirmAction;
+    private Runnable noticeCancelAction;
+
+    private static MainLayoutController instance;
+
+    public static MainLayoutController getInstance() {
+        return instance;
+    }
 
     @FXML private Button btnHeaderSettings;
     @FXML private Button btnNotification;
@@ -157,10 +205,18 @@ public class MainLayoutController implements Initializable {
     private Object activeSubController;
     private final AuthService authService = AuthService.getInstance();
     private final BookService bookService = new BookService();
+    private final ReaderService readerService = new ReaderService();
+    private final BorrowService borrowService = new BorrowService();
+    private final SettingService settingService = SettingService.getInstance();
     private final PauseTransition searchDebounce = new PauseTransition(Duration.millis(120));
+
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        showInAppNotice(type, title, content, null, null);
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        instance = this;
         setupSearchAutocomplete();
         loadViews();
         updateUserSessionUI();
@@ -397,10 +453,24 @@ public class MainLayoutController implements Initializable {
                 lblSecReaders.setManaged(isLibrarian && isSidebarExpanded);
             }
 
-            btnNavBorrowReturn.setVisible(isLibrarian);
-            btnNavBorrowReturn.setManaged(isLibrarian);
-            btnNavTransactions.setVisible(isLibrarian || isReader);
-            btnNavTransactions.setManaged(isLibrarian || isReader);
+            // Mượn - Trả Section
+            if (btnNavBorrowReturn != null) {
+                btnNavBorrowReturn.setVisible(isLibrarian);
+                btnNavBorrowReturn.setManaged(isLibrarian);
+            }
+            if (btnNavReturnBook != null) {
+                btnNavReturnBook.setVisible(isLibrarian);
+                btnNavReturnBook.setManaged(isLibrarian);
+            }
+            if (btnNavReaderBorrow != null) {
+                btnNavReaderBorrow.setVisible(isReader);
+                btnNavReaderBorrow.setManaged(isReader);
+            }
+            if (btnNavTransactions != null) {
+                btnNavTransactions.setVisible(isLibrarian || isReader);
+                btnNavTransactions.setManaged(isLibrarian || isReader);
+                btnNavTransactions.setText(isReader ? "Phiếu mượn của tôi" : "Lịch sử phiếu mượn");
+            }
             if (lblSecBorrow != null) {
                 lblSecBorrow.setVisible((isLibrarian || isReader) && isSidebarExpanded);
                 lblSecBorrow.setManaged((isLibrarian || isReader) && isSidebarExpanded);
@@ -430,10 +500,22 @@ public class MainLayoutController implements Initializable {
                 lblSecReaders.setManaged(false);
             }
 
-            btnNavBorrowReturn.setVisible(false);
-            btnNavBorrowReturn.setManaged(false);
-            btnNavTransactions.setVisible(false);
-            btnNavTransactions.setManaged(false);
+            if (btnNavBorrowReturn != null) {
+                btnNavBorrowReturn.setVisible(false);
+                btnNavBorrowReturn.setManaged(false);
+            }
+            if (btnNavReturnBook != null) {
+                btnNavReturnBook.setVisible(false);
+                btnNavReturnBook.setManaged(false);
+            }
+            if (btnNavReaderBorrow != null) {
+                btnNavReaderBorrow.setVisible(false);
+                btnNavReaderBorrow.setManaged(false);
+            }
+            if (btnNavTransactions != null) {
+                btnNavTransactions.setVisible(false);
+                btnNavTransactions.setManaged(false);
+            }
             if (lblSecBorrow != null) {
                 lblSecBorrow.setVisible(false);
                 lblSecBorrow.setManaged(false);
@@ -452,14 +534,15 @@ public class MainLayoutController implements Initializable {
         }
         if (homeController != null) {
             homeController.updateGreeting();
+            homeController.applyPermissions();
         }
     }
 
     private void setActiveNavButton(Button activeButton) {
         Button[] navButtons = {
                 btnNavHome, btnNavBooks, btnNavCategories,
-                btnNavReaders, btnNavBorrowReturn, btnNavTransactions, btnNavStats,
-                btnNavRecycleBin, btnNavSettings
+                btnNavReaders, btnNavBorrowReturn, btnNavReturnBook, btnNavReaderBorrow,
+                btnNavTransactions, btnNavStats, btnNavRecycleBin, btnNavSettings
         };
         for (Button btn : navButtons) {
             if (btn != null) {
@@ -525,7 +608,7 @@ public class MainLayoutController implements Initializable {
         boolean isVisible = !categorySubmenuContainer.isVisible();
         categorySubmenuContainer.setVisible(isVisible);
         categorySubmenuContainer.setManaged(isVisible);
-        btnToggleCategories.setText(isVisible ? "▾" : "▸");
+        btnToggleCategories.setText(isVisible ? "▾ Thể loại" : "▸ Thể loại");
     }
 
     @FXML
@@ -584,8 +667,14 @@ public class MainLayoutController implements Initializable {
         if (borrowReturnView != null) {
             contentArea.getChildren().setAll(borrowReturnView);
             activeSubController = borrowReturnController;
-            if (tabIndex == 2) {
+            if (tabIndex == 0) {
+                setActiveNavButton(btnNavBorrowReturn);
+            } else if (tabIndex == 1) {
+                setActiveNavButton(btnNavReturnBook);
+            } else if (tabIndex == 2) {
                 setActiveNavButton(btnNavTransactions);
+            } else if (tabIndex == 3) {
+                setActiveNavButton(btnNavBorrowReturn);
             } else {
                 setActiveNavButton(btnNavBorrowReturn);
             }
@@ -596,9 +685,17 @@ public class MainLayoutController implements Initializable {
     }
 
     public void stageBookForBorrow(Book book) {
-        showBorrowReturnView(0);
-        if (borrowReturnController != null && book != null) {
-            borrowReturnController.addToBasket(book);
+        if (!authService.isLoggedIn()) {
+            showAuthPrompt("Vui lòng đăng nhập tài khoản để mượn sách!");
+            return;
+        }
+        if (authService.isReader()) {
+            openReaderBorrowModal(book);
+        } else {
+            showBorrowReturnView(0);
+            if (borrowReturnController != null && book != null) {
+                borrowReturnController.addToBasket(book);
+            }
         }
     }
 
@@ -608,8 +705,267 @@ public class MainLayoutController implements Initializable {
     }
 
     @FXML
+    public void handleNavBorrowDesk() {
+        showBorrowReturnView(0);
+    }
+
+    @FXML
+    public void handleNavReturnBook() {
+        showBorrowReturnView(1);
+    }
+
+    @FXML
+    public void handleNavBorrowWizard() {
+        showBorrowReturnView(3);
+    }
+
+    @FXML
+    public void handleOpenReaderBorrowModal() {
+        openReaderBorrowModal(null);
+    }
+
+    @FXML
     public void handleNavTransactions() {
         showBorrowReturnView(2);
+    }
+
+    public void openReaderBorrowModal(Book book) {
+        hideSearchDropdown();
+        User u = authService.getCurrentUser();
+        if (u == null) {
+            showAlert(Alert.AlertType.WARNING, "Yêu cầu đăng nhập", "Vui lòng đăng nhập tài khoản Độc Giả để đăng ký mượn sách!");
+            openAuthPopup();
+            return;
+        }
+
+        if (helpModalBox != null) {
+            helpModalBox.setVisible(false);
+            helpModalBox.setManaged(false);
+        }
+        if (profileModalBox != null) {
+            profileModalBox.setVisible(false);
+            profileModalBox.setManaged(false);
+        }
+        if (authModalBox != null) {
+            authModalBox.setVisible(false);
+            authModalBox.setManaged(false);
+        }
+
+        if (readerBorrowModalBox != null) {
+            readerBorrowModalBox.setVisible(true);
+            readerBorrowModalBox.setManaged(true);
+        }
+        authOverlayPane.setVisible(true);
+        authOverlayPane.setManaged(true);
+        mainContainer.setEffect(new GaussianBlur(14));
+
+        if (lblReaderBorrowMsg != null) {
+            lblReaderBorrowMsg.setText("");
+        }
+
+        // Setup Reader info
+        Reader reader = readerService.getReaderForUser(u);
+        if (reader == null) {
+            if (lblReaderBorrowName != null) lblReaderBorrowName.setText(u.getFullName());
+            if (lblReaderBorrowId != null) lblReaderBorrowId.setText("Chưa liên kết thẻ");
+            if (lblReaderBorrowStats != null) lblReaderBorrowStats.setText("Tài khoản chưa có mã độc giả");
+            if (lblReaderBorrowStatus != null) {
+                lblReaderBorrowStatus.setText("Thẻ: Chưa kích hoạt");
+                lblReaderBorrowStatus.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold;");
+            }
+            if (btnReaderBorrowSubmit != null) btnReaderBorrowSubmit.setDisable(true);
+        } else {
+            if (lblReaderBorrowName != null) lblReaderBorrowName.setText(reader.getFullName());
+            if (lblReaderBorrowId != null) lblReaderBorrowId.setText(reader.getId());
+            int activeCount = (int) borrowService.getTransactionsByReader(reader.getId()).stream()
+                    .filter(t -> "Đang Mượn".equalsIgnoreCase(t.getStatus()))
+                    .count();
+            int maxAllowed = settingService.getMaxBooksPerReader();
+            if (lblReaderBorrowStats != null) {
+                lblReaderBorrowStats.setText("Đang mượn: " + activeCount + "/" + maxAllowed + " cuốn");
+            }
+
+            String status = reader.getStatus();
+            if (lblReaderBorrowStatus != null) {
+                lblReaderBorrowStatus.setText("Thẻ: " + status);
+            }
+            boolean canBorrow = !"Blocked".equalsIgnoreCase(status) && !"Expired".equalsIgnoreCase(status) && !"Chờ Cấp Thẻ".equalsIgnoreCase(status) && activeCount < maxAllowed;
+            if (!canBorrow) {
+                if (lblReaderBorrowStatus != null) {
+                    lblReaderBorrowStatus.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold;");
+                }
+                if (btnReaderBorrowSubmit != null) {
+                    btnReaderBorrowSubmit.setDisable(true);
+                }
+                if (lblReaderBorrowMsg != null) {
+                    if ("Chờ Cấp Thẻ".equalsIgnoreCase(status)) {
+                        lblReaderBorrowMsg.setText("Thẻ của bạn chưa được cấp tại quầy. Vui lòng gặp Thủ Thư để kích hoạt!");
+                    } else if (activeCount >= maxAllowed) {
+                        lblReaderBorrowMsg.setText("Bạn đã mượn tối đa (" + maxAllowed + " cuốn). Vui lòng trả sách trước khi mượn tiếp!");
+                    } else {
+                        lblReaderBorrowMsg.setText("Thẻ độc giả chưa đủ điều kiện mượn sách. Vui lòng liên hệ thủ thư!");
+                    }
+                    lblReaderBorrowMsg.setStyle("-fx-text-fill: #EF4444;");
+                }
+            } else {
+                if (lblReaderBorrowStatus != null) {
+                    lblReaderBorrowStatus.setStyle("-fx-text-fill: #1DB954; -fx-font-weight: bold;");
+                }
+                if (btnReaderBorrowSubmit != null) {
+                    btnReaderBorrowSubmit.setDisable(false);
+                }
+            }
+        }
+
+        // Setup borrow types
+        if (cmbReaderBorrowType != null && cmbReaderBorrowType.getItems().isEmpty()) {
+            cmbReaderBorrowType.getItems().addAll("Mang về nhà (14 ngày)", "Mượn đọc tại chỗ (trong ngày)");
+        }
+        if (cmbReaderBorrowType != null) {
+            cmbReaderBorrowType.getSelectionModel().selectFirst();
+        }
+
+        // Setup book selection
+        setReaderBorrowSelectedBook(book);
+    }
+
+    private void setReaderBorrowSelectedBook(Book book) {
+        this.currentReaderBorrowBook = book;
+        if (book != null) {
+            if (boxReaderBorrowBookSelect != null) {
+                boxReaderBorrowBookSelect.setVisible(false);
+                boxReaderBorrowBookSelect.setManaged(false);
+            }
+            if (boxReaderBorrowBookSelected != null) {
+                boxReaderBorrowBookSelected.setVisible(true);
+                boxReaderBorrowBookSelected.setManaged(true);
+            }
+
+            if (lblReaderBorrowBookTitle != null) lblReaderBorrowBookTitle.setText(book.getTitle());
+            if (lblReaderBorrowBookAuthor != null) lblReaderBorrowBookAuthor.setText("Tác giả: " + book.getAuthor());
+            if (lblReaderBorrowBookCategory != null) lblReaderBorrowBookCategory.setText(book.getCategory());
+            if (lblReaderBorrowBookAvailable != null) lblReaderBorrowBookAvailable.setText("Còn sẵn: " + book.getAvailableCopies() + " bản");
+            if (book.getAvailableCopies() <= 0) {
+                if (lblReaderBorrowMsg != null) {
+                    lblReaderBorrowMsg.setText("Sách này hiện đã hết bản có sẵn để mượn!");
+                    lblReaderBorrowMsg.setStyle("-fx-text-fill: #EF4444;");
+                }
+                if (btnReaderBorrowSubmit != null) btnReaderBorrowSubmit.setDisable(true);
+            }
+        } else {
+            if (boxReaderBorrowBookSelect != null) {
+                boxReaderBorrowBookSelect.setVisible(true);
+                boxReaderBorrowBookSelect.setManaged(true);
+            }
+            if (boxReaderBorrowBookSelected != null) {
+                boxReaderBorrowBookSelected.setVisible(false);
+                boxReaderBorrowBookSelected.setManaged(false);
+            }
+
+            List<Book> availableBooks = bookService.getAllBooks().stream()
+                    .filter(b -> b.getAvailableCopies() > 0)
+                    .toList();
+            if (cmbReaderBorrowBook != null) {
+                cmbReaderBorrowBook.setItems(FXCollections.observableArrayList(availableBooks));
+                cmbReaderBorrowBook.setConverter(new StringConverter<Book>() {
+                    @Override
+                    public String toString(Book b) {
+                        return b == null ? "" : b.getTitle() + " - " + b.getAuthor() + " (Còn " + b.getAvailableCopies() + " bản)";
+                    }
+                    @Override
+                    public Book fromString(String string) { return null; }
+                });
+                if (!availableBooks.isEmpty()) {
+                    cmbReaderBorrowBook.getSelectionModel().selectFirst();
+                }
+            }
+        }
+    }
+
+    @FXML
+    public void handleReaderBorrowChangeBook() {
+        setReaderBorrowSelectedBook(null);
+    }
+
+    @FXML
+    public void handleExecuteReaderBorrow() {
+        User u = authService.getCurrentUser();
+        if (u == null) {
+            if (lblReaderBorrowMsg != null) {
+                lblReaderBorrowMsg.setText("Vui lòng đăng nhập trước khi mượn sách!");
+                lblReaderBorrowMsg.setStyle("-fx-text-fill: #EF4444;");
+            }
+            return;
+        }
+
+        Reader reader = readerService.getReaderForUser(u);
+        if (reader == null) {
+            if (lblReaderBorrowMsg != null) {
+                lblReaderBorrowMsg.setText("Tài khoản chưa có thẻ độc giả liên kết. Không thể mượn sách!");
+                lblReaderBorrowMsg.setStyle("-fx-text-fill: #EF4444;");
+            }
+            return;
+        }
+
+        Book bookToBorrow = currentReaderBorrowBook;
+        if (bookToBorrow == null && cmbReaderBorrowBook != null) {
+            bookToBorrow = cmbReaderBorrowBook.getSelectionModel().getSelectedItem();
+        }
+
+        if (bookToBorrow == null) {
+            if (lblReaderBorrowMsg != null) {
+                lblReaderBorrowMsg.setText("Vui lòng chọn cuốn sách cần mượn!");
+                lblReaderBorrowMsg.setStyle("-fx-text-fill: #EF4444;");
+            }
+            return;
+        }
+
+        String selectedType = (cmbReaderBorrowType != null) ? cmbReaderBorrowType.getSelectionModel().getSelectedItem() : null;
+        String borrowType = (selectedType != null && selectedType.contains("tại chỗ")) ? "Mượn đọc tại chỗ" : "Mang về nhà";
+        int days = "Mượn đọc tại chỗ".equalsIgnoreCase(borrowType) ? settingService.getMaxBorrowDaysOnsite() : settingService.getMaxBorrowDaysHome();
+        String notes = (txtReaderBorrowNotes != null) ? txtReaderBorrowNotes.getText() : "";
+        if (notes == null || notes.trim().isEmpty()) {
+            notes = "Độc giả đăng ký online";
+        }
+
+        String error = borrowService.borrowBook(reader.getId(), bookToBorrow.getId(), borrowType, days, notes.trim());
+        if (error != null) {
+            if (lblReaderBorrowMsg != null) {
+                lblReaderBorrowMsg.setText(error);
+                lblReaderBorrowMsg.setStyle("-fx-text-fill: #EF4444;");
+            }
+        } else {
+            closeAuthPopup();
+            showAlert(Alert.AlertType.INFORMATION, "Mượn sách thành công",
+                    "Chúc mừng bạn đã lập phiếu mượn thành công cho cuốn sách: \"" + bookToBorrow.getTitle() + "\"!\nThời hạn: " + days + " ngày.");
+            if (bookController != null) {
+                bookController.loadBooks();
+            }
+            if (homeController != null) {
+                homeController.refreshData();
+            }
+            showBorrowReturnView(2);
+        }
+    }
+
+    public VBox getReaderBorrowModalBox() {
+        return readerBorrowModalBox;
+    }
+
+    public Button getBtnNavReturnBook() {
+        return btnNavReturnBook;
+    }
+
+    public Button getBtnNavBorrowWizard() {
+        return null;
+    }
+
+    public VBox getAppNoticeModalBox() {
+        return appNoticeModalBox;
+    }
+
+    public Button getBtnNavReaderBorrow() {
+        return btnNavReaderBorrow;
     }
 
     public void showStatsView() {
@@ -666,6 +1022,10 @@ public class MainLayoutController implements Initializable {
         authModalBox.setManaged(false);
         profileModalBox.setVisible(false);
         profileModalBox.setManaged(false);
+        if (readerBorrowModalBox != null) {
+            readerBorrowModalBox.setVisible(false);
+            readerBorrowModalBox.setManaged(false);
+        }
 
         if (helpModalBox != null) {
             helpModalBox.setVisible(true);
@@ -722,6 +1082,10 @@ public class MainLayoutController implements Initializable {
             helpModalBox.setVisible(false);
             helpModalBox.setManaged(false);
         }
+        if (readerBorrowModalBox != null) {
+            readerBorrowModalBox.setVisible(false);
+            readerBorrowModalBox.setManaged(false);
+        }
         if (passwordChangeBox != null) {
             passwordChangeBox.setVisible(false);
             passwordChangeBox.setManaged(false);
@@ -757,6 +1121,10 @@ public class MainLayoutController implements Initializable {
             helpModalBox.setVisible(false);
             helpModalBox.setManaged(false);
         }
+        if (readerBorrowModalBox != null) {
+            readerBorrowModalBox.setVisible(false);
+            readerBorrowModalBox.setManaged(false);
+        }
         profileModalBox.setVisible(false);
         profileModalBox.setManaged(false);
         authModalBox.setVisible(true);
@@ -776,6 +1144,14 @@ public class MainLayoutController implements Initializable {
             helpModalBox.setVisible(false);
             helpModalBox.setManaged(false);
         }
+        if (readerBorrowModalBox != null) {
+            readerBorrowModalBox.setVisible(false);
+            readerBorrowModalBox.setManaged(false);
+        }
+        if (appNoticeModalBox != null) {
+            appNoticeModalBox.setVisible(false);
+            appNoticeModalBox.setManaged(false);
+        }
         if (passwordChangeBox != null) {
             passwordChangeBox.setVisible(false);
             passwordChangeBox.setManaged(false);
@@ -786,6 +1162,246 @@ public class MainLayoutController implements Initializable {
         lblLoginError.setText("");
         lblRegError.setText("");
         lblProfileMsg.setText("");
+        if (lblReaderBorrowMsg != null) {
+            lblReaderBorrowMsg.setText("");
+        }
+    }
+
+    public void showInAppNotice(Alert.AlertType type, String title, String message, String details, Runnable onConfirm) {
+        if (!javafx.application.Platform.isFxApplicationThread()) {
+            javafx.application.Platform.runLater(() -> showInAppNotice(type, title, message, details, onConfirm));
+            return;
+        }
+
+        hideSearchDropdown();
+        this.noticeConfirmAction = onConfirm;
+        this.noticeCancelAction = null;
+
+        if (helpModalBox != null) {
+            helpModalBox.setVisible(false);
+            helpModalBox.setManaged(false);
+        }
+        if (readerBorrowModalBox != null) {
+            readerBorrowModalBox.setVisible(false);
+            readerBorrowModalBox.setManaged(false);
+        }
+        if (profileModalBox != null) {
+            profileModalBox.setVisible(false);
+            profileModalBox.setManaged(false);
+        }
+        if (authModalBox != null) {
+            authModalBox.setVisible(false);
+            authModalBox.setManaged(false);
+        }
+
+        if (appNoticeModalBox != null) {
+            lblNoticeTitle.setText(title != null ? title : "Thông Báo Hệ Thống");
+            lblNoticeMessage.setText(message != null ? message : "");
+
+            if (type == Alert.AlertType.ERROR) {
+                lblNoticeIconBadge.setText("✕");
+                lblNoticeIconBadge.setStyle("-fx-background-color: #EF4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 3 8; -fx-background-radius: 4px;");
+            } else if (type == Alert.AlertType.WARNING) {
+                lblNoticeIconBadge.setText("⚠");
+                lblNoticeIconBadge.setStyle("-fx-background-color: #F59E0B; -fx-text-fill: black; -fx-font-weight: bold; -fx-padding: 3 8; -fx-background-radius: 4px;");
+            } else if (type == Alert.AlertType.CONFIRMATION) {
+                lblNoticeIconBadge.setText("?");
+                lblNoticeIconBadge.setStyle("-fx-background-color: #3B82F6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 3 8; -fx-background-radius: 4px;");
+            } else {
+                lblNoticeIconBadge.setText("✓");
+                lblNoticeIconBadge.setStyle("-fx-background-color: #10B981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 3 8; -fx-background-radius: 4px;");
+            }
+
+            if (details != null && !details.trim().isEmpty()) {
+                txtNoticeDetails.setText(details);
+                txtNoticeDetails.setVisible(true);
+                txtNoticeDetails.setManaged(true);
+            } else {
+                txtNoticeDetails.setText("");
+                txtNoticeDetails.setVisible(false);
+                txtNoticeDetails.setManaged(false);
+            }
+
+            if (type == Alert.AlertType.CONFIRMATION) {
+                btnNoticeCancel.setVisible(true);
+                btnNoticeCancel.setManaged(true);
+                btnNoticeCancel.setText("Hủy Bỏ");
+                btnNoticeConfirm.setText("Đồng Ý");
+            } else {
+                btnNoticeCancel.setVisible(false);
+                btnNoticeCancel.setManaged(false);
+                btnNoticeConfirm.setText("Đã Hiểu");
+            }
+
+            appNoticeModalBox.setVisible(true);
+            appNoticeModalBox.setManaged(true);
+            authOverlayPane.setVisible(true);
+            authOverlayPane.setManaged(true);
+            mainContainer.setEffect(new GaussianBlur(14));
+        }
+    }
+
+    public void showInAppNotice(Alert.AlertType type, String title, String message) {
+        showInAppNotice(type, title, message, null, null);
+    }
+
+    public void showInAppNotice(Alert.AlertType type, String title, String message, Runnable onConfirm) {
+        showInAppNotice(type, title, message, null, onConfirm);
+    }
+
+    public void showAuthPrompt(String message) {
+        if (!javafx.application.Platform.isFxApplicationThread()) {
+            javafx.application.Platform.runLater(() -> showAuthPrompt(message));
+            return;
+        }
+
+        hideSearchDropdown();
+        this.noticeConfirmAction = this::openAuthPopup;
+        this.noticeCancelAction = null;
+
+        if (helpModalBox != null) {
+            helpModalBox.setVisible(false);
+            helpModalBox.setManaged(false);
+        }
+        if (readerBorrowModalBox != null) {
+            readerBorrowModalBox.setVisible(false);
+            readerBorrowModalBox.setManaged(false);
+        }
+        if (profileModalBox != null) {
+            profileModalBox.setVisible(false);
+            profileModalBox.setManaged(false);
+        }
+        if (authModalBox != null) {
+            authModalBox.setVisible(false);
+            authModalBox.setManaged(false);
+        }
+
+        if (appNoticeModalBox != null) {
+            lblNoticeTitle.setText("Yêu Cầu Đăng Nhập");
+            lblNoticeMessage.setText(message != null ? message : "Bạn cần đăng nhập tài khoản để thực hiện thao tác này!");
+            lblNoticeIconBadge.setText("🔒");
+            lblNoticeIconBadge.setStyle("-fx-background-color: #F59E0B; -fx-text-fill: black; -fx-font-weight: bold; -fx-padding: 3 8; -fx-background-radius: 4px;");
+
+            txtNoticeDetails.setText("");
+            txtNoticeDetails.setVisible(false);
+            txtNoticeDetails.setManaged(false);
+
+            btnNoticeCancel.setVisible(true);
+            btnNoticeCancel.setManaged(true);
+            btnNoticeCancel.setText("Để Sau");
+
+            btnNoticeConfirm.setText("Đăng Nhập Ngay");
+
+            appNoticeModalBox.setVisible(true);
+            appNoticeModalBox.setManaged(true);
+            authOverlayPane.setVisible(true);
+            authOverlayPane.setManaged(true);
+            mainContainer.setEffect(new GaussianBlur(14));
+        }
+    }
+
+    public void showReceiptModal(String title, String heading, String receiptText) {
+        if (!javafx.application.Platform.isFxApplicationThread()) {
+            javafx.application.Platform.runLater(() -> showReceiptModal(title, heading, receiptText));
+            return;
+        }
+
+        hideSearchDropdown();
+        this.noticeConfirmAction = null;
+        this.noticeCancelAction = null;
+
+        if (helpModalBox != null) {
+            helpModalBox.setVisible(false);
+            helpModalBox.setManaged(false);
+        }
+        if (readerBorrowModalBox != null) {
+            readerBorrowModalBox.setVisible(false);
+            readerBorrowModalBox.setManaged(false);
+        }
+        if (profileModalBox != null) {
+            profileModalBox.setVisible(false);
+            profileModalBox.setManaged(false);
+        }
+        if (authModalBox != null) {
+            authModalBox.setVisible(false);
+            authModalBox.setManaged(false);
+        }
+
+        if (appNoticeModalBox != null) {
+            lblNoticeTitle.setText(title != null ? title : "Phiếu Lưu Hành Thư Viện");
+            lblNoticeMessage.setText(heading != null ? heading : "Chi tiết mẫu phiếu in:");
+            lblNoticeIconBadge.setText("📄");
+            lblNoticeIconBadge.setStyle("-fx-background-color: #10B981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 3 8; -fx-background-radius: 4px;");
+
+            txtNoticeDetails.setText(receiptText != null ? receiptText : "");
+            txtNoticeDetails.setVisible(true);
+            txtNoticeDetails.setManaged(true);
+
+            btnNoticeCancel.setVisible(false);
+            btnNoticeCancel.setManaged(false);
+            btnNoticeConfirm.setText("Đóng / In Xong");
+
+            appNoticeModalBox.setVisible(true);
+            appNoticeModalBox.setManaged(true);
+            authOverlayPane.setVisible(true);
+            authOverlayPane.setManaged(true);
+            mainContainer.setEffect(new GaussianBlur(14));
+        }
+    }
+
+    @FXML
+    public void handleNoticeConfirm() {
+        Runnable action = this.noticeConfirmAction;
+        this.noticeConfirmAction = null;
+        closeAuthPopup();
+        if (action != null) {
+            action.run();
+        }
+    }
+
+    @FXML
+    public void handleNoticeCancel() {
+        Runnable action = this.noticeCancelAction;
+        this.noticeCancelAction = null;
+        closeAuthPopup();
+        if (action != null) {
+            action.run();
+        }
+    }
+
+    public static void showAppNotice(Alert.AlertType type, String title, String message, String details, Runnable onConfirm) {
+        if (instance != null) {
+            instance.showInAppNotice(type, title, message, details, onConfirm);
+        } else {
+            org.slf4j.LoggerFactory.getLogger(MainLayoutController.class).info("[NOTICE - {}] {}: {} ({})", type, title, message, details);
+            if (type == Alert.AlertType.CONFIRMATION && onConfirm != null) {
+                onConfirm.run();
+            }
+        }
+    }
+
+    public static void showAppNotice(Alert.AlertType type, String title, String message) {
+        showAppNotice(type, title, message, null, null);
+    }
+
+    public static void showAppNotice(Alert.AlertType type, String title, String message, Runnable onConfirm) {
+        showAppNotice(type, title, message, null, onConfirm);
+    }
+
+    public static void showAuthPromptModal(String message) {
+        if (instance != null) {
+            instance.showAuthPrompt(message);
+        } else {
+            org.slf4j.LoggerFactory.getLogger(MainLayoutController.class).info("[AUTH PROMPT] {}", message);
+        }
+    }
+
+    public static void showReceiptPopup(String title, String heading, String receiptText) {
+        if (instance != null) {
+            instance.showReceiptModal(title, heading, receiptText);
+        } else {
+            org.slf4j.LoggerFactory.getLogger(MainLayoutController.class).info("[RECEIPT - {}] {}:\n{}", title, heading, receiptText);
+        }
     }
 
     @FXML
@@ -878,11 +1494,8 @@ public class MainLayoutController implements Initializable {
             updateUserSessionUI();
             closeAuthPopup();
             showHomeView();
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Đăng Ký Thành Công");
-            alert.setHeaderText("Hồ sơ độc giả trực tuyến đã được tạo!");
-            alert.setContentText("Trạng thái thẻ của bạn là: 'Chờ Cấp Thẻ'.\nVui lòng mang theo CCCD đến thư viện để Thủ Thư đối chiếu và kích hoạt thẻ chính thức trước khi mượn sách.");
-            alert.showAndWait();
+            showInAppNotice(Alert.AlertType.INFORMATION, "Đăng Ký Thành Công",
+                    "Hồ sơ độc giả trực tuyến đã được tạo!\nTrạng thái thẻ của bạn là: 'Chờ Cấp Thẻ'.\nVui lòng mang theo CCCD đến thư viện để Thủ Thư đối chiếu và kích hoạt thẻ chính thức trước khi mượn sách.");
         } else {
             lblRegError.setText("Tên đăng nhập đã tồn tại trong hệ thống!");
             lblRegError.setStyle("-fx-text-fill: #EF4444;");
@@ -945,11 +1558,8 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     public void handleNotificationClick() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Thông báo hệ thống");
-        alert.setHeaderText("Thông báo từ LibMan");
-        alert.setContentText("Hệ thống hoạt động bình thường.\nĐang theo dõi các phiếu mượn và tự động kiểm tra thời hạn thẻ.");
-        alert.showAndWait();
+        showInAppNotice(Alert.AlertType.INFORMATION, "Thông Báo Hệ Thống",
+                "Hệ thống hoạt động bình thường.\nĐang theo dõi các phiếu mượn và tự động kiểm tra thời hạn thẻ.");
     }
 
     @FXML
@@ -974,11 +1584,8 @@ public class MainLayoutController implements Initializable {
 
     @FXML
     public void handleMessageClick() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Hộp thư nội bộ");
-        alert.setHeaderText("Tin nhắn thủ thư");
-        alert.setContentText("Không có tin nhắn mới nào.");
-        alert.showAndWait();
+        showInAppNotice(Alert.AlertType.INFORMATION, "Hộp Thư Nội Bộ",
+                "Không có tin nhắn mới nào.");
     }
 
     private void setupBraveVerticalSidebar() {
@@ -1067,7 +1674,8 @@ public class MainLayoutController implements Initializable {
 
         Button[] navButtons = {
                 btnNavHome, btnNavBooks, btnNavCategories,
-                btnNavReaders, btnNavBorrowReturn, btnNavTransactions, btnNavStats,
+                btnNavReaders, btnNavBorrowReturn, btnNavReturnBook, btnNavReaderBorrow,
+                btnNavTransactions, btnNavStats,
                 btnNavRecycleBin, btnNavSettings, btnHelp
         };
         for (Button btn : navButtons) {
@@ -1133,7 +1741,8 @@ public class MainLayoutController implements Initializable {
 
         Button[] navButtons = {
                 btnNavHome, btnNavBooks, btnNavCategories,
-                btnNavReaders, btnNavBorrowReturn, btnNavTransactions, btnNavStats,
+                btnNavReaders, btnNavBorrowReturn, btnNavReturnBook, btnNavReaderBorrow,
+                btnNavTransactions, btnNavStats,
                 btnNavRecycleBin, btnNavSettings, btnHelp
         };
         for (Button btn : navButtons) {

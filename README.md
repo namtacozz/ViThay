@@ -61,12 +61,14 @@ Hệ thống cài đặt sẵn 3 tài khoản tương ứng với 3 cấp độ 
 ### 6. Trợ Giúp & Hướng Dẫn Sử Dụng Trong Ứng Dụng (SRS Mục 4 & 6.4)
 - **Modal Popup Hướng Dẫn (SRS)** chuyên nghiệp tích hợp ngay trong app với nền kính mờ (`GaussianBlur`), trình bày 5 khối thẻ phong cách Spotify: Kiến trúc phân hệ, Phân quyền RBAC, Phím tắt toàn cục (`Ctrl+F`, `Ctrl+N`, `Ctrl+D`, `Esc`), Quy trình mượn - trả và Cơ chế an toàn bảo mật.
 
-### 7. Tối Ưu Hiệu Năng & Tương Tác Hiện Đại (v1.3.2)
-- **Dashboard 60fps Siêu Mượt:** Tối ưu hàng sách nổi bật với bộ nhớ đệm tăng tốc phần cứng JavaFX (`card.setCache(true); CacheHint.SPEED`), loại bỏ 100% giật lag khi rê chuột.
-- **Lời Chào Động:** Tự động hiển thị `"Xin chào!"` khi chưa đăng nhập và chào đích danh `"Xin chào, [Họ và tên]!"` khi đăng nhập, cập nhật tức thì khi chuyển đổi tài khoản.
-- **Hành Vi Click Kho Sách Chuẩn Mực:** Click 1 lần chỉ chọn và xem trước tại thanh Inspector bên phải; chỉ khi **Click đúp (double-click)** hoặc bấm `Enter` mới mở toàn màn hình chi tiết sách.
-- **Form Hồ Sơ Cá Nhân Tinh Gọn:** Khối đổi mật khẩu được ẩn mặc định và tích hợp nút toggle `"🔑 Đổi mật khẩu ▾"` bung mở khi cần, không chiếm dụng không gian.
-- **Dữ Liệu Mẫu Thực Tế Phong Phú:** 221 cuốn sách với **100% ảnh bìa thật xuất bản từ web (0% bìa tự sinh, 0% trùng lặp hash)**, 38 độc giả phủ kín các phân loại/trạng thái, 28 giao dịch mượn sách gần đây.
+### 7. Tối Ưu Hiệu Năng & Trải Nghiệm Người Dùng (v1.4.0)
+- **Hệ Thống In-App Popup Overlay (Không Cửa Sổ Phụ):** Triệt tiêu 100% các hộp thoại OS-level (`new Alert`, `new Dialog`), thay thế bằng `appNoticeModalBox` với hiệu ứng kính mờ `GaussianBlur(14)`.
+- **Yêu Cầu Đăng Nhập Tự Động:** Khi người dùng chưa đăng nhập bấm mượn sách hoặc gửi bình luận, popup in-app nhắc đăng nhập hiện lên với tùy chọn chuyển nhanh đến form đăng nhập.
+- **Tách Biệt Lưu Hành Độc Giả (RBAC):** Độc giả lập phiếu mượn qua modal riêng biệt (`readerBorrowModalBox`), không còn bị chuyển vào bàn lưu hành chuyên trách của thủ thư/admin.
+- **Đồng Nhất Mã Giao Dịch Tuần Tự (`2112xxxxx`):** Tự động cấp mã mượn tuần tự 9 chữ số chuẩn thư viện thay cho các mã ngẫu nhiên dạng `TX...`.
+- **Hợp Nhất Trợ Lý Mượn Nhanh:** Chuyển tính năng Trợ lý Wizard thành nút tùy chọn nâng cao `[⚡ Trợ lý mượn nhanh (Wizard)]` tại góc trên bên phải của Bàn lưu hành (Desk).
+- **Hành Vi Tương Tác Kép Kho Sách:** Hỗ trợ click đúp (Double-click) hoặc phím Enter trên cả Dạng Bảng (Table View) và Dạng Lưới Thẻ (Grid View) để mở giao diện toàn màn hình chi tiết sách.
+- **Hồ Sơ Độc Giả Chuẩn Mực:** Khôi phục tài khoản `docgia` và thẻ `DG001` về họ tên chuẩn: **Trần Văn An**, cách ly hoàn toàn dữ liệu kiểm thử.
 
 ---
 
@@ -94,8 +96,8 @@ Hệ thống cài đặt sẵn 3 tài khoản tương ứng với 3 cấp độ 
 ./mvnw clean package -DskipTests
 ```
 Lệnh trên tự động biên dịch và tạo ra 2 tệp thực thi hoàn chỉnh trong thư mục `target/`:
-- **`target/LibMan.exe`** (31 MB): Tệp thực thi giao diện đồ họa (GUI) cho hệ điều hành **Windows 10 / 11**.
-- **`target/libman-1.0.0.jar`** (31 MB): Tệp Fat JAR độc lập đa nền tảng cho **Linux (Fedora, Ubuntu...)** lẫn **Windows**. Chạy bằng:
+- **`target/LibMan.exe`** (32 MB): Tệp thực thi giao diện đồ họa (GUI) cho hệ điều hành **Windows 10 / 11**.
+- **`target/libman-1.0.0.jar`** (32 MB): Tệp Fat JAR độc lập đa nền tảng cho **Linux (Fedora, Ubuntu...)** lẫn **Windows**. Chạy bằng:
   ```bash
   java -jar target/libman-1.0.0.jar
   ```
@@ -106,15 +108,16 @@ Lệnh trên tự động biên dịch và tạo ra 2 tệp thực thi hoàn ch�
 ```bash
 ./mvnw test
 ```
-Toàn bộ **56/56 bài test tự động** đều vượt qua 100% (BUILD SUCCESS), bao gồm:
+Toàn bộ **62/62 bài test tự động** đều vượt qua 100% (BUILD SUCCESS), bao gồm:
 - **Kiến trúc dữ liệu & DAO:** `LibManTest` (10 tests), `DatabaseConfig`, `BookDao`, `ReaderDao`, `BorrowTransactionDao`.
 - **Interaction Design Patterns:** `TwoPanelSelectorTest`, `BorrowWizardTest` (6 tests), `CirculationBasketTest` (4 tests), `CirculationContextualBranchTest` (5 tests), `BookViewSwitchingTest` (3 tests), `BookDrilldownAndBranchesTest` (6 tests), `BookFilterBugFixesTest` (5 tests).
-- **Hành vi tương tác người dùng v1.3.2:**
+- **Hành vi tương tác người dùng v1.4.0:**
   - `BookClickBehaviorTest`: Xác thực single-click xem trước Inspector và double-click mở full view.
   - `BookCoversDistinctTest`: Xác thực 221/221 cuốn sách có ảnh bìa thật xuất bản độ phân giải cao (>= 15KB) và 0% trùng lặp hash MD5.
   - `DashboardAndGreetingTest`: Xác thực lời chào động và giới hạn 15 sách nổi bật loại bỏ lag.
-  - `HelpModalAndProfileTest`: Xác thực modal popup Hướng dẫn (SRS) và nút toggle đổi mật khẩu trong layout chính.
-  - `ReaderAndTransactionDataTest`: Xác thực 38 độc giả đầy đủ nhóm/trạng thái và 28 giao dịch gần đây.
+  - `HelpModalAndProfileTest`: Xác thực modal popup Hướng dẫn (SRS), in-app notice modal và nút toggle đổi mật khẩu trong layout chính.
+  - `ReaderAndTransactionDataTest`: Xác thực 38 độc giả, mã giao dịch tuần tự `2112xxxxx` và tài khoản độc giả Trần Văn An.
+  - `ReaderCirculationAndRoleTest`: Xác thực phân quyền lưu hành độc lập và modal mượn sách độc giả.
 
 ---
 © 2026 LibMan Project. Phát triển bởi Antigravity.

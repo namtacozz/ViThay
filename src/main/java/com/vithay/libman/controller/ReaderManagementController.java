@@ -198,24 +198,21 @@ public class ReaderManagementController implements Initializable {
     }
 
     private void handleIssueCard(Reader reader) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Xác Nhận Cấp Thẻ Thư Viện");
-        alert.setHeaderText("Cấp thẻ thư viện chính thức cho độc giả: " + reader.getFullName() + " (CCCD: " + reader.getIdCard() + ")?");
-        alert.setContentText("Hệ thống sẽ kích hoạt tài khoản sang trạng thái 'Hoạt Động' với thời hạn " +
-                settingService.getCardValidityMonths() + " tháng kể từ hôm nay.");
-
-        Optional<ButtonType> res = alert.showAndWait();
-        if (res.isPresent() && res.get() == ButtonType.OK) {
-            boolean ok = readerService.issueCard(reader.getId());
-            if (ok) {
-                loadReaders();
-                Alert success = new Alert(Alert.AlertType.INFORMATION, "✓ Đã cấp thẻ thư viện thành công cho độc giả " + reader.getFullName() + "!");
-                success.showAndWait();
-            } else {
-                Alert err = new Alert(Alert.AlertType.ERROR, "Lỗi khi kích hoạt thẻ độc giả!");
-                err.showAndWait();
-            }
-        }
+        MainLayoutController.showAppNotice(
+                Alert.AlertType.CONFIRMATION,
+                "Xác Nhận Cấp Thẻ Thư Viện",
+                "Cấp thẻ thư viện chính thức cho độc giả: " + reader.getFullName() + " (CCCD: " + reader.getIdCard() + ")?\n" +
+                "Hệ thống sẽ kích hoạt tài khoản sang trạng thái 'Hoạt Động' với thời hạn " + settingService.getCardValidityMonths() + " tháng.",
+                () -> {
+                    boolean ok = readerService.issueCard(reader.getId());
+                    if (ok) {
+                        loadReaders();
+                        MainLayoutController.showAppNotice(Alert.AlertType.INFORMATION, "Cấp Thẻ Thành Công", "✓ Đã cấp thẻ thư viện thành công cho độc giả " + reader.getFullName() + "!");
+                    } else {
+                        MainLayoutController.showAppNotice(Alert.AlertType.ERROR, "Lỗi Kích Hoạt Thẻ", "Lỗi khi kích hoạt thẻ độc giả!");
+                    }
+                }
+        );
     }
 
     public void loadReaders() {
@@ -228,11 +225,11 @@ public class ReaderManagementController implements Initializable {
     public void handleScanExpiredReaders() {
         int updated = readerService.deactivateExpiredReaders();
         loadReaders();
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Quét Hạn Thẻ Độc Giả");
-        alert.setHeaderText("Kết quả rà soát tự động:");
-        alert.setContentText("Đã cập nhật " + updated + " độc giả sang trạng thái 'Expired' (Hết hạn).");
-        alert.showAndWait();
+        MainLayoutController.showAppNotice(
+                Alert.AlertType.INFORMATION,
+                "Quét Hạn Thẻ Độc Giả",
+                "Kết quả rà soát tự động:\nĐã cập nhật " + updated + " độc giả sang trạng thái 'Expired' (Hết hạn)."
+        );
     }
 
     @FXML
@@ -245,11 +242,9 @@ public class ReaderManagementController implements Initializable {
         if (file != null) {
             boolean ok = exportService.exportReadersToCsv(file);
             if (ok) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Xuất danh sách độc giả thành công: " + file.getName());
-                alert.showAndWait();
+                MainLayoutController.showAppNotice(Alert.AlertType.INFORMATION, "Xuất Danh Sách Thành Công", "Xuất danh sách độc giả thành công: " + file.getName());
             } else {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Lỗi khi xuất danh sách độc giả ra CSV!");
-                alert.showAndWait();
+                MainLayoutController.showAppNotice(Alert.AlertType.ERROR, "Lỗi Xuất File", "Lỗi khi xuất danh sách độc giả ra CSV!");
             }
         }
     }
@@ -431,15 +426,14 @@ public class ReaderManagementController implements Initializable {
     }
 
     private void handleSoftDeleteReader(Reader reader) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Xác Nhận Xóa Độc Giả");
-        alert.setHeaderText("Chuyển hồ sơ độc giả '" + reader.getFullName() + "' vào Thùng Rác?");
-        alert.setContentText("Hồ sơ sẽ được ẩn khỏi danh sách chính nhưng có thể khôi phục lại từ Thùng Rác.");
-
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            readerService.softDeleteReader(reader.getId());
-            loadReaders();
-        }
+        MainLayoutController.showAppNotice(
+                Alert.AlertType.CONFIRMATION,
+                "Xác Nhận Xóa Độc Giả",
+                "Chuyển hồ sơ độc giả '" + reader.getFullName() + "' vào Thùng Rác?\nHồ sơ sẽ được ẩn khỏi danh sách chính nhưng có thể khôi phục lại từ Thùng Rác.",
+                () -> {
+                    readerService.softDeleteReader(reader.getId());
+                    loadReaders();
+                }
+        );
     }
 }

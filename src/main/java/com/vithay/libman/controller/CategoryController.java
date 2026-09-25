@@ -166,15 +166,14 @@ public class CategoryController implements Initializable {
     }
 
     private void handleDeleteCategory(Category cat) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Xác Nhận Xóa Thể Loại");
-        alert.setHeaderText("Bạn có chắc chắn muốn xóa thể loại: " + cat.getName() + "?");
-        alert.setContentText("Hành động này không thể hoàn tác.");
-
-        Optional<ButtonType> res = alert.showAndWait();
-        if (res.isPresent() && res.get() == ButtonType.OK) {
-            categoryService.deleteCategory(cat.getId());
-            loadCategories();
-        }
+        MainLayoutController.showAppNotice(
+                Alert.AlertType.CONFIRMATION,
+                "Xác Nhận Xóa Thể Loại",
+                "Bạn có chắc chắn muốn xóa thể loại: " + cat.getName() + "?\nHành động này không thể hoàn tác.",
+                () -> {
+                    categoryService.deleteCategory(cat.getId());
+                    loadCategories();
+                }
+        );
     }
 }

@@ -51,6 +51,7 @@ public class HomeController implements Initializable {
     @FXML private HBox featuredBooksContainer;
 
     @FXML private TableView<BorrowTransaction> transactionsTable;
+    @FXML private VBox recentTransactionsSection;
     @FXML private TableColumn<BorrowTransaction, String> colTxId;
     @FXML private TableColumn<BorrowTransaction, String> colReaderName;
     @FXML private TableColumn<BorrowTransaction, String> colBookTitle;
@@ -81,6 +82,28 @@ public class HomeController implements Initializable {
         loadStats();
         loadFeaturedBooks();
         loadTransactions();
+        applyPermissions();
+    }
+
+    public void applyPermissions() {
+        AuthService auth = AuthService.getInstance();
+        boolean isStaff = auth.isLibrarian(); // Quản trị hoặc Thủ thư
+        if (cardAvailableBooks != null) {
+            cardAvailableBooks.setVisible(isStaff);
+            cardAvailableBooks.setManaged(isStaff);
+        }
+        if (cardBorrowedBooks != null) {
+            cardBorrowedBooks.setVisible(isStaff);
+            cardBorrowedBooks.setManaged(isStaff);
+        }
+        if (cardTotalReaders != null) {
+            cardTotalReaders.setVisible(isStaff);
+            cardTotalReaders.setManaged(isStaff);
+        }
+        if (recentTransactionsSection != null) {
+            recentTransactionsSection.setVisible(isStaff);
+            recentTransactionsSection.setManaged(isStaff);
+        }
     }
 
     public void updateGreeting() {
@@ -304,6 +327,10 @@ public class HomeController implements Initializable {
 
     @FXML
     public void handleNewBorrow() {
+        if (!AuthService.getInstance().isLoggedIn()) {
+            MainLayoutController.showAuthPromptModal("Bạn cần đăng nhập tài khoản để thực hiện lập phiếu mượn sách!");
+            return;
+        }
         if (mainController != null) {
             mainController.showBorrowReturnView(0);
         }
@@ -346,5 +373,17 @@ public class HomeController implements Initializable {
         if (mainController != null) {
             mainController.showReaderView();
         }
+    }
+
+    public VBox getCardBorrowedBooks() {
+        return cardBorrowedBooks;
+    }
+
+    public VBox getCardTotalReaders() {
+        return cardTotalReaders;
+    }
+
+    public VBox getRecentTransactionsSection() {
+        return recentTransactionsSection;
     }
 }

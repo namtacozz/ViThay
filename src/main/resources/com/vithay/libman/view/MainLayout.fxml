@@ -110,8 +110,10 @@
                                 </graphic>
                                 <tooltip><Tooltip text="Kho sách - Danh mục và tra cứu"/></tooltip>
                             </Button>
-                            <Button fx:id="btnToggleCategories" text="▾" onAction="#handleToggleCategories"
-                                    style="-fx-background-color: transparent; -fx-text-fill: #B3B3B3; -fx-font-size: 11px; -fx-padding: 6 8; -fx-cursor: hand;"/>
+                            <Button fx:id="btnToggleCategories" text="▾ Thể loại" onAction="#handleToggleCategories"
+                                    styleClass="btn-toggle-categories">
+                                <tooltip><Tooltip text="Bấm để ẩn / hiện danh mục thể loại"/></tooltip>
+                            </Button>
                         </HBox>
 
                         <!-- Collapsible Categories Sub-Menu with Theme-Aware Badges -->
@@ -169,11 +171,23 @@
 
                         <!-- Section: Mượn & Trả -->
                         <Label fx:id="lblSecBorrow" text="MƯỢN &amp; TRẢ SÁCH" styleClass="sidebar-category-label"/>
-                        <Button fx:id="btnNavBorrowReturn" text="Lưu hành Mượn - Trả" onAction="#handleNavBorrowReturn" maxWidth="Infinity" styleClass="nav-item">
+                        <Button fx:id="btnNavBorrowReturn" text="Bàn lưu hành (Desk)" onAction="#handleNavBorrowReturn" maxWidth="Infinity" styleClass="nav-item">
                             <graphic>
                                 <SVGPath mouseTransparent="true" content="M 8 3 L 4 7 L 8 11 M 4 7 H 20 M 16 21 L 20 17 L 16 13 M 20 17 H 4" styleClass="sidebar-svg-icon" scaleX="0.7" scaleY="0.7"/>
                             </graphic>
-                            <tooltip><Tooltip text="Bàn lưu hành mượn - trả sách"/></tooltip>
+                            <tooltip><Tooltip text="Bàn lưu hành mượn - trả sách (Desk)"/></tooltip>
+                        </Button>
+                        <Button fx:id="btnNavReturnBook" text="Xử lý trả &amp; bồi hoàn" onAction="#handleNavReturnBook" maxWidth="Infinity" styleClass="nav-item">
+                            <graphic>
+                                <SVGPath mouseTransparent="true" content="M 9 11 L 12 14 L 22 4 M 21 12 V 19 C 21 20.1 20.1 21 19 21 H 5 C 3.9 21 3 20.1 3 19 V 5 C 3 3.9 3.9 3 5 3 H 16" styleClass="sidebar-svg-icon" scaleX="0.7" scaleY="0.7"/>
+                            </graphic>
+                            <tooltip><Tooltip text="Xử lý trả sách và ghi nhận bồi hoàn"/></tooltip>
+                        </Button>
+                        <Button fx:id="btnNavReaderBorrow" text="Đăng ký mượn sách" onAction="#handleOpenReaderBorrowModal" maxWidth="Infinity" styleClass="nav-item">
+                            <graphic>
+                                <SVGPath mouseTransparent="true" content="M 12 5 V 19 M 5 12 H 19 M 4 19.5 A 2.5 2.5 0 0 1 6.5 17 H 20 M 6.5 2 H 20 V 22 H 6.5" styleClass="sidebar-svg-icon" scaleX="0.7" scaleY="0.7"/>
+                            </graphic>
+                            <tooltip><Tooltip text="Đăng ký mượn sách trực tuyến (Dành cho Độc Giả)"/></tooltip>
                         </Button>
                         <Button fx:id="btnNavTransactions" text="Lịch sử phiếu mượn" onAction="#handleNavTransactions" maxWidth="Infinity" styleClass="nav-item">
                             <graphic>
@@ -522,6 +536,98 @@
             <!-- Footer Action -->
             <HBox alignment="CENTER_RIGHT" spacing="12">
                 <Button text="Đã Hiểu &amp; Đóng" onAction="#closeAuthPopup" styleClass="btn-primary" style="-fx-padding: 8 20;"/>
+            </HBox>
+        </VBox>
+
+        <!-- CARD 4: DEDICATED READER BORROW MODAL (CHỨC NĂNG LẬP PHIẾU MƯỢN ĐỘC LẬP CHO ĐỘC GIẢ) -->
+        <VBox fx:id="readerBorrowModalBox" maxWidth="520" maxHeight="620" styleClass="reader-borrow-modal" spacing="16" visible="false" managed="false">
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT">
+                <VBox spacing="2">
+                    <Label text="Đăng Ký Mượn Sách" styleClass="title-large" style="-fx-font-size: 18px;"/>
+                    <Label text="Dành riêng cho Độc Giả thư viện" styleClass="text-muted"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="✕" onAction="#closeAuthPopup" styleClass="btn-secondary" style="-fx-padding: 4 10; -fx-background-radius: 50%;"/>
+            </HBox>
+
+            <!-- Reader Profile Card Summary -->
+            <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-background-color: #222222; -fx-padding: 10 14; -fx-background-radius: 8px;">
+                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label fx:id="lblReaderBorrowName" text="Họ và tên" style="-fx-font-weight: bold; -fx-text-fill: #FFFFFF; -fx-font-size: 14px;"/>
+                        <Label fx:id="lblReaderBorrowId" text="DG001" styleClass="badge-available" style="-fx-font-size: 10px;"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label fx:id="lblReaderBorrowStats" text="Đang mượn: 0/5 cuốn" style="-fx-text-fill: #B3B3B3; -fx-font-size: 11px;"/>
+                        <Label fx:id="lblReaderBorrowStatus" text="Thẻ: Hoạt động" style="-fx-text-fill: #1DB954; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                    </HBox>
+                </VBox>
+            </HBox>
+
+            <!-- Book Selection / Details Box -->
+            <VBox spacing="8">
+                <Label text="THÔNG TIN TÀI LIỆU MƯỢN" style="-fx-text-fill: #1DB954; -fx-font-weight: bold; -fx-font-size: 11px;"/>
+                <VBox fx:id="boxReaderBorrowBookSelect" spacing="6">
+                    <Label text="Chọn sách muốn mượn:" styleClass="form-label"/>
+                    <ComboBox fx:id="cmbReaderBorrowBook" maxWidth="Infinity" promptText="-- Chọn đầu sách có sẵn --" styleClass="form-control"/>
+                </VBox>
+                <HBox fx:id="boxReaderBorrowBookSelected" alignment="CENTER_LEFT" spacing="12" style="-fx-background-color: #1a1a1a; -fx-padding: 10 14; -fx-background-radius: 8px; -fx-border-color: #2a2a2a; -fx-border-radius: 8px;">
+                    <VBox spacing="3" HBox.hgrow="ALWAYS">
+                        <Label fx:id="lblReaderBorrowBookTitle" text="Tên sách" style="-fx-font-weight: bold; -fx-text-fill: #FFFFFF; -fx-font-size: 13px;" wrapText="true"/>
+                        <Label fx:id="lblReaderBorrowBookAuthor" text="Tác giả: ..." styleClass="text-muted" style="-fx-font-size: 11px;"/>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <Label fx:id="lblReaderBorrowBookCategory" text="Thể loại" styleClass="badge-available" style="-fx-font-size: 10px;"/>
+                            <Label fx:id="lblReaderBorrowBookAvailable" text="Còn sẵn: 3 bản" style="-fx-text-fill: #1DB954; -fx-font-size: 11px;"/>
+                        </HBox>
+                    </VBox>
+                    <Button fx:id="btnReaderBorrowChangeBook" text="Đổi sách" onAction="#handleReaderBorrowChangeBook" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 4 8;"/>
+                </HBox>
+            </VBox>
+
+            <!-- Borrow Options -->
+            <GridPane hgap="10" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="120"/>
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="180"/>
+                </columnConstraints>
+                <Label text="Hình Thức Mượn:" styleClass="form-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="cmbReaderBorrowType" maxWidth="Infinity" styleClass="form-control" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Ghi Chú Độc Giả:" styleClass="form-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtReaderBorrowNotes" promptText="Lý do / yêu cầu đặc biệt..." text="Độc giả đăng ký online" styleClass="form-control" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <!-- Validation/Feedback message -->
+            <Label fx:id="lblReaderBorrowMsg" text="" wrapText="true" style="-fx-font-weight: bold; -fx-font-size: 11px;"/>
+
+            <!-- Action Buttons -->
+            <HBox spacing="12" alignment="CENTER_RIGHT">
+                <Button fx:id="btnReaderBorrowSubmit" text="Xác Nhận Lập Phiếu Mượn" onAction="#handleExecuteReaderBorrow" styleClass="btn-primary" style="-fx-padding: 8 16;"/>
+                <Button text="Hủy &amp; Đóng" onAction="#closeAuthPopup" styleClass="btn-secondary" style="-fx-padding: 8 16;"/>
+            </HBox>
+        </VBox>
+
+        <!-- CARD 5: IN-APP NOTICE / CONFIRM / PROMPT MODAL (REPLACES OS ALERTS/DIALOGS) -->
+        <VBox fx:id="appNoticeModalBox" maxWidth="520" maxHeight="580" styleClass="auth-modal" spacing="16" visible="false" managed="false">
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label fx:id="lblNoticeIconBadge" text="ℹ" styleClass="badge-available" style="-fx-font-size: 14px; -fx-padding: 3 8;"/>
+                <Label fx:id="lblNoticeTitle" text="Thông Báo Hệ Thống" styleClass="title-large" style="-fx-font-size: 16px;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="✕" onAction="#handleNoticeCancel" styleClass="btn-secondary" style="-fx-padding: 4 10; -fx-background-radius: 50%;"/>
+            </HBox>
+
+            <!-- Main Message -->
+            <Label fx:id="lblNoticeMessage" text="Nội dung thông báo..." wrapText="true" style="-fx-font-size: 13px; -fx-text-fill: #E5E7EB;"/>
+
+            <!-- Optional Details / Previews / Slip View -->
+            <TextArea fx:id="txtNoticeDetails" editable="false" wrapText="true" visible="false" managed="false" prefHeight="260" styleClass="wizard-slip-preview" style="-fx-font-family: monospace; -fx-font-size: 11px;"/>
+
+            <!-- Action Buttons -->
+            <HBox fx:id="boxNoticeActions" spacing="12" alignment="CENTER_RIGHT">
+                <Button fx:id="btnNoticeCancel" text="Hủy Bỏ" onAction="#handleNoticeCancel" styleClass="btn-secondary" style="-fx-padding: 8 16;"/>
+                <Button fx:id="btnNoticeConfirm" text="Đồng Ý" onAction="#handleNoticeConfirm" styleClass="btn-primary" style="-fx-padding: 8 20;"/>
             </HBox>
         </VBox>
     </StackPane>

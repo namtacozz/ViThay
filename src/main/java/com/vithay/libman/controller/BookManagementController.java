@@ -16,12 +16,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
@@ -421,7 +423,7 @@ public class BookManagementController implements Initializable {
         booksTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             showBookDetail(newVal);
             if (!isTableViewMode && booksGridPane != null) {
-                renderGridView(currentFilteredBooks);
+                updateGridCardSelection(newVal);
             }
         });
 
@@ -798,28 +800,41 @@ public class BookManagementController implements Initializable {
         }
     }
 
+    private void updateGridCardSelection(Book selectedBook) {
+        if (booksGridPane == null) return;
+        for (Node node : booksGridPane.getChildren()) {
+            if (node instanceof VBox) {
+                VBox card = (VBox) node;
+                Book cardBook = (Book) card.getUserData();
+                if (cardBook != null && selectedBook != null && java.util.Objects.equals(cardBook.getId(), selectedBook.getId())) {
+                    if (!card.getStyleClass().contains("book-grid-card-selected")) {
+                        card.getStyleClass().add("book-grid-card-selected");
+                    }
+                } else {
+                    card.getStyleClass().remove("book-grid-card-selected");
+                }
+            }
+        }
+    }
+
     private void renderGridView(List<Book> books) {
         if (booksGridPane == null) return;
         booksGridPane.getChildren().clear();
         Book selected = booksTable != null ? booksTable.getSelectionModel().getSelectedItem() : null;
         for (Book b : books) {
             boolean isSelected = selected != null && java.util.Objects.equals(selected.getId(), b.getId());
-            VBox card = BookCardView.createCard(b, isSelected, clickedBook -> {
-                if (booksTable != null) {
-                    booksTable.getSelectionModel().select(clickedBook);
-                }
-                showBookDetail(clickedBook);
-                renderGridView(currentFilteredBooks);
-            });
+            VBox card = BookCardView.createCard(b, isSelected, null);
+            card.setUserData(b);
             card.setOnMouseClicked(e -> {
+                if (e.getButton() != MouseButton.PRIMARY) return;
                 if (e.getClickCount() == 2) {
                     showFullBookDetailView(b);
-                } else {
+                } else if (e.getClickCount() == 1) {
                     if (booksTable != null) {
                         booksTable.getSelectionModel().select(b);
                     }
                     showBookDetail(b);
-                    renderGridView(currentFilteredBooks);
+                    updateGridCardSelection(b);
                 }
             });
             booksGridPane.getChildren().add(card);
@@ -836,11 +851,9 @@ public class BookManagementController implements Initializable {
         if (file != null) {
             boolean ok = exportService.exportBooksToCsv(file);
             if (ok) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Xuất danh sách sách thành công vào tệp: " + file.getName());
-                alert.showAndWait();
+                MainLayoutController.showAppNotice(Alert.AlertType.INFORMATION, "Xuất Danh Sách Thành Công", "Đã xuất danh sách sách thành công vào tệp: " + file.getName());
             } else {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Lỗi khi xuất danh sách sách ra CSV!");
-                alert.showAndWait();
+                MainLayoutController.showAppNotice(Alert.AlertType.ERROR, "Lỗi Xuất File", "Lỗi khi xuất danh sách sách ra CSV!");
             }
         }
     }
@@ -971,18 +984,17 @@ public class BookManagementController implements Initializable {
     }
 
     private void handleSoftDeleteBook(Book book) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Xác Nhận Xóa Sách");
-        alert.setHeaderText("Chuyển sách '" + book.getTitle() + "' vào Thùng Rác?");
-        alert.setContentText("Sách sẽ được ẩn khỏi kho mượn nhưng có thể phục hồi lại từ Thùng Rác bất cứ lúc nào.");
-
-        Optional<ButtonType> res = alert.showAndWait();
-        if (res.isPresent() && res.get() == ButtonType.OK) {
-            boolean ok = bookService.softDeleteBook(book.getId());
-            if (ok) {
-                loadBooks();
-            }
-        }
+        MainLayoutController.showAppNotice(
+                Alert.AlertType.CONFIRMATION,
+                "Xác Nhận Xóa Sách",
+                "Chuyển sách '" + book.getTitle() + "' vào Thùng Rác?\nSách sẽ được ẩn khỏi kho mượn nhưng có thể phục hồi lại từ Thùng Rác bất cứ lúc nào.",
+                () -> {
+                    boolean ok = bookService.softDeleteBook(book.getId());
+                    if (ok) {
+                        loadBooks();
+                    }
+                }
+        );
     }
 
     public Book getCurrentSelectedBook() {
@@ -1519,6 +1531,15 @@ public class BookManagementController implements Initializable {
             return;
         }
 
+        if (!AuthService.getInstance().isLoggedIn()) {
+            if (lblReviewStatus != null) {
+                lblReviewStatus.setText("Vui lòng đăng nhập để gửi bình luận đánh giá sách!");
+                lblReviewStatus.setStyle("-fx-text-fill: #EF4444;");
+            }
+            MainLayoutController.showAuthPromptModal("Bạn cần đăng nhập tài khoản để gửi bình luận đánh giá sách!");
+            return;
+        }
+
         int rating = 5;
         if (comboReviewRating != null && comboReviewRating.getValue() != null) {
             String val = comboReviewRating.getValue();
@@ -1682,17 +1703,19 @@ public class BookManagementController implements Initializable {
     @FXML
     public void handleInspectorQuickBorrow() {
         if (currentSelectedBook == null) return;
+        if (!AuthService.getInstance().isLoggedIn()) {
+            MainLayoutController.showAuthPromptModal("Bạn cần đăng nhập tài khoản để thực hiện lập phiếu mượn sách!");
+            return;
+        }
         if (currentSelectedBook.getAvailableCopies() <= 0) {
-            Alert alert = new Alert(Alert.AlertType.WARNING, "Sách '" + currentSelectedBook.getTitle() + "' hiện đã hết bản khả dụng trong kho!");
-            alert.showAndWait();
+            MainLayoutController.showAppNotice(Alert.AlertType.WARNING, "Hết Sách Khả Dụng", "Sách '" + currentSelectedBook.getTitle() + "' hiện đã hết bản khả dụng trong kho!");
             return;
         }
 
         if (mainController != null) {
             mainController.stageBookForBorrow(currentSelectedBook);
         } else {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Đã chọn sách '" + currentSelectedBook.getTitle() + "' để lập phiếu mượn.");
-            alert.showAndWait();
+            MainLayoutController.showAppNotice(Alert.AlertType.INFORMATION, "Đã Chọn Sách", "Đã chọn sách '" + currentSelectedBook.getTitle() + "' để lập phiếu mượn.");
         }
     }
 

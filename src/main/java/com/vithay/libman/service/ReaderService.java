@@ -96,4 +96,47 @@ public class ReaderService {
         Reader reader = getReaderById(readerId.trim());
         return isCardValid(reader);
     }
+
+    public Reader getReaderForUser(com.vithay.libman.model.User user) {
+        if (user == null) return null;
+        if ("docgia".equalsIgnoreCase(user.getUsername())) {
+            Reader r = getReaderById("DG001");
+            if (r != null) return r;
+        }
+        List<Reader> all = getAllReaders();
+        if (user.getEmail() != null && !user.getEmail().isBlank()) {
+            for (Reader r : all) {
+                if (user.getEmail().equalsIgnoreCase(r.getEmail())) {
+                    return r;
+                }
+            }
+        }
+        if (user.getFullName() != null && !user.getFullName().isBlank()) {
+            for (Reader r : all) {
+                if (user.getFullName().equalsIgnoreCase(r.getFullName())) {
+                    return r;
+                }
+            }
+        }
+        if ("Độc Giả".equalsIgnoreCase(user.getRole())) {
+            String readerId = "DG_" + user.getUsername().toUpperCase();
+            Reader newReader = new Reader(
+                    readerId,
+                    user.getFullName() != null ? user.getFullName() : user.getUsername(),
+                    user.getEmail(),
+                    user.getPhone(),
+                    "Độc giả trực tuyến",
+                    "048000" + (System.currentTimeMillis() % 1000000),
+                    "2000-01-01",
+                    LocalDate.now().toString(),
+                    LocalDate.now().toString(),
+                    LocalDate.now().plusYears(2).toString(),
+                    "Active",
+                    false
+            );
+            readerDao.addReader(newReader);
+            return newReader;
+        }
+        return null;
+    }
 }

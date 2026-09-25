@@ -201,6 +201,25 @@ public class BorrowTransactionDao {
         return list;
     }
 
+    public synchronized String getNextTransactionId() {
+        String sql = "SELECT id FROM borrow_transactions WHERE id GLOB '2112[0-9]*' ORDER BY id DESC LIMIT 1";
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                String maxId = rs.getString("id");
+                try {
+                    long num = Long.parseLong(maxId);
+                    return String.valueOf(num + 1);
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error generating next transaction ID", e);
+        }
+        return "211200001";
+    }
+
     private BorrowTransaction mapResultSet(ResultSet rs) throws SQLException {
         return new BorrowTransaction(
                 rs.getString("id"),

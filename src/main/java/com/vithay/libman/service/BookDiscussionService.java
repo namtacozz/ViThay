@@ -82,6 +82,35 @@ public class BookDiscussionService {
         // Harry Potter 1
         addPredefinedReview("BK032", "Nguyễn Minh Trí", 5, "2026-09-08",
                 "Tác phẩm mở đầu cho thế giới phù thủy tuyệt diệu. Đọc đi đọc lại nhiều lần vẫn thấy vẹn nguyên sự háo hức và mê hoặc.");
+        // Doraemon - Tuyển Tập Tranh Truyện Màu (BK027)
+        addPredefinedReview("BK027", "Võ Khánh Vy", 5, "2026-09-17",
+                "Ấn bản tranh truyện màu NXB Kim Đồng in ấn cực kỳ sắc nét và rực rỡ. Đọc lại những mẩu chuyện về chú mèo máy Doraemon và Nobita luôn mang lại cảm xúc ấm áp và thư giãn tuyệt vời!");
+        addPredefinedReview("BK027", "Đặng Hoàng Long", 5, "2026-09-20",
+                "Bộ truyện tuổi thơ bất hủ! Những bảo bối thần kỳ của Doraemon luôn tràn ngập sức sáng tạo và mang lại nhiều bài học tình bạn sâu sắc cho lứa tuổi học trò.");
+
+        // Thám Tử Lừng Danh Conan (BK028)
+        addPredefinedReview("BK028", "Ngô Quốc Bảo", 5, "2026-09-16",
+                "Một trong những bộ truyện trinh thám đỉnh cao nhất! Cách Gosho Aoyama xây dựng các câu đố án mạng rất logic, chặt chẽ và màn đối đầu với Tổ chức Áo đen vô cùng nghẹt thở.");
+        addPredefinedReview("BK028", "Trịnh Quỳnh Nga", 5, "2026-09-21",
+                "Bản dịch tiếng Việt của Kim Đồng rất mượt mà. Conan và đội thám tử nhí luôn là nguồn cảm hứng yêu thích của mình mỗi khi đến thư viện.");
+
+        // Kính Vạn Hoa (BK030)
+        addPredefinedReview("BK030", "Lê Thị Thu Nhàn", 5, "2026-09-14",
+                "Bộ ba Quý ròm, Tiểu Long và nhỏ Hạnh như mang cả bầu trời tuổi thơ ùa về. Tác phẩm kinh điển của bác Ánh với muôn vàn trò nghịch ngợm thông minh và tình bạn ấm áp.");
+        addPredefinedReview("BK030", "Trần Văn An", 5, "2026-09-19",
+                "Giọng văn dí dỏm, mộc mạc và đầy tính giáo dục. Những câu chuyện hè của nhóm bạn học sinh luôn làm người đọc mỉm cười và hoài niệm.");
+
+        // Dune: Xứ Cát (B002)
+        addPredefinedReview("B002", "Bùi Phương Thảo", 5, "2026-09-11",
+                "Tác phẩm khoa học viễn tưởng vĩ đại. Frank Herbert đã kiến tạo nên một vũ trụ sa mạc Arrakis với hệ sinh thái và chiều sâu chính trị tôn giáo choáng ngợp.");
+
+        // Atomic Habits (B004)
+        addPredefinedReview("B004", "Phạm Thu Hà", 5, "2026-09-15",
+                "Phương pháp 1% mỗi ngày rất thực tế và dễ áp dụng. Cuốn sách giúp mình thiết lập lại thói quen đọc sách và quản lý thời gian hiệu quả hơn hẳn.");
+
+        // Đắc Nhân Tâm (BK019)
+        addPredefinedReview("BK019", "Đoàn Thanh Tùng", 5, "2026-09-13",
+                "Một cuốn sách gối đầu giường về nghệ thuật giao tiếp và đối nhân xử thế. Đọc để thấu hiểu người khác hơn và hoàn thiện bản thân mỗi ngày.");
     }
 
     private void addPredefinedReview(String bookId, String readerName, int rating, String date, String content) {
@@ -89,6 +118,15 @@ public class BookDiscussionService {
         BookReview rev = new BookReview(id, bookId, readerName, "/com/vithay/libman/images/avatar.png", rating, date, content);
         reviewsMap.computeIfAbsent(bookId, k -> new CopyOnWriteArrayList<>()).add(rev);
     }
+
+    // Danh sách thành viên độc giả thư viện thực tế (khớp hồ sơ độc giả trong hệ thống)
+    private static final String[] REAL_LIBRARY_READERS = {
+            "Trần Văn An", "Trần Thị Mai Anh", "Nguyễn Văn Nhân", "Lê Thị Thu Nhàn",
+            "Phùng Tuấn Kiệt", "Hoàng Minh Châu", "Vũ Đức Thịnh", "Phạm Thu Hà",
+            "Đặng Hoàng Long", "Bùi Phương Thảo", "Ngô Quốc Bảo", "Trịnh Quỳnh Nga",
+            "Lâm Đình Phong", "Đinh Diệu Linh", "Trương Mỹ Dung", "Đoàn Thanh Tùng",
+            "Mai Hoàng Yến", "Võ Khánh Vy", "Nguyễn Thành Đạt"
+    };
 
     public String getBookDescription(Book book) {
         if (book == null) return "Không có thông tin mô tả cuốn sách.";
@@ -113,25 +151,29 @@ public class BookDiscussionService {
         if (bookId == null) return Collections.emptyList();
         List<BookReview> list = reviewsMap.get(bookId);
         if (list == null || list.isEmpty()) {
-            // Default 2 welcoming reviews if none exist
+            // Khởi tạo bình luận từ các thành viên độc giả thực tế trong thư viện
+            int hash = Math.abs(bookId.hashCode());
+            String reader1 = REAL_LIBRARY_READERS[hash % REAL_LIBRARY_READERS.length];
+            String reader2 = REAL_LIBRARY_READERS[(hash + 3) % REAL_LIBRARY_READERS.length];
+
             List<BookReview> generated = new CopyOnWriteArrayList<>();
             generated.add(new BookReview(
                     "REV_" + UUID.randomUUID().toString().substring(0, 8),
                     bookId,
-                    "Độc Giả Thư Viện",
+                    reader1,
                     "/com/vithay/libman/images/avatar.png",
                     5,
-                    LocalDate.now().minusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE),
-                    "Cuốn sách rất hay và bổ ích, nội dung súc tích, trình bày rõ ràng. Rất khuyên mọi người nên đọc thử!"
+                    LocalDate.now().minusDays(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
+                    "Tác phẩm rất lôi cuốn và giàu giá trị học thuật. Văn phong mạch lạc, dịch thuật chuẩn xác và mang lại nhiều góc nhìn sâu sắc cho người đọc."
             ));
             generated.add(new BookReview(
                     "REV_" + UUID.randomUUID().toString().substring(0, 8),
                     bookId,
-                    "Ban Bạn Đọc",
+                    reader2,
                     "/com/vithay/libman/images/avatar.png",
-                    4,
-                    LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE),
-                    "Tài liệu tham khảo xuất sắc, giấy in đẹp và bản dịch mượt mà. Sách luôn sẵn sàng tại kho."
+                    5,
+                    LocalDate.now().minusDays(5).format(DateTimeFormatter.ISO_LOCAL_DATE),
+                    "Nội dung chất lượng, cách tiếp cận vấn đề khoa học và thực tiễn. Rất khuyến khích các bạn đọc mượn về nghiên cứu và tham khảo!"
             ));
             reviewsMap.put(bookId, generated);
             return generated;

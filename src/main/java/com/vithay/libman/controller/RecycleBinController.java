@@ -128,28 +128,26 @@ public class RecycleBinController implements Initializable {
     }
 
     private void handlePermanentDeleteBook(Book b) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Hủy Vĩnh Viễn Sách");
-        alert.setHeaderText("CẢNH BÁO: Bạn có muốn hủy vĩnh viễn cuốn sách '" + b.getTitle() + "'?");
-        alert.setContentText("Dữ liệu sẽ bị xóa hoàn toàn khỏi cơ sở dữ liệu và không thể khôi phục.");
-
-        Optional<ButtonType> opt = alert.showAndWait();
-        if (opt.isPresent() && opt.get() == ButtonType.OK) {
-            bookService.permanentDeleteBook(b.getId());
-            loadRecycleBinData();
-        }
+        MainLayoutController.showAppNotice(
+                Alert.AlertType.CONFIRMATION,
+                "Hủy Vĩnh Viễn Sách",
+                "CẢNH BÁO: Bạn có muốn hủy vĩnh viễn cuốn sách '" + b.getTitle() + "'?\nDữ liệu sẽ bị xóa hoàn toàn khỏi cơ sở dữ liệu và không thể khôi phục.",
+                () -> {
+                    bookService.permanentDeleteBook(b.getId());
+                    loadRecycleBinData();
+                }
+        );
     }
 
     private void handlePermanentDeleteReader(Reader r) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Hủy Vĩnh Viễn Độc Giả");
-        alert.setHeaderText("CẢNH BÁO: Bạn có muốn hủy vĩnh viễn hồ sơ độc giả '" + r.getFullName() + "'?");
-        alert.setContentText("Dữ liệu sẽ bị xóa hoàn toàn khỏi cơ sở dữ liệu và không thể khôi phục.");
-
-        Optional<ButtonType> opt = alert.showAndWait();
-        if (opt.isPresent() && opt.get() == ButtonType.OK) {
-            readerService.permanentDeleteReader(r.getId());
-            loadRecycleBinData();
-        }
+        MainLayoutController.showAppNotice(
+                Alert.AlertType.CONFIRMATION,
+                "Hủy Vĩnh Viễn Độc Giả",
+                "CẢNH BÁO: Bạn có muốn hủy vĩnh viễn hồ sơ độc giả '" + r.getFullName() + "'?\nDữ liệu sẽ bị xóa hoàn toàn khỏi cơ sở dữ liệu và không thể khôi phục.",
+                () -> {
+                    readerService.permanentDeleteReader(r.getId());
+                    loadRecycleBinData();
+                }
+        );
     }
 }

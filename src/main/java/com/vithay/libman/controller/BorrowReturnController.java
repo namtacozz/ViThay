@@ -57,6 +57,8 @@ public class BorrowReturnController implements Initializable {
     @FXML private Label lblSummaryQuotaStatus;
     @FXML private TextField txtDeskNotes;
     @FXML private Button btnCompleteCheckout;
+    @FXML private Button btnSwitchToWizard;
+    @FXML private Button btnSwitchBackToDesk;
 
     // Intriguing Branches & Extras on Demand (Task 7)
     @FXML private HBox deskDueAlertBanner;
@@ -168,11 +170,42 @@ public class BorrowReturnController implements Initializable {
         setupReturnTab();
         setupHistoryTab();
         loadAllData();
+
+        if (borrowTabPane != null) {
+            borrowTabPane.getSelectionModel().selectedIndexProperty().addListener((obs, oldVal, newVal) -> {
+                updateSwitchButtons(newVal != null ? newVal.intValue() : 0);
+            });
+            updateSwitchButtons(borrowTabPane.getSelectionModel().getSelectedIndex());
+        }
+    }
+
+    private void updateSwitchButtons(int tabIndex) {
+        if (btnSwitchToWizard != null) {
+            boolean isDesk = (tabIndex == 0);
+            btnSwitchToWizard.setVisible(isDesk);
+            btnSwitchToWizard.setManaged(isDesk);
+        }
+        if (btnSwitchBackToDesk != null) {
+            boolean isWizard = (tabIndex == 3);
+            btnSwitchBackToDesk.setVisible(isWizard);
+            btnSwitchBackToDesk.setManaged(isWizard);
+        }
+    }
+
+    @FXML
+    public void handleSwitchToWizard() {
+        selectTab(3);
+    }
+
+    @FXML
+    public void handleSwitchBackToDesk() {
+        selectTab(0);
     }
 
     public void selectTab(int index) {
         if (borrowTabPane != null && index >= 0 && index < borrowTabPane.getTabs().size()) {
             borrowTabPane.getSelectionModel().select(index);
+            updateSwitchButtons(index);
         }
         loadAllData();
     }
@@ -888,59 +921,17 @@ public class BorrowReturnController implements Initializable {
 
     private void showReceiptDialog(Reader reader, List<BorrowTransaction> transactions) {
         try {
-            if (!javafx.application.Platform.isFxApplicationThread()) {
-                logger.info("Receipt dialog skipped in non-FX environment for reader: {}", reader != null ? reader.getFullName() : "");
-                return;
-            }
             String slipText = exportService.generateBasketBorrowSlip(reader, transactions);
-
-            Dialog<Void> dialog = new Dialog<>();
-            dialog.setTitle("In Phiếu Mượn Sách - " + reader.getFullName());
-            dialog.setHeaderText("Lập phiếu mượn thành công! Xem trước mẫu phiếu in (SRS Mục 6.1):");
-
-            DialogPane pane = dialog.getDialogPane();
-            try {
-                pane.getStylesheets().add(getClass().getResource("/com/vithay/libman/css/style.css").toExternalForm());
-            } catch (Exception ignored) {
-            }
-            pane.getStyleClass().add("bg-surface");
-            pane.getButtonTypes().add(ButtonType.CLOSE);
-
-            TextArea txt = new TextArea(slipText);
-            txt.setEditable(false);
-            txt.setPrefSize(580, 420);
-            txt.getStyleClass().add("wizard-slip-preview");
-            txt.setStyle("-fx-font-family: monospace; -fx-font-size: 12px;");
-
-            VBox box = new VBox(10, txt);
-            box.setPadding(new Insets(12));
-            pane.setContent(box);
-
-            dialog.showAndWait();
+            String title = "In Phiếu Mượn Sách - " + (reader != null ? reader.getFullName() : "");
+            String heading = "Lập phiếu mượn thành công! Xem trước mẫu phiếu in (SRS Mục 6.1):";
+            MainLayoutController.showReceiptPopup(title, heading, slipText);
         } catch (Throwable t) {
             logger.warn("Could not display receipt dialog: {}", t.getMessage());
         }
     }
 
     private void showDeskAlert(Alert.AlertType type, String title, String message) {
-        try {
-            if (javafx.application.Platform.isFxApplicationThread()) {
-                Alert alert = new Alert(type, message, ButtonType.OK);
-                alert.setTitle(title);
-                alert.setHeaderText(null);
-                try {
-                    DialogPane pane = alert.getDialogPane();
-                    pane.getStylesheets().add(getClass().getResource("/com/vithay/libman/css/style.css").toExternalForm());
-                    pane.getStyleClass().add("bg-surface");
-                } catch (Throwable ignored) {
-                }
-                alert.showAndWait();
-            } else {
-                logger.info("[DESK ALERT - {}] {}: {}", type, title, message);
-            }
-        } catch (Throwable t) {
-            logger.warn("Could not display desk alert: {}", t.getMessage());
-        }
+        MainLayoutController.showAppNotice(type, title, message);
     }
 
     // =========================================================================
@@ -1138,7 +1129,24 @@ public class BorrowReturnController implements Initializable {
     }
 
     public void loadAllTransactions() {
-        List<BorrowTransaction> list = borrowService.getAllTransactions();
+        com.vithay.libman.service.AuthService auth = com.vithay.libman.service.AuthService.getInstance();
+        com.vithay.libman.model.User currentUser = auth.getCurrentUser();
+        List<BorrowTransaction> list;
+        if (auth.isReader() && currentUser != null) {
+            Reader r = readerService.getReaderForUser(currentUser);
+            if (r != null) {
+                list = borrowService.getTransactionsByReader(r.getId());
+            } else {
+                list = new ArrayList<>();
+                for (BorrowTransaction tx : borrowService.getAllTransactions()) {
+                    if (currentUser.getFullName() != null && currentUser.getFullName().equalsIgnoreCase(tx.getReaderName())) {
+                        list.add(tx);
+                    }
+                }
+            }
+        } else {
+            list = borrowService.getAllTransactions();
+        }
         allTxList.setAll(list);
         filterTransactions(txtSearchTx != null ? txtSearchTx.getText() : "");
     }
@@ -1173,36 +1181,14 @@ public class BorrowReturnController implements Initializable {
         if (allTransactionsTable == null) return;
         BorrowTransaction selected = allTransactionsTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING, "Vui lòng chọn một phiếu mượn từ danh sách để in!");
-            alert.showAndWait();
+            MainLayoutController.showAppNotice(Alert.AlertType.WARNING, "Chưa Chọn Phiếu", "Vui lòng chọn một phiếu mượn từ danh sách để in!");
             return;
         }
 
         String slipText = exportService.generateBorrowSlip(selected);
-
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("In Phiếu Mượn Sách - " + selected.getId());
-        dialog.setHeaderText("Xem trước mẫu phiếu mượn in ấn (SRS Mục 6.1):");
-
-        DialogPane pane = dialog.getDialogPane();
-        try {
-            pane.getStylesheets().add(getClass().getResource("/com/vithay/libman/css/style.css").toExternalForm());
-        } catch (Exception ignored) {
-        }
-        pane.getStyleClass().add("bg-surface");
-        pane.getButtonTypes().add(ButtonType.CLOSE);
-
-        TextArea txt = new TextArea(slipText);
-        txt.setEditable(false);
-        txt.setPrefSize(520, 380);
-        txt.getStyleClass().add("wizard-slip-preview");
-        txt.setStyle("-fx-font-family: monospace; -fx-font-size: 12px;");
-
-        VBox box = new VBox(10, txt);
-        box.setPadding(new Insets(12));
-        pane.setContent(box);
-
-        dialog.showAndWait();
+        String title = "In Phiếu Mượn Sách - " + selected.getId();
+        String heading = "Xem trước mẫu phiếu mượn in ấn (SRS Mục 6.1):";
+        MainLayoutController.showReceiptPopup(title, heading, slipText);
     }
 
     // =========================================================================
@@ -1935,5 +1921,9 @@ public class BorrowReturnController implements Initializable {
     @FXML
     public void handleWizardClearSelectedBooks() {
         clearWizardSelectedBooks();
+    }
+
+    public ObservableList<BorrowTransaction> getAllTxList() {
+        return allTxList;
     }
 }

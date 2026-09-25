@@ -12,13 +12,24 @@
     </padding>
 
     <!-- Header -->
-    <VBox spacing="2">
-        <Label text="Lưu Hành Mượn &amp; Trả Sách" styleClass="title-large"/>
-        <Label text="Xử lý lập phiếu mượn (đọc tại chỗ / mang về), trả sách, bồi hoàn và in phiếu (SRS Mục 5.5)" styleClass="text-muted"/>
-    </VBox>
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <VBox spacing="2" HBox.hgrow="ALWAYS">
+            <Label text="Lưu Hành Mượn &amp; Trả Sách" styleClass="title-large"/>
+            <Label text="Xử lý lập phiếu mượn (đọc tại chỗ / mang về), trả sách, bồi hoàn và in phiếu (SRS Mục 5.5)" styleClass="text-muted"/>
+        </VBox>
+        <Button fx:id="btnSwitchToWizard" text="⚡ Trợ lý mượn nhanh (Wizard)" onAction="#handleSwitchToWizard"
+                styleClass="btn-secondary" style="-fx-font-weight: bold; -fx-padding: 8 16; -fx-text-fill: #1DB954; -fx-border-color: #1DB954; -fx-border-radius: 6px;">
+            <tooltip><Tooltip text="Chuyển sang quy trình Trợ lý mượn nhanh 4 bước nâng cao"/></tooltip>
+        </Button>
+        <Button fx:id="btnSwitchBackToDesk" text="⮌ Bàn lưu hành tiêu chuẩn (Desk)" onAction="#handleSwitchBackToDesk"
+                visible="false" managed="false"
+                styleClass="btn-secondary" style="-fx-font-weight: bold; -fx-padding: 8 16; -fx-text-fill: #60A5FA; -fx-border-color: #3B82F6; -fx-border-radius: 6px;">
+            <tooltip><Tooltip text="Quay lại bàn lưu hành tiêu chuẩn (Desk)"/></tooltip>
+        </Button>
+    </HBox>
 
-    <!-- Main TabPane -->
-    <TabPane fx:id="borrowTabPane" VBox.vgrow="ALWAYS" styleClass="bg-surface" tabClosingPolicy="UNAVAILABLE">
+    <!-- Main TabPane (Header hidden, navigation controlled via sidebar) -->
+    <TabPane fx:id="borrowTabPane" VBox.vgrow="ALWAYS" styleClass="bg-surface, tab-pane-hidden-header" tabClosingPolicy="UNAVAILABLE">
         <tabs>
             <!-- TAB 1: BÀN LƯU HÀNH (CANVAS PLUS PALETTE) -->
             <Tab text="Bàn Lưu Hành (Desk)">

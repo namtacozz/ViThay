@@ -96,7 +96,7 @@ public class BorrowService {
         LocalDate now = LocalDate.now();
         LocalDate due = now.plusDays(days > 0 ? days : 14);
 
-        String txId = "TX" + System.currentTimeMillis() + "_" + (System.nanoTime() % 10000);
+        String txId = transactionDao.getNextTransactionId();
         BorrowTransaction tx = new BorrowTransaction(
                 txId,
                 reader.getId(),

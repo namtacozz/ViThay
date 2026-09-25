@@ -215,7 +215,8 @@ public class LibManTest {
         assertNull(auth.getCurrentUser());
         assertTrue(auth.login("docgia", "654321"));
 
-        // Revert password back for test repeatability
+        // Revert profile and password back for test repeatability
+        assertTrue(auth.updateProfile("Trần Văn An", "an.tran@gmail.com", "0987654321"));
         assertTrue(auth.changePassword("654321", "123456"));
     }
 }
