@@ -1396,7 +1396,7 @@
 .wizard-stepper-bar {
     -fx-background-color: #181818;
     -fx-background-radius: 8px;
-    -fx-padding: 12px 20px;
+    -fx-padding: 8px 16px;
 }
 .wizard-step-node {
     -fx-background-color: #282828;
