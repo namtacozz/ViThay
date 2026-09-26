@@ -4,15 +4,30 @@ import com.vithay.libman.controller.BorrowReturnController;
 import com.vithay.libman.model.Book;
 import com.vithay.libman.model.Reader;
 import com.vithay.libman.service.ReaderService;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.control.ComboBox;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BorrowWizardTest {
+
+    @BeforeAll
+    public static void initJavaFX() {
+        try {
+            Platform.startup(() -> {});
+        } catch (IllegalStateException ignored) {
+        }
+    }
 
     @Test
     public void testStep1ReaderValidation() {
@@ -175,4 +190,87 @@ public class BorrowWizardTest {
         controller.clearWizardSelectedBooks();
         assertEquals(0, controller.getWizardSelectedBooks().size());
     }
+
+    @Test
+    public void testFXMLWizardStep1ReaderSelection() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        final Throwable[] error = new Throwable[1];
+
+        Platform.runLater(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vithay/libman/view/BorrowReturnView.fxml"));
+                Parent root = loader.load();
+                BorrowReturnController controller = loader.getController();
+
+                // Switch to wizard tab
+                controller.handleSwitchToWizard();
+                assertEquals(1, controller.getCurrentWizardStep());
+
+                // Find comboWizardReader reflectively or via controller
+                java.lang.reflect.Field comboField = BorrowReturnController.class.getDeclaredField("comboWizardReader");
+                comboField.setAccessible(true);
+                @SuppressWarnings("unchecked")
+                ComboBox<Reader> combo = (ComboBox<Reader>) comboField.get(controller);
+
+                assertNotNull(combo, "comboWizardReader should be injected");
+                assertFalse(combo.getItems().isEmpty(), "comboWizardReader should have items loaded");
+
+                // Test if setItems or selectTab wipes wizardReader
+                Reader validReader = null;
+                Reader blockedReader = null;
+                for (Reader rd : combo.getItems()) {
+                    if ("Active".equalsIgnoreCase(rd.getStatus()) && validReader == null) {
+                        validReader = rd;
+                    }
+                    if (("Bị Khóa".equalsIgnoreCase(rd.getStatus()) || "Blocked".equalsIgnoreCase(rd.getStatus())) && blockedReader == null) {
+                        blockedReader = rd;
+                    }
+                }
+                assertNotNull(validReader, "Should have at least one active reader in seed data");
+
+                // Test 1: Selecting valid reader via ComboBox value and pressing Next
+                combo.setValue(validReader);
+                controller.handleSelectWizardReader();
+                assertEquals(validReader.getId(), controller.getWizardReader().getId());
+                boolean nextSuccess = controller.wizardNextStep();
+                assertTrue(nextSuccess, "Selecting a valid reader must allow proceeding to Step 2");
+                assertEquals(2, controller.getCurrentWizardStep(), "Wizard must advance to Step 2");
+
+                // Return to Step 1
+                controller.goToWizardStep(1);
+                assertEquals(1, controller.getCurrentWizardStep());
+
+                // Test 2: If a blocked reader is selected, it must NOT advance to Step 2
+                if (blockedReader != null) {
+                    combo.setValue(blockedReader);
+                    controller.handleSelectWizardReader();
+                    assertFalse(controller.wizardNextStep(), "Blocked reader must not allow proceeding to Step 2");
+                    assertEquals(1, controller.getCurrentWizardStep(), "Wizard should stay on Step 1 for blocked reader");
+                }
+
+                // Test 3: Desk-to-wizard sync
+                controller.goToWizardStep(1);
+                controller.handleSwitchBackToDesk();
+                controller.setSelectedReader(validReader);
+                controller.handleSwitchToWizard();
+                assertEquals(validReader.getId(), controller.getWizardReader().getId(), "Desk reader must sync to wizard");
+                assertTrue(controller.wizardNextStep(), "Wizard must allow proceeding to Step 2 after switching from desk with reader selected");
+                assertEquals(2, controller.getCurrentWizardStep(), "Must be on Step 2");
+            } catch (Throwable t) {
+                error[0] = t;
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        assertTrue(latch.await(10, TimeUnit.SECONDS), "Timeout waiting for JavaFX");
+        if (error[0] != null) {
+            error[0].printStackTrace();
+            fail("testFXMLWizardStep1ReaderSelection failed: " + error[0].getMessage());
+        }
+    }
 }
+
+
+
+

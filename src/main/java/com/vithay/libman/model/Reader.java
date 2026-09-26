@@ -140,6 +140,19 @@ public class Reader {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Reader reader = (Reader) o;
+        return id != null && id.equalsIgnoreCase(reader.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.toLowerCase().hashCode() : 0;
+    }
+
+    @Override
     public String toString() {
         return fullName + " (" + id + ")";
     }

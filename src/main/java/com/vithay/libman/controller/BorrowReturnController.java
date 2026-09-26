@@ -194,20 +194,44 @@ public class BorrowReturnController implements Initializable {
 
     @FXML
     public void handleSwitchToWizard() {
+        Reader reader = getSelectedReader();
+        if (reader != null) {
+            setWizardReader(reader);
+        }
         selectTab(3);
     }
 
     @FXML
     public void handleSwitchBackToDesk() {
+        Reader reader = getWizardReader();
+        if (reader != null) {
+            setSelectedReader(reader);
+        }
         selectTab(0);
     }
 
     public void selectTab(int index) {
+        if (index == 3) {
+            Reader r = getSelectedReader();
+            if (r != null) {
+                this.wizardReader = r;
+            }
+        } else if (index == 0) {
+            Reader r = getWizardReader();
+            if (r != null) {
+                this.selectedReader = r;
+            }
+        }
         if (borrowTabPane != null && index >= 0 && index < borrowTabPane.getTabs().size()) {
             borrowTabPane.getSelectionModel().select(index);
             updateSwitchButtons(index);
         }
         loadAllData();
+        if (index == 3 && wizardReader != null) {
+            setWizardReader(wizardReader);
+        } else if (index == 0 && selectedReader != null) {
+            setSelectedReader(selectedReader);
+        }
     }
 
     public void selectTabByName(String name) {
@@ -316,12 +340,14 @@ public class BorrowReturnController implements Initializable {
     private void loadDeskData() {
         if (comboDeskReader != null) {
             List<Reader> readers = readerService.getAllReaders();
-            Reader previous = comboDeskReader.getValue();
+            Reader previous = selectedReader != null ? selectedReader : comboDeskReader.getValue();
             comboDeskReader.setItems(FXCollections.observableArrayList(readers));
             if (previous != null) {
                 for (Reader r : readers) {
-                    if (r.getId().equals(previous.getId())) {
+                    if (r.getId().equalsIgnoreCase(previous.getId())) {
+                        selectedReader = r;
                         comboDeskReader.setValue(r);
+                        comboDeskReader.getSelectionModel().select(r);
                         break;
                     }
                 }
@@ -646,16 +672,40 @@ public class BorrowReturnController implements Initializable {
     }
 
     public Reader getSelectedReader() {
-        if (comboDeskReader != null && comboDeskReader.getValue() != null) {
-            return comboDeskReader.getValue();
+        if (selectedReader != null) {
+            return selectedReader;
         }
-        return selectedReader;
+        if (comboDeskReader != null) {
+            if (comboDeskReader.getValue() != null) {
+                return comboDeskReader.getValue();
+            }
+            if (comboDeskReader.getSelectionModel() != null && comboDeskReader.getSelectionModel().getSelectedItem() != null) {
+                return comboDeskReader.getSelectionModel().getSelectedItem();
+            }
+        }
+        return null;
     }
 
     public void setSelectedReader(Reader reader) {
         this.selectedReader = reader;
-        if (comboDeskReader != null) {
-            comboDeskReader.setValue(reader);
+        if (comboDeskReader != null && reader != null) {
+            boolean found = false;
+            for (Reader r : comboDeskReader.getItems()) {
+                if (r.getId().equalsIgnoreCase(reader.getId())) {
+                    comboDeskReader.setValue(r);
+                    comboDeskReader.getSelectionModel().select(r);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                comboDeskReader.setValue(reader);
+            }
+        } else if (comboDeskReader != null) {
+            comboDeskReader.setValue(null);
+            if (comboDeskReader.getSelectionModel() != null) {
+                comboDeskReader.getSelectionModel().clearSelection();
+            }
         }
         updateDeskReaderInfo();
     }
@@ -1203,8 +1253,12 @@ public class BorrowReturnController implements Initializable {
                     super.updateItem(r, empty);
                     if (empty || r == null) {
                         setText(null);
+                        setGraphic(null);
                     } else {
-                        setText(r.getFullName() + " (" + r.getId() + ")");
+                        boolean valid = readerService != null && readerService.isCardValid(r);
+                        String badge = valid ? "[✓ Hợp lệ]" : "[" + (r.getStatus() != null ? r.getStatus() : "Không hợp lệ") + "]";
+                        setText(r.getFullName() + " (" + r.getId() + ") - " + badge);
+                        setGraphic(null);
                     }
                 }
             });
@@ -1214,9 +1268,26 @@ public class BorrowReturnController implements Initializable {
                     super.updateItem(r, empty);
                     if (empty || r == null) {
                         setText(null);
+                        setGraphic(null);
                     } else {
-                        setText(r.getFullName() + " (" + r.getId() + ")");
+                        boolean valid = readerService != null && readerService.isCardValid(r);
+                        String badge = valid ? "[✓ Hợp lệ]" : "[" + (r.getStatus() != null ? r.getStatus() : "Không hợp lệ") + "]";
+                        setText(r.getFullName() + " (" + r.getId() + ") - " + badge);
+                        setGraphic(null);
                     }
+                }
+            });
+
+            comboWizardReader.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null) {
+                    wizardReader = newVal;
+                    updateWizardReaderInfo();
+                }
+            });
+            comboWizardReader.valueProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null) {
+                    wizardReader = newVal;
+                    updateWizardReaderInfo();
                 }
             });
         }
@@ -1347,11 +1418,14 @@ public class BorrowReturnController implements Initializable {
     public void loadWizardData() {
         List<Reader> all = readerService.getAllReaders();
         if (comboWizardReader != null) {
+            Reader prev = getWizardReader();
             comboWizardReader.setItems(FXCollections.observableArrayList(all));
-            if (wizardReader != null) {
+            if (prev != null) {
                 for (Reader r : all) {
-                    if (r.getId().equals(wizardReader.getId())) {
+                    if (r.getId().equalsIgnoreCase(prev.getId())) {
+                        wizardReader = r;
                         comboWizardReader.setValue(r);
+                        comboWizardReader.getSelectionModel().select(r);
                         break;
                     }
                 }
@@ -1489,13 +1563,14 @@ public class BorrowReturnController implements Initializable {
         }
 
         if (lblWizardStep1Feedback != null) {
-            if ("Blocked".equalsIgnoreCase(reader.getStatus()) || "KHOA".equalsIgnoreCase(reader.getStatus())) {
+            String st = reader.getStatus() != null ? reader.getStatus().trim() : "";
+            if ("Blocked".equalsIgnoreCase(st) || "KHOA".equalsIgnoreCase(st) || "Bị Khóa".equalsIgnoreCase(st) || "Khóa".equalsIgnoreCase(st)) {
                 lblWizardStep1Feedback.setText("❌ THẺ BỊ KHÓA: Độc giả đang bị khóa tài khoản! Không thể mượn sách.");
                 lblWizardStep1Feedback.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #EF4444;");
-            } else if ("Expired".equalsIgnoreCase(reader.getStatus()) || (reader.getNgayHetHan() != null && reader.getNgayHetHan().isBefore(LocalDate.now()))) {
-                lblWizardStep1Feedback.setText("❌ THẺ HẾT HẠN: Thẻ độc giả đã hết hạn sử dụng (" + reader.getCardExpiryDate() + ")! Cần gia hạn thẻ trước.");
+            } else if ("Expired".equalsIgnoreCase(st) || "Hết Hạn".equalsIgnoreCase(st) || (reader.getNgayHetHan() != null && reader.getNgayHetHan().isBefore(LocalDate.now()))) {
+                lblWizardStep1Feedback.setText("❌ THẺ HẾT HẠN: Thẻ độc giả đã hết hạn sử dụng (" + (reader.getCardExpiryDate() != null ? reader.getCardExpiryDate() : "") + ")! Cần gia hạn thẻ trước.");
                 lblWizardStep1Feedback.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #EF4444;");
-            } else if ("Chờ Cấp Thẻ".equalsIgnoreCase(reader.getStatus())) {
+            } else if ("Chờ Cấp Thẻ".equalsIgnoreCase(st) || "Cho Cap The".equalsIgnoreCase(st)) {
                 lblWizardStep1Feedback.setText("⚠️ CHƯA CẤP THẺ: Độc giả chưa hoàn tất cấp thẻ tại quầy.");
                 lblWizardStep1Feedback.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #F59E0B;");
             } else if (remainingQuota <= 0) {
@@ -1606,11 +1681,12 @@ public class BorrowReturnController implements Initializable {
 
         if (!readerService.isCardValid(reader)) {
             String reason = "Thẻ độc giả không hợp lệ hoặc đã hết hạn!";
-            if ("Blocked".equalsIgnoreCase(reader.getStatus()) || "KHOA".equalsIgnoreCase(reader.getStatus())) {
+            String st = reader.getStatus() != null ? reader.getStatus().trim() : "";
+            if ("Blocked".equalsIgnoreCase(st) || "KHOA".equalsIgnoreCase(st) || "Bị Khóa".equalsIgnoreCase(st) || "Khóa".equalsIgnoreCase(st)) {
                 reason = "Thẻ độc giả đang bị khóa tài khoản!";
-            } else if ("Expired".equalsIgnoreCase(reader.getStatus()) || (reader.getNgayHetHan() != null && reader.getNgayHetHan().isBefore(LocalDate.now()))) {
-                reason = "Thẻ độc giả đã hết hạn sử dụng (" + reader.getCardExpiryDate() + ")!";
-            } else if ("Chờ Cấp Thẻ".equalsIgnoreCase(reader.getStatus())) {
+            } else if ("Expired".equalsIgnoreCase(st) || "Hết Hạn".equalsIgnoreCase(st) || (reader.getNgayHetHan() != null && reader.getNgayHetHan().isBefore(LocalDate.now()))) {
+                reason = "Thẻ độc giả đã hết hạn sử dụng (" + (reader.getCardExpiryDate() != null ? reader.getCardExpiryDate() : "") + ")!";
+            } else if ("Chờ Cấp Thẻ".equalsIgnoreCase(st) || "Cho Cap The".equalsIgnoreCase(st)) {
                 reason = "Độc giả chưa được cấp thẻ thư viện tại quầy!";
             }
             showDeskAlert(Alert.AlertType.ERROR, "Thẻ Không Hợp Lệ", reason);
@@ -1791,16 +1867,43 @@ public class BorrowReturnController implements Initializable {
     }
 
     public Reader getWizardReader() {
-        if (comboWizardReader != null && comboWizardReader.getValue() != null) {
-            return comboWizardReader.getValue();
+        if (wizardReader != null) {
+            return wizardReader;
         }
-        return wizardReader;
+        if (comboWizardReader != null) {
+            if (comboWizardReader.getValue() != null) {
+                return comboWizardReader.getValue();
+            }
+            if (comboWizardReader.getSelectionModel() != null && comboWizardReader.getSelectionModel().getSelectedItem() != null) {
+                return comboWizardReader.getSelectionModel().getSelectedItem();
+            }
+        }
+        if (selectedReader != null) {
+            return selectedReader;
+        }
+        return null;
     }
 
     public void setWizardReader(Reader reader) {
         this.wizardReader = reader;
-        if (comboWizardReader != null) {
-            comboWizardReader.setValue(reader);
+        if (comboWizardReader != null && reader != null) {
+            boolean found = false;
+            for (Reader r : comboWizardReader.getItems()) {
+                if (r.getId().equalsIgnoreCase(reader.getId())) {
+                    comboWizardReader.setValue(r);
+                    comboWizardReader.getSelectionModel().select(r);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                comboWizardReader.setValue(reader);
+            }
+        } else if (comboWizardReader != null) {
+            comboWizardReader.setValue(null);
+            if (comboWizardReader.getSelectionModel() != null) {
+                comboWizardReader.getSelectionModel().clearSelection();
+            }
         }
         updateWizardReaderInfo();
     }
@@ -1864,7 +1967,13 @@ public class BorrowReturnController implements Initializable {
     @FXML
     public void handleSelectWizardReader() {
         if (comboWizardReader != null) {
-            wizardReader = comboWizardReader.getValue();
+            Reader r = comboWizardReader.getValue();
+            if (r == null && comboWizardReader.getSelectionModel() != null) {
+                r = comboWizardReader.getSelectionModel().getSelectedItem();
+            }
+            if (r != null) {
+                this.wizardReader = r;
+            }
             updateWizardReaderInfo();
         }
     }
