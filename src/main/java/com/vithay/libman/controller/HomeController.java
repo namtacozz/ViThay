@@ -49,6 +49,7 @@ public class HomeController implements Initializable {
     @FXML private Button btnToggleStats;
 
     @FXML private HBox featuredBooksContainer;
+    @FXML private ScrollPane featuredScrollPane;
 
     @FXML private TableView<BorrowTransaction> transactionsTable;
     @FXML private VBox recentTransactionsSection;
@@ -74,6 +75,17 @@ public class HomeController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupTable();
+        if (featuredScrollPane != null) {
+            featuredScrollPane.setOnScroll(event -> {
+                double deltaY = event.getDeltaY();
+                if (deltaY != 0) {
+                    double hValue = featuredScrollPane.getHvalue();
+                    double step = (deltaY < 0 ? 0.08 : -0.08);
+                    featuredScrollPane.setHvalue(Math.min(1.0, Math.max(0.0, hValue + step)));
+                    event.consume();
+                }
+            });
+        }
         refreshData();
     }
 
@@ -104,6 +116,20 @@ public class HomeController implements Initializable {
             recentTransactionsSection.setVisible(isStaff);
             recentTransactionsSection.setManaged(isStaff);
         }
+
+        if (featuredScrollPane != null) {
+            if (isStaff) {
+                featuredScrollPane.setPrefHeight(230);
+                featuredScrollPane.setMinHeight(210);
+                featuredScrollPane.setMaxHeight(230);
+            } else {
+                // Độc giả / Khách: Không có bảng giao dịch mượn gần đây, hiển thị thẻ to thoáng
+                featuredScrollPane.setPrefHeight(380);
+                featuredScrollPane.setMinHeight(340);
+                featuredScrollPane.setMaxHeight(420);
+            }
+        }
+        loadFeaturedBooks();
     }
 
     public void updateGreeting() {
@@ -136,30 +162,48 @@ public class HomeController implements Initializable {
         featuredBooksContainer.getChildren().clear();
         List<Book> books = bookService.getAllBooks();
         int limit = Math.min(15, books.size());
+        boolean isStaff = AuthService.getInstance().isLibrarian();
         for (int i = 0; i < limit; i++) {
-            VBox card = createBookCard(books.get(i));
+            VBox card = createBookCard(books.get(i), isStaff);
             featuredBooksContainer.getChildren().add(card);
         }
     }
 
-    private VBox createBookCard(Book book) {
+    private VBox createBookCard(Book book, boolean isStaff) {
         VBox card = new VBox(8);
         card.getStyleClass().add("bg-card");
         card.setCursor(Cursor.HAND);
-        card.setPrefWidth(180);
-        card.setMinWidth(180);
-        card.setMaxWidth(180);
-        card.setPadding(new Insets(12));
         card.setAlignment(Pos.TOP_LEFT);
         card.setCache(true);
         card.setCacheHint(CacheHint.SPEED);
 
-        // Book Cover Image
+        double cardW = isStaff ? 135 : 185;
+        double cardH = isStaff ? 215 : 325;
+        double imgW = isStaff ? 119 : 161;
+        double imgH = isStaff ? 150 : 225;
+        double titleH = isStaff ? 28 : 36;
+        double authorH = isStaff ? 16 : 20;
+
+        card.setPrefWidth(cardW);
+        card.setMinWidth(cardW);
+        card.setMaxWidth(cardW);
+        card.setPrefHeight(cardH);
+        card.setMinHeight(cardH);
+        card.setMaxHeight(cardH);
+        card.setPadding(new Insets(isStaff ? 8 : 12));
+
+        // Fixed-size Image Container with dropshadow - prevents text jumping
         ImageView imageView = new ImageView();
-        imageView.setFitWidth(156);
-        imageView.setFitHeight(200);
+        imageView.setFitWidth(imgW);
+        imageView.setFitHeight(imgH);
         imageView.setPreserveRatio(false);
-        imageView.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0, 0, 2);");
+
+        javafx.scene.layout.StackPane imagePane = new javafx.scene.layout.StackPane(imageView);
+        imagePane.setPrefSize(imgW, imgH);
+        imagePane.setMinSize(imgW, imgH);
+        imagePane.setMaxSize(imgW, imgH);
+        imagePane.setAlignment(Pos.CENTER);
+        imagePane.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0, 0, 2);");
 
         try {
             String imgPath = book.getCoverImage();
@@ -175,46 +219,30 @@ public class HomeController implements Initializable {
             logger.warn("Could not load image for book: {}", book.getTitle());
         }
 
-        // Title
+        // Title with fixed height to guarantee constant vertical baseline
         Label lblTitle = new Label(book.getTitle());
         lblTitle.getStyleClass().add("title-card");
+        lblTitle.setStyle("-fx-font-size: " + (isStaff ? "11px" : "13px") + "; -fx-font-weight: bold;");
         lblTitle.setWrapText(true);
-        lblTitle.setMaxWidth(156);
-        lblTitle.setMaxHeight(38);
+        lblTitle.setPrefWidth(imgW);
+        lblTitle.setMaxWidth(imgW);
+        lblTitle.setPrefHeight(titleH);
+        lblTitle.setMinHeight(titleH);
+        lblTitle.setMaxHeight(titleH);
+        lblTitle.setAlignment(Pos.TOP_LEFT);
 
-        // Author
+        // Author with fixed height
         Label lblAuthor = new Label(book.getAuthor());
         lblAuthor.getStyleClass().add("subtitle-card");
-        lblAuthor.setMaxWidth(156);
+        lblAuthor.setStyle("-fx-font-size: " + (isStaff ? "10px" : "11px") + "; -fx-text-fill: #a0a0a0;");
+        lblAuthor.setPrefWidth(imgW);
+        lblAuthor.setMaxWidth(imgW);
+        lblAuthor.setPrefHeight(authorH);
+        lblAuthor.setMinHeight(authorH);
+        lblAuthor.setMaxHeight(authorH);
+        lblAuthor.setAlignment(Pos.TOP_LEFT);
 
-        // Category
-        Label lblCategory = new Label(book.getCategory());
-        lblCategory.getStyleClass().add("text-muted");
-
-        // Status Badge
-        Label lblBadge = new Label(book.getStatus());
-        String status = book.getStatus();
-        if ("Available".equalsIgnoreCase(status) || "Có sẵn".equalsIgnoreCase(status) || "Khả dụng".equalsIgnoreCase(status)) {
-            lblBadge.getStyleClass().add("badge-available");
-            lblBadge.setText("Khả dụng");
-        } else if ("Borrowed".equalsIgnoreCase(status) || "Đang mượn".equalsIgnoreCase(status)) {
-            lblBadge.getStyleClass().add("badge-borrowed");
-            lblBadge.setText("Đang mượn");
-        } else if ("On Hold".equalsIgnoreCase(status) || "Đang giữ".equalsIgnoreCase(status)) {
-            lblBadge.getStyleClass().add("badge-onhold");
-            lblBadge.setText("Đang giữ");
-        } else {
-            lblBadge.getStyleClass().add("badge-returned");
-            lblBadge.setText("Đã trả");
-        }
-
-        HBox badgeBox = new HBox(lblBadge);
-        badgeBox.setAlignment(Pos.CENTER_LEFT);
-
-        Region spacer = new Region();
-        VBox.setVgrow(spacer, Priority.ALWAYS);
-
-        card.getChildren().addAll(imageView, lblTitle, lblAuthor, lblCategory, spacer, badgeBox);
+        card.getChildren().addAll(imagePane, lblTitle, lblAuthor);
 
         card.setOnMouseClicked(event -> {
             if (mainController != null) {
@@ -223,6 +251,10 @@ public class HomeController implements Initializable {
         });
 
         return card;
+    }
+
+    private VBox createBookCard(Book book) {
+        return createBookCard(book, AuthService.getInstance().isLibrarian());
     }
 
     private void setupTable() {

@@ -25,7 +25,6 @@
                     </ImageView>
                     <VBox spacing="1" alignment="CENTER_LEFT">
                         <Label text="LibMan" styleClass="sidebar-logo-text"/>
-                        <Label text="Thư Viện Chuẩn Quốc Gia" style="-fx-font-size: 10px; -fx-text-fill: #727272;"/>
                     </VBox>
                 </HBox>
 
@@ -37,6 +36,7 @@
                         <TextField fx:id="headerSearchField" promptText="Tìm kiếm sách, tác giả, thể loại, độc giả..."
                                    style="-fx-background-color: transparent; -fx-text-fill: inherit; -fx-prompt-text-fill: #727272;"
                                    HBox.hgrow="ALWAYS"/>
+                        <Label text="Ctrl + K" styleClass="kbd-badge"/>
                     </HBox>
 
                     <Region HBox.hgrow="ALWAYS"/>
@@ -200,7 +200,7 @@
                         <Label fx:id="lblSecAdmin" text="BÁO CÁO &amp; HỆ THỐNG" styleClass="sidebar-category-label"/>
                         <Button fx:id="btnNavStats" text="Thống kê thư viện" onAction="#handleNavStats" maxWidth="Infinity" styleClass="nav-item">
                             <graphic>
-                                <SVGPath mouseTransparent="true" content="M 18 20 V 10 M 12 20 V 4 M 6 20 V 14" styleClass="sidebar-svg-icon" scaleX="0.75" scaleY="0.75"/>
+                                <SVGPath mouseTransparent="true" content="M 4 20 H 7 V 13 H 4 Z M 10 20 H 13 V 4 H 10 Z M 16 20 H 19 V 9 H 16 Z M 2 21 H 22 V 23 H 2 Z" styleClass="sidebar-svg-icon" scaleX="0.75" scaleY="0.75"/>
                             </graphic>
                             <tooltip><Tooltip text="Báo cáo thống kê thư viện"/></tooltip>
                         </Button>
@@ -247,7 +247,7 @@
     </BorderPane>
 
     <!-- LAYER 2: SPOTIFY-LIKE INSTANT SEARCH FLOATING DROPDOWN (STRAIGHT COLUMN ALIGNMENT) -->
-    <VBox fx:id="searchDropdownContainer" visible="false" managed="false"
+    <VBox fx:id="searchDropdownContainer" visible="false" managed="false" mouseTransparent="true"
           alignment="TOP_LEFT" maxWidth="460" maxHeight="380"
           styleClass="search-dropdown"
           StackPane.alignment="TOP_LEFT">
@@ -262,12 +262,12 @@
     </VBox>
 
     <!-- LAYER 3: IN-WINDOW OVERLAY MODAL (DIMMED & BLURRED BACKDROP) -->
-    <StackPane fx:id="authOverlayPane" visible="false" managed="false" styleClass="auth-overlay">
+    <StackPane fx:id="authOverlayPane" visible="false" managed="false" mouseTransparent="true" styleClass="auth-overlay">
         <!-- Overlay backdrop click handler closes popup -->
         <Pane onMouseClicked="#closeAuthPopup"/>
 
         <!-- CARD 1: DYNAMIC AUTH MODAL (LOGIN & REGISTER) -->
-        <VBox fx:id="authModalBox" maxWidth="460" maxHeight="620" styleClass="auth-modal" spacing="16">
+        <VBox fx:id="authModalBox" maxWidth="460" maxHeight="-Infinity" StackPane.alignment="CENTER" styleClass="auth-modal" spacing="16">
             <!-- VIEW A: ĐĂNG NHẬP (DEFAULT) -->
             <VBox fx:id="loginViewBox" spacing="16">
                 <!-- Header -->
@@ -308,9 +308,9 @@
                     <Label text="Đăng ký nếu chưa có tài khoản." styleClass="auth-link" onMouseClicked="#switchToRegisterView"/>
                 </HBox>
 
-                <HBox spacing="12">
-                    <Button text="Đăng Nhập Ngay" onAction="#handleExecuteLogin" styleClass="btn-primary"/>
+                <HBox spacing="12" alignment="CENTER_RIGHT">
                     <Button text="Đóng" onAction="#closeAuthPopup" styleClass="btn-secondary"/>
+                    <Button text="Đăng Nhập Ngay" onAction="#handleExecuteLogin" styleClass="btn-primary"/>
                 </HBox>
             </VBox>
 
@@ -365,15 +365,15 @@
                     <Label text="Đã có tài khoản? Đăng nhập ngay." styleClass="auth-link" onMouseClicked="#switchToLoginView"/>
                 </HBox>
 
-                <HBox spacing="12">
-                    <Button text="Hoàn Tất Đăng Ký" onAction="#handleExecuteRegister" styleClass="btn-primary"/>
+                <HBox spacing="12" alignment="CENTER_RIGHT">
                     <Button text="Quay Lại" onAction="#switchToLoginView" styleClass="btn-secondary"/>
+                    <Button text="Hoàn Tất Đăng Ký" onAction="#handleExecuteRegister" styleClass="btn-primary"/>
                 </HBox>
             </VBox>
         </VBox>
 
         <!-- CARD 2: ACCOUNT SETTINGS / PROFILE MODAL (WHEN LOGGED IN) -->
-        <VBox fx:id="profileModalBox" maxWidth="480" maxHeight="620" styleClass="profile-modal" spacing="16" visible="false" managed="false">
+        <VBox fx:id="profileModalBox" maxWidth="480" maxHeight="-Infinity" StackPane.alignment="CENTER" styleClass="profile-modal" spacing="16" visible="false" managed="false">
             <!-- Header -->
             <HBox alignment="CENTER_LEFT">
                 <VBox spacing="2">
@@ -456,7 +456,7 @@
         </VBox>
 
         <!-- CARD 3: IN-APP SRS HELP MODAL (PROFESSIONAL CARDS & TYPOGRAPHY) -->
-        <VBox fx:id="helpModalBox" id="helpModalBox" maxWidth="700" maxHeight="640" styleClass="auth-modal" spacing="16" visible="false" managed="false">
+        <VBox fx:id="helpModalBox" id="helpModalBox" maxWidth="700" maxHeight="-Infinity" StackPane.alignment="CENTER" styleClass="auth-modal" spacing="16" visible="false" managed="false">
             <!-- Header -->
             <HBox alignment="CENTER_LEFT">
                 <VBox spacing="2">
@@ -540,7 +540,7 @@
         </VBox>
 
         <!-- CARD 4: DEDICATED READER BORROW MODAL (CHỨC NĂNG LẬP PHIẾU MƯỢN ĐỘC LẬP CHO ĐỘC GIẢ) -->
-        <VBox fx:id="readerBorrowModalBox" maxWidth="520" maxHeight="620" styleClass="reader-borrow-modal" spacing="16" visible="false" managed="false">
+        <VBox fx:id="readerBorrowModalBox" maxWidth="520" maxHeight="-Infinity" StackPane.alignment="CENTER" styleClass="reader-borrow-modal" spacing="16" visible="false" managed="false">
             <!-- Header -->
             <HBox alignment="CENTER_LEFT">
                 <VBox spacing="2">
@@ -603,13 +603,13 @@
 
             <!-- Action Buttons -->
             <HBox spacing="12" alignment="CENTER_RIGHT">
-                <Button fx:id="btnReaderBorrowSubmit" text="Xác Nhận Lập Phiếu Mượn" onAction="#handleExecuteReaderBorrow" styleClass="btn-primary" style="-fx-padding: 8 16;"/>
                 <Button text="Hủy &amp; Đóng" onAction="#closeAuthPopup" styleClass="btn-secondary" style="-fx-padding: 8 16;"/>
+                <Button fx:id="btnReaderBorrowSubmit" text="Xác Nhận Lập Phiếu Mượn" onAction="#handleExecuteReaderBorrow" styleClass="btn-primary" style="-fx-padding: 8 16;"/>
             </HBox>
         </VBox>
 
         <!-- CARD 5: IN-APP NOTICE / CONFIRM / PROMPT MODAL (REPLACES OS ALERTS/DIALOGS) -->
-        <VBox fx:id="appNoticeModalBox" maxWidth="520" maxHeight="580" styleClass="auth-modal" spacing="16" visible="false" managed="false">
+        <VBox fx:id="appNoticeModalBox" maxWidth="520" maxHeight="-Infinity" StackPane.alignment="CENTER" styleClass="auth-modal" spacing="16" visible="false" managed="false">
             <!-- Header -->
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label fx:id="lblNoticeIconBadge" text="ℹ" styleClass="badge-available" style="-fx-font-size: 14px; -fx-padding: 3 8;"/>
@@ -631,5 +631,13 @@
             </HBox>
         </VBox>
     </StackPane>
+
+    <!-- LAYER 3: NON-BLOCKING FLOATING TOAST CONTAINER -->
+    <VBox fx:id="toastContainer" alignment="BOTTOM_RIGHT" spacing="10" maxWidth="420"
+          mouseTransparent="true" pickOnBounds="false" StackPane.alignment="BOTTOM_RIGHT">
+        <padding>
+            <Insets bottom="24" right="24"/>
+        </padding>
+    </VBox>
 
 </StackPane>

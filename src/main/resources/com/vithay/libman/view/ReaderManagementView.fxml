@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
 
 <StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
            fx:id="readerRootPane"
@@ -22,22 +23,57 @@
                 <Label text="Hồ sơ độc giả, cấp thẻ, hạn hiệu lực và quản lý danh mục hội viên (SRS Mục 5.4)" styleClass="text-muted"/>
             </VBox>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnScanExpired" text="Quét Thẻ Hết Hạn" onAction="#handleScanExpiredReaders" styleClass="btn-secondary"/>
-            <Button fx:id="btnExportReaders" text="Xuất File CSV" onAction="#handleExportCsv" styleClass="btn-secondary"/>
-            <Button fx:id="btnAddReader" text="+ Thêm Độc Giả Mới" onAction="#handleOpenAddReader" styleClass="btn-primary"/>
-            <Button text="Làm Mới" onAction="#loadReaders" styleClass="btn-secondary"/>
+            <!-- Secondary Utility Group -->
+            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="header-utility-group">
+                <Button fx:id="btnScanExpired" onAction="#handleScanExpiredReaders" styleClass="btn-secondary" style="-fx-padding: 6 12;">
+                    <graphic>
+                        <HBox alignment="CENTER" spacing="6">
+                            <SVGPath content="M 12 2 C 6.48 2 2 6.48 2 12 s 4.48 10 10 10 10 -4.48 10 -10 S 17.52 2 12 2 Z M 13 17 h -2 v -2 h 2 v 2 Z M 13 13 h -2 V 7 h 2 v 6 Z" fill="#F59E0B" scaleX="0.65" scaleY="0.65"/>
+                            <Label text="Quét Hết Hạn" style="-fx-text-fill: #FFFFFF; -fx-font-size: 12px;"/>
+                        </HBox>
+                    </graphic>
+                    <tooltip><Tooltip text="Quét và cập nhật trạng thái thẻ độc giả đã hết hạn"/></tooltip>
+                </Button>
+                <Button fx:id="btnExportReaders" onAction="#handleExportCsv" styleClass="btn-secondary" style="-fx-padding: 6 12;">
+                    <graphic>
+                        <HBox alignment="CENTER" spacing="6">
+                            <SVGPath content="M 19 9 h -4 V 3 H 9 v 6 H 5 l 7 7 l 7 -7 Z M 5 18 v 2 h 14 v -2 H 5 Z" fill="#B3B3B3" scaleX="0.65" scaleY="0.65"/>
+                            <Label text="Xuất" style="-fx-text-fill: #FFFFFF; -fx-font-size: 12px;"/>
+                        </HBox>
+                    </graphic>
+                    <tooltip><Tooltip text="Xuất danh sách độc giả ra file CSV"/></tooltip>
+                </Button>
+                <Button onAction="#loadReaders" styleClass="btn-circle, btn-secondary">
+                    <graphic>
+                        <SVGPath content="M 17.65 6.35 C 16.2 4.9 14.21 4 12 4 C 7.58 4 4.01 7.58 4.01 12 C 4.01 16.42 7.58 20 12 20 C 15.73 20 18.84 17.45 19.73 14 H 17.65 C 16.83 16.33 14.61 18 12 18 C 8.69 18 6 15.31 6 12 C 6 8.69 8.69 6 12 6 C 13.66 6 15.14 6.69 16.22 7.78 L 13 11 H 20 V 4 L 17.65 6.35 Z" fill="#FFFFFF" scaleX="0.65" scaleY="0.65"/>
+                    </graphic>
+                    <tooltip><Tooltip text="Làm mới danh sách độc giả"/></tooltip>
+                </Button>
+            </HBox>
+            <!-- Primary CTA Action -->
+            <Button fx:id="btnAddReader" onAction="#handleOpenAddReader" styleClass="btn-primary" style="-fx-padding: 6 14;">
+                <graphic>
+                    <HBox alignment="CENTER" spacing="6">
+                        <SVGPath content="M 19 13 h -6 v 6 h -2 v -6 H 5 v -2 h 6 V 5 h 2 v 6 h 6 v 2 Z" fill="#000000" scaleX="0.65" scaleY="0.65"/>
+                        <Label text="Thêm" style="-fx-text-fill: #000000; -fx-font-weight: bold; -fx-font-size: 12px;"/>
+                    </HBox>
+                </graphic>
+                <tooltip><Tooltip text="Tạo hồ sơ và cấp thẻ độc giả mới"/></tooltip>
+            </Button>
         </HBox>
 
-        <!-- Filter & Search Toolbar -->
+        <!-- Filter & Search Toolbar (Top-Left Search Priority) -->
         <HBox alignment="CENTER_LEFT" spacing="12" styleClass="bg-surface">
             <padding>
                 <Insets top="12" right="16" bottom="12" left="16"/>
             </padding>
-            <Label text="Trạng thái thẻ:" styleClass="form-label"/>
-            <ComboBox fx:id="readerStatusFilterCombo" prefWidth="160" styleClass="form-control" onAction="#handleStatusFilter"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <TextField fx:id="txtSearchReader" promptText="Tìm theo mã, họ tên, SĐT, CCCD, hạn thẻ..." prefWidth="300"
+            <TextField fx:id="txtSearchReader" promptText="Tìm kiếm" prefWidth="320"
                        styleClass="search-field" onKeyReleased="#handleSearchReader"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="filter-group-box">
+                <Label text="Trạng thái thẻ:" styleClass="form-label"/>
+                <ComboBox fx:id="readerStatusFilterCombo" prefWidth="160" styleClass="form-control" onAction="#handleStatusFilter"/>
+            </HBox>
         </HBox>
 
         <!-- Readers Table -->
@@ -62,7 +98,7 @@
     <!-- IN-WINDOW OVERLAY MODAL FOR ADD/EDIT READER -->
     <StackPane fx:id="readerModalOverlay" visible="false" managed="false" styleClass="auth-overlay">
         <Pane onMouseClicked="#closeReaderModal"/>
-        <VBox fx:id="readerModalBox" maxWidth="540" maxHeight="640" styleClass="auth-modal" spacing="14">
+        <VBox fx:id="readerModalBox" maxWidth="540" maxHeight="-Infinity" StackPane.alignment="CENTER" styleClass="auth-modal" spacing="14">
             <HBox alignment="CENTER_LEFT">
                 <VBox spacing="2">
                     <Label fx:id="lblReaderModalTitle" text="Thêm Độc Giả Mới" styleClass="title-large"/>

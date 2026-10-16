@@ -8,6 +8,7 @@ import com.vithay.libman.service.AuthService;
 import com.vithay.libman.service.BookService;
 import com.vithay.libman.service.CategoryService;
 import com.vithay.libman.service.ExportService;
+import com.vithay.libman.util.UIUtils;
 import com.vithay.libman.util.VietnameseUtils;
 import com.vithay.libman.view.component.BookCardView;
 import javafx.collections.FXCollections;
@@ -22,9 +23,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
+import javafx.scene.shape.SVGPath;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +55,8 @@ public class BookManagementController implements Initializable {
     @FXML private HBox filterToolbar;
     @FXML private ComboBox<String> authorFilterCombo;
     @FXML private ComboBox<String> statusFilterCombo;
+    @FXML private Button btnToggleInspector;
+    @FXML private Button btnSwapPanels;
     private String currentCategoryFilter = "Tất cả";
     private String drilldownAuthor = null;
     private String drilldownShelf = null;
@@ -164,6 +170,10 @@ public class BookManagementController implements Initializable {
     @FXML private TextField txtModalBookPrice;
     @FXML private TextField txtModalBookCopies;
     @FXML private ComboBox<String> comboModalBookStatus;
+    @FXML private HBox boxCoverPicker;
+    @FXML private ImageView imgModalCoverPreview;
+    @FXML private Label lblCoverPathHint;
+    private String modalCoverImagePath = null;
     private Book currentEditingBook = null;
 
     private final BookService bookService = new BookService();
@@ -179,10 +189,14 @@ public class BookManagementController implements Initializable {
         if (bookSplitPane != null) {
             bookSplitPane.setDividerPositions(DIVIDER_RATIO);
         }
+        if (bookModalBox != null && !bookModalBox.getChildren().isEmpty()) {
+            UIUtils.makeDraggable(bookModalBox.getChildren().get(0), bookModalBox);
+        }
         setupFilters();
         setupAdvancedFilters();
         setupCirculationTable();
         setupTable();
+        setupCoverPickerDragAndDrop();
         loadBooks();
         switchView(true);
         updateBreadcrumbs();
@@ -341,7 +355,9 @@ public class BookManagementController implements Initializable {
         colBookTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         colBookAuthor.setCellValueFactory(new PropertyValueFactory<>("author"));
         colBookCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
-        colBookShelf.setCellValueFactory(new PropertyValueFactory<>("shelfLocation"));
+        if (colBookShelf != null) {
+            colBookShelf.setCellValueFactory(new PropertyValueFactory<>("shelfLocation"));
+        }
         colBookPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
         colBookAvailable.setCellValueFactory(new PropertyValueFactory<>("availableCopies"));
 
@@ -369,8 +385,10 @@ public class BookManagementController implements Initializable {
                     setText(null);
                 } else {
                     Label badge = new Label();
-                    if ("Available".equalsIgnoreCase(item) || "Còn sách".equalsIgnoreCase(item) || "KHA_DUNG".equalsIgnoreCase(item)) {
-                        badge.setText("Còn sách");
+                    badge.setMinWidth(Region.USE_PREF_SIZE);
+                    badge.setStyle("-fx-padding: 3 8;");
+                    if ("Available".equalsIgnoreCase(item) || "Còn sách".equalsIgnoreCase(item) || "KHA_DUNG".equalsIgnoreCase(item) || "Khả dụng".equalsIgnoreCase(item)) {
+                        badge.setText("Khả dụng");
                         badge.getStyleClass().add("badge-available");
                     } else if ("Borrowed".equalsIgnoreCase(item) || "Đang mượn".equalsIgnoreCase(item) || "DANG_MUON".equalsIgnoreCase(item)) {
                         badge.setText("Đang mượn");
@@ -390,23 +408,46 @@ public class BookManagementController implements Initializable {
             }
         });
 
-        // Action Buttons: Edit, Move to Recycle Bin (Xóa tạm)
+        // Action Buttons: Edit (Pencil SVG), Move to Recycle Bin (Trash SVG)
         colBookActions.setCellFactory(param -> new TableCell<>() {
-            private final Button btnEdit = new Button("Sửa");
-            private final Button btnDelete = new Button("Xóa");
-            private final HBox pane = new HBox(6, btnEdit, btnDelete);
+            private final Button btnEdit = new Button();
+            private final Button btnDelete = new Button();
+            private final HBox pane = new HBox(8, btnEdit, btnDelete);
 
             {
                 pane.setAlignment(Pos.CENTER);
-                btnEdit.getStyleClass().add("btn-secondary");
-                btnEdit.setStyle("-fx-font-size: 11px; -fx-padding: 3 8;");
+
+                // Edit Button with SVG Pencil
+                btnEdit.getStyleClass().addAll("btn-secondary", "btn-icon-action");
+                btnEdit.setTooltip(new Tooltip("Chỉnh sửa thông tin sách"));
+                btnEdit.setMinWidth(28);
+                btnEdit.setPrefWidth(28);
+                btnEdit.setMinHeight(28);
+                btnEdit.setPrefHeight(28);
+                SVGPath editSvg = new SVGPath();
+                editSvg.setContent("M 3 17.25 V 21 h 3.75 L 17.81 9.94 l -3.75 -3.75 L 3 17.25 Z M 20.71 7.04 c 0.39 -0.39 0.39 -1.02 0 -1.41 l -2.34 -2.34 c -0.39 -0.39 -1.02 -0.39 -1.41 0 l -1.83 1.83 3.75 3.75 1.83 -1.83 Z");
+                editSvg.setStyle("-fx-fill: #1DB954;");
+                editSvg.setScaleX(0.7);
+                editSvg.setScaleY(0.7);
+                btnEdit.setGraphic(editSvg);
                 btnEdit.setOnAction(e -> {
                     Book book = getTableView().getItems().get(getIndex());
                     showBookFormModal(book);
                 });
 
-                btnDelete.getStyleClass().add("btn-danger");
-                btnDelete.setStyle("-fx-font-size: 11px; -fx-padding: 3 8;");
+                // Delete Button with SVG Trash
+                btnDelete.getStyleClass().addAll("btn-danger", "btn-icon-action");
+                btnDelete.setTooltip(new Tooltip("Chuyển sách vào Thùng Rác"));
+                btnDelete.setMinWidth(28);
+                btnDelete.setPrefWidth(28);
+                btnDelete.setMinHeight(28);
+                btnDelete.setPrefHeight(28);
+                SVGPath deleteSvg = new SVGPath();
+                deleteSvg.setContent("M 6 19 c 0 1.1 0.9 2 2 2 h 8 c 1.1 0 2 -0.9 2 -2 V 7 H 6 v 12 Z M 19 4 h -3.5 l -1 -1 h -5 l -1 1 H 5 v 2 h 14 V 4 Z");
+                deleteSvg.setStyle("-fx-fill: #EF4444;");
+                deleteSvg.setScaleX(0.7);
+                deleteSvg.setScaleY(0.7);
+                btnDelete.setGraphic(deleteSvg);
                 btnDelete.setOnAction(e -> {
                     Book book = getTableView().getItems().get(getIndex());
                     handleSoftDeleteBook(book);
@@ -863,6 +904,104 @@ public class BookManagementController implements Initializable {
         showBookFormModal(null);
     }
 
+    private void setupCoverPickerDragAndDrop() {
+        if (boxCoverPicker == null) return;
+
+        boxCoverPicker.setOnDragOver(event -> {
+            if (event.getGestureSource() != boxCoverPicker && event.getDragboard().hasFiles()) {
+                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            }
+            event.consume();
+        });
+
+        boxCoverPicker.setOnDragEntered(event -> {
+            if (event.getGestureSource() != boxCoverPicker && event.getDragboard().hasFiles()) {
+                boxCoverPicker.setStyle("-fx-background-color: #2a2a2a; -fx-padding: 12 14; -fx-background-radius: 8px; -fx-border-color: #1DB954; -fx-border-radius: 8px; -fx-border-width: 1.5px;");
+            }
+            event.consume();
+        });
+
+        boxCoverPicker.setOnDragExited(event -> {
+            boxCoverPicker.setStyle("-fx-background-color: #202020; -fx-padding: 12 14; -fx-background-radius: 8px; -fx-border-color: #2F2F2F; -fx-border-radius: 8px; -fx-border-width: 1px;");
+            event.consume();
+        });
+
+        boxCoverPicker.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasFiles()) {
+                File file = db.getFiles().get(0);
+                String name = file.getName().toLowerCase();
+                if (name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".webp")) {
+                    setModalCoverPreview(file.toURI().toString());
+                    if (lblCoverPathHint != null) {
+                        lblCoverPathHint.setText("✓ Đã chọn ảnh: " + file.getName());
+                    }
+                    MainLayoutController.showToast("Đã tải ảnh bìa: " + file.getName(), "SUCCESS");
+                    success = true;
+                } else {
+                    MainLayoutController.showToast("Chỉ hỗ trợ định dạng ảnh (.png, .jpg, .webp)!", "WARNING");
+                }
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });
+    }
+
+    @FXML
+    public void handleChooseCoverImage() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Chọn Ảnh Bìa Sách");
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Ảnh Bìa (*.png, *.jpg, *.jpeg, *.webp)", "*.png", "*.jpg", "*.jpeg", "*.webp"),
+                new FileChooser.ExtensionFilter("Tất cả tệp", "*.*")
+        );
+        File file = chooser.showOpenDialog(bookRootPane != null && bookRootPane.getScene() != null ? bookRootPane.getScene().getWindow() : null);
+        if (file != null) {
+            setModalCoverPreview(file.toURI().toString());
+            if (lblCoverPathHint != null) {
+                lblCoverPathHint.setText("✓ Đã chọn ảnh: " + file.getName());
+            }
+            MainLayoutController.showToast("Đã chọn ảnh bìa: " + file.getName(), "SUCCESS");
+        }
+    }
+
+    @FXML
+    public void handleResetCoverImage() {
+        setModalCoverPreview("/com/vithay/libman/images/doraemon.jpg");
+        if (lblCoverPathHint != null) {
+            lblCoverPathHint.setText("Kéo thả file ảnh (.jpg, .png) vào đây hoặc bấm nút chọn ảnh từ máy.");
+        }
+        MainLayoutController.showToast("Đã đặt lại ảnh bìa mặc định", "INFO");
+    }
+
+    private void setModalCoverPreview(String imagePathOrUri) {
+        this.modalCoverImagePath = imagePathOrUri;
+        if (imgModalCoverPreview == null) return;
+
+        if (imagePathOrUri == null || imagePathOrUri.isBlank()) {
+            imagePathOrUri = "/com/vithay/libman/images/doraemon.jpg";
+        }
+
+        try {
+            if (imagePathOrUri.startsWith("file:") || imagePathOrUri.startsWith("http:") || imagePathOrUri.startsWith("https:")) {
+                imgModalCoverPreview.setImage(new Image(imagePathOrUri, 70, 95, true, true));
+            } else {
+                String path = imagePathOrUri;
+                if (!path.startsWith("/")) path = "/com/vithay/libman/images/" + path;
+                URL res = getClass().getResource(path);
+                if (res != null) {
+                    imgModalCoverPreview.setImage(new Image(res.toExternalForm(), 70, 95, true, true));
+                } else {
+                    imgModalCoverPreview.setImage(null);
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Could not load preview cover: {}", e.getMessage());
+            imgModalCoverPreview.setImage(null);
+        }
+    }
+
     public void showBookFormModal(Book bookToEdit) {
         this.currentEditingBook = bookToEdit;
         lblBookModalError.setText("");
@@ -896,6 +1035,11 @@ public class BookManagementController implements Initializable {
             } else {
                 comboModalBookStatus.setValue("Còn sách");
             }
+
+            setModalCoverPreview(bookToEdit.getCoverImage());
+            if (lblCoverPathHint != null) {
+                lblCoverPathHint.setText("Ảnh bìa hiện tại: " + (bookToEdit.getCoverImage() != null ? bookToEdit.getCoverImage() : "Mặc định"));
+            }
         } else {
             lblBookModalTitle.setText("Thêm Sách Mới");
             txtModalBookId.setText("BK0" + (bookMasterList.size() + 1));
@@ -910,6 +1054,11 @@ public class BookManagementController implements Initializable {
             txtModalBookPrice.setText("95000");
             txtModalBookCopies.setText("5");
             comboModalBookStatus.setValue("Còn sách");
+
+            setModalCoverPreview("/com/vithay/libman/images/doraemon.jpg");
+            if (lblCoverPathHint != null) {
+                lblCoverPathHint.setText("Kéo thả file ảnh (.jpg, .png) vào đây hoặc bấm nút chọn ảnh từ máy.");
+            }
         }
 
         bookMainContainer.setEffect(new GaussianBlur(14));
@@ -922,6 +1071,68 @@ public class BookManagementController implements Initializable {
         bookMainContainer.setEffect(null);
         bookModalOverlay.setVisible(false);
         bookModalOverlay.setManaged(false);
+        if (bookModalBox != null) {
+            UIUtils.resetPosition(bookModalBox);
+        }
+    }
+
+    @FXML
+    public void closeInspectorPanel() {
+        if (bookSplitPane != null && detailInspectorPane != null) {
+            bookSplitPane.getItems().remove(detailInspectorPane);
+        }
+    }
+
+    @FXML
+    public void openInspectorPanel() {
+        if (bookSplitPane != null && detailInspectorPane != null) {
+            if (!bookSplitPane.getItems().contains(detailInspectorPane)) {
+                // If bookMasterPane is first, add to end; else add to start
+                if (bookSplitPane.getItems().contains(bookMasterPane)) {
+                    bookSplitPane.getItems().add(detailInspectorPane);
+                    bookSplitPane.setDividerPositions(DIVIDER_RATIO);
+                } else {
+                    bookSplitPane.getItems().add(0, detailInspectorPane);
+                    bookSplitPane.setDividerPositions(1.0 - DIVIDER_RATIO);
+                }
+            }
+            detailInspectorPane.setVisible(true);
+            detailInspectorPane.setManaged(true);
+        }
+    }
+
+    @FXML
+    public void toggleInspectorPanel() {
+        if (bookSplitPane == null || detailInspectorPane == null) return;
+        if (bookSplitPane.getItems().contains(detailInspectorPane)) {
+            closeInspectorPanel();
+        } else {
+            openInspectorPanel();
+        }
+    }
+
+    @FXML
+    public void handleSwapPanels() {
+        if (bookSplitPane == null || bookMasterPane == null || detailInspectorPane == null) return;
+        boolean hasInspector = bookSplitPane.getItems().contains(detailInspectorPane);
+        double[] currentPositions = bookSplitPane.getDividerPositions();
+        double currentRatio = (currentPositions != null && currentPositions.length > 0) ? currentPositions[0] : DIVIDER_RATIO;
+        
+        bookSplitPane.getItems().clear();
+        if (hasInspector) {
+            if (bookMasterPane.getParent() == null) {
+                // Swapping order
+                if (currentRatio > 0.5) {
+                    bookSplitPane.getItems().addAll(detailInspectorPane, bookMasterPane);
+                    bookSplitPane.setDividerPositions(1.0 - currentRatio);
+                } else {
+                    bookSplitPane.getItems().addAll(bookMasterPane, detailInspectorPane);
+                    bookSplitPane.setDividerPositions(1.0 - currentRatio);
+                }
+            }
+        } else {
+            bookSplitPane.getItems().add(bookMasterPane);
+        }
     }
 
     @FXML
@@ -941,7 +1152,9 @@ public class BookManagementController implements Initializable {
             double price = Double.parseDouble(txtModalBookPrice.getText().trim());
             int copies = Integer.parseInt(txtModalBookCopies.getText().trim());
             int available = currentEditingBook != null ? Math.min(currentEditingBook.getAvailableCopies(), copies) : copies;
-            String cover = currentEditingBook != null ? currentEditingBook.getCoverImage() : "/com/vithay/libman/images/doraemon.jpg";
+            String cover = (modalCoverImagePath != null && !modalCoverImagePath.isBlank())
+                    ? modalCoverImagePath
+                    : (currentEditingBook != null ? currentEditingBook.getCoverImage() : "/com/vithay/libman/images/doraemon.jpg");
 
             String rawStatus = comboModalBookStatus.getValue() != null ? comboModalBookStatus.getValue() : "Còn sách";
             String savedStatus = "Available";
@@ -973,6 +1186,7 @@ public class BookManagementController implements Initializable {
             if (ok) {
                 closeBookModal();
                 loadBooks();
+                MainLayoutController.showToast("Đã lưu sách '" + title + "' thành công!", "SUCCESS");
             } else {
                 lblBookModalError.setText("Lỗi: Không thể lưu sách (Mã sách có thể đã trùng)!");
                 lblBookModalError.setStyle("-fx-text-fill: #EF4444;");
@@ -992,6 +1206,7 @@ public class BookManagementController implements Initializable {
                     boolean ok = bookService.softDeleteBook(book.getId());
                     if (ok) {
                         loadBooks();
+                        MainLayoutController.showToast("Đã chuyển sách '" + book.getTitle() + "' vào Thùng Rác", "INFO");
                     }
                 }
         );
@@ -1044,8 +1259,7 @@ public class BookManagementController implements Initializable {
             return;
         }
 
-        detailInspectorPane.setVisible(true);
-        detailInspectorPane.setManaged(true);
+        openInspectorPanel();
 
         if (lblInspectorTitle != null) {
             lblInspectorTitle.setText(book.getTitle() != null ? book.getTitle() : "Không có tiêu đề");
@@ -1079,8 +1293,8 @@ public class BookManagementController implements Initializable {
         if (lblInspectorStatus != null) {
             String status = book.getStatus() != null ? book.getStatus() : "Available";
             lblInspectorStatus.getStyleClass().removeAll("badge-available", "badge-borrowed", "badge-onhold", "badge-returned", "badge-overdue");
-            if ("Available".equalsIgnoreCase(status) || "Còn sách".equalsIgnoreCase(status) || "KHA_DUNG".equalsIgnoreCase(status)) {
-                lblInspectorStatus.setText("Còn sách");
+            if ("Available".equalsIgnoreCase(status) || "Còn sách".equalsIgnoreCase(status) || "KHA_DUNG".equalsIgnoreCase(status) || "Khả dụng".equalsIgnoreCase(status)) {
+                lblInspectorStatus.setText("Khả dụng");
                 lblInspectorStatus.getStyleClass().add("badge-available");
             } else if ("Borrowed".equalsIgnoreCase(status) || "Đang mượn".equalsIgnoreCase(status) || "DANG_MUON".equalsIgnoreCase(status)) {
                 lblInspectorStatus.setText("Đang mượn");
@@ -1135,12 +1349,13 @@ public class BookManagementController implements Initializable {
         inspectorBranchesBox.getChildren().clear();
         if (book == null) return;
 
-        Label lblSection = new Label("NHÁNH LIÊN QUAN & GỢI Ý");
+        Label lblSection = new Label("GỢI Ý");
         lblSection.getStyleClass().add("branch-section-title");
         inspectorBranchesBox.getChildren().add(lblSection);
 
         // 1. Same Shelf Branch
-        VBox shelfBox = new VBox(4);
+        VBox shelfBox = new VBox(6);
+        shelfBox.getStyleClass().add("inspector-branch-card");
         HBox shelfHeader = new HBox(8);
         shelfHeader.setAlignment(Pos.CENTER_LEFT);
         Label lblShelf = new Label("Cùng vị trí kệ: " + (book.getShelfLocation() != null ? book.getShelfLocation() : "Chưa xếp"));
@@ -1173,7 +1388,8 @@ public class BookManagementController implements Initializable {
         inspectorBranchesBox.getChildren().add(shelfBox);
 
         // 2. Same Author Branch
-        VBox authorBox = new VBox(4);
+        VBox authorBox = new VBox(6);
+        authorBox.getStyleClass().add("inspector-branch-card");
         HBox authorHeader = new HBox(8);
         authorHeader.setAlignment(Pos.CENTER_LEFT);
         Label lblAuthor = new Label("Cùng tác giả: " + (book.getAuthor() != null ? book.getAuthor() : "Không rõ"));
@@ -1206,7 +1422,7 @@ public class BookManagementController implements Initializable {
         inspectorBranchesBox.getChildren().add(authorBox);
 
         // 3. Circulation History Action
-        Button btnViewCirculation = new Button("Xem Lịch Sử Lưu Hành Cuốn Này");
+        Button btnViewCirculation = new Button("Lịch sử lưu hành");
         btnViewCirculation.setMaxWidth(Double.MAX_VALUE);
         btnViewCirculation.getStyleClass().add("btn-secondary");
         btnViewCirculation.setStyle("-fx-font-size: 11px; -fx-padding: 6 12;");
@@ -1427,8 +1643,8 @@ public class BookManagementController implements Initializable {
         if (lblFullDetailStatus != null) {
             String status = book.getStatus() != null ? book.getStatus() : "Available";
             lblFullDetailStatus.getStyleClass().removeAll("badge-available", "badge-borrowed", "badge-onhold", "badge-returned");
-            if ("Available".equalsIgnoreCase(status) || "Còn sách".equalsIgnoreCase(status) || "KHA_DUNG".equalsIgnoreCase(status)) {
-                lblFullDetailStatus.setText("Còn sách");
+            if ("Available".equalsIgnoreCase(status) || "Còn sách".equalsIgnoreCase(status) || "KHA_DUNG".equalsIgnoreCase(status) || "Khả dụng".equalsIgnoreCase(status)) {
+                lblFullDetailStatus.setText("Khả dụng");
                 lblFullDetailStatus.getStyleClass().add("badge-available");
             } else if ("Borrowed".equalsIgnoreCase(status) || "Đang mượn".equalsIgnoreCase(status) || "DANG_MUON".equalsIgnoreCase(status)) {
                 lblFullDetailStatus.setText("Đang mượn");

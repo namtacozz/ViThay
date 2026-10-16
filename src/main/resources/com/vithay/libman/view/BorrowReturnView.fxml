@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
 
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.vithay.libman.controller.BorrowReturnController"
@@ -17,13 +18,21 @@
             <Label text="Lưu Hành Mượn &amp; Trả Sách" styleClass="title-large"/>
             <Label text="Xử lý lập phiếu mượn (đọc tại chỗ / mang về), trả sách, bồi hoàn và in phiếu (SRS Mục 5.5)" styleClass="text-muted"/>
         </VBox>
-        <Button fx:id="btnSwitchToWizard" text="⚡ Trợ lý mượn nhanh (Wizard)" onAction="#handleSwitchToWizard"
-                styleClass="btn-secondary" style="-fx-font-weight: bold; -fx-padding: 8 16; -fx-text-fill: #1DB954; -fx-border-color: #1DB954; -fx-border-radius: 6px;">
-            <tooltip><Tooltip text="Chuyển sang quy trình Trợ lý mượn nhanh 4 bước nâng cao"/></tooltip>
+        <Button fx:id="btnSwapDeskPanels" onAction="#handleSwapDeskPanels"
+                styleClass="btn-circle, btn-secondary" style="-fx-min-width: 34px; -fx-pref-width: 34px; -fx-min-height: 34px; -fx-pref-height: 34px; -fx-padding: 0;">
+            <graphic>
+                <SVGPath content="M 6.99 11 L 3 15 l 3.99 4 v -3 H 14 v -2 H 6.99 v -3 Z M 21 9 l -3.99 -4 v 3 H 10 v 2 h 7.01 v 3 L 21 9 Z" fill="#B3B3B3" scaleX="0.7" scaleY="0.7"/>
+            </graphic>
+            <tooltip><Tooltip text="Đổi bên"/></tooltip>
+        </Button>
+        <Button fx:id="btnSwitchToWizard" text="⚡ Mượn nhanh" onAction="#handleSwitchToWizard"
+                minWidth="-Infinity"
+                styleClass="btn-secondary, btn-accent-green" style="-fx-font-weight: bold; -fx-padding: 8 16;">
+            <tooltip><Tooltip text="Chuyển sang quy trình Mượn nhanh 4 bước nâng cao"/></tooltip>
         </Button>
         <Button fx:id="btnSwitchBackToDesk" text="⮌ Bàn lưu hành tiêu chuẩn (Desk)" onAction="#handleSwitchBackToDesk"
-                visible="false" managed="false"
-                styleClass="btn-secondary" style="-fx-font-weight: bold; -fx-padding: 8 16; -fx-text-fill: #60A5FA; -fx-border-color: #3B82F6; -fx-border-radius: 6px;">
+                visible="false" managed="false" minWidth="-Infinity"
+                styleClass="btn-secondary, btn-accent-blue" style="-fx-font-weight: bold; -fx-padding: 8 16;">
             <tooltip><Tooltip text="Quay lại bàn lưu hành tiêu chuẩn (Desk)"/></tooltip>
         </Button>
     </HBox>
@@ -33,19 +42,19 @@
         <tabs>
             <!-- TAB 1: BÀN LƯU HÀNH (CANVAS PLUS PALETTE) -->
             <Tab text="Bàn Lưu Hành (Desk)">
-                <SplitPane fx:id="deskSplitPane" dividerPositions="0.32" VBox.vgrow="ALWAYS"
+                <SplitPane fx:id="deskSplitPane" dividerPositions="0.38" VBox.vgrow="ALWAYS"
                            style="-fx-background-color: transparent; -fx-box-border: transparent; -fx-padding: 12 16;">
-                    <!-- Cột Palette (30%): Tìm kiếm sách nhanh, danh sách sách khả dụng -->
-                    <VBox styleClass="desk-palette-box" spacing="12">
+                    <!-- Cột Palette (38%): Tìm kiếm sách nhanh, danh sách sách khả dụng -->
+                    <VBox styleClass="desk-palette-box" spacing="12" minWidth="320" prefWidth="360">
                         <VBox spacing="4">
-                            <Label text="Bảng Sách Khả Dụng (Palette)" styleClass="title-medium" style="-fx-font-size: 15px;"/>
+                            <Label text="Sách Khả Dụng" styleClass="title-medium" style="-fx-font-size: 15px;"/>
                             <Label text="Tìm và bấm [+ Thêm] để xếp sách lên bàn lưu hành" styleClass="text-muted" style="-fx-font-size: 11px;"/>
                         </VBox>
 
                         <TextField fx:id="txtDeskBookSearch" promptText="Tìm theo tên sách, tác giả, mã..."
                                    styleClass="search-field" onKeyReleased="#handleDeskBookSearch"/>
 
-                        <ListView fx:id="listDeskAvailableBooks" VBox.vgrow="ALWAYS" styleClass="bg-card"/>
+                        <ListView fx:id="listDeskAvailableBooks" VBox.vgrow="ALWAYS" styleClass="desk-palette-list"/>
 
                         <HBox alignment="CENTER_LEFT" spacing="8">
                             <Label fx:id="lblDeskAvailableCount" text="Khả dụng: 0 cuốn" styleClass="text-muted" style="-fx-font-size: 11px;"/>
@@ -55,8 +64,8 @@
                         </HBox>
                     </VBox>
 
-                    <!-- Cột Canvas (70%): Bàn làm việc mượn sách -->
-                    <VBox styleClass="desk-canvas-zone" spacing="14">
+                    <!-- Cột Canvas (62%): Bàn làm việc mượn sách -->
+                    <VBox styleClass="desk-canvas-zone" spacing="14" minWidth="450">
                         <!-- Intriguing Branches: Banner cảnh báo hạn trả sách -->
                         <HBox fx:id="deskDueAlertBanner" managed="false" visible="false" alignment="CENTER_LEFT" spacing="12" styleClass="desk-alert-banner">
                             <Label text="!" styleClass="desk-alert-icon"/>
@@ -69,8 +78,8 @@
                         <!-- Active Reader Header -->
                         <VBox spacing="8" styleClass="desk-header-box">
                             <HBox alignment="CENTER_LEFT" spacing="12">
-                                <Label text="Chọn Độc Giả:" styleClass="form-label" style="-fx-font-weight: bold;"/>
-                                <ComboBox fx:id="comboDeskReader" prefWidth="300" styleClass="form-control"
+                                <Label text="Độc Giả:" minWidth="-Infinity" styleClass="form-label" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="comboDeskReader" minWidth="220" prefWidth="300" styleClass="form-control"
                                           promptText="-- Chọn hoặc tìm độc giả --" onAction="#handleSelectDeskReader"/>
 
                                 <!-- Profile Chip -->
@@ -89,7 +98,7 @@
                         <!-- Circulation Basket Canvas Area -->
                         <VBox VBox.vgrow="ALWAYS" spacing="8">
                             <HBox alignment="CENTER_LEFT" spacing="10">
-                                <Label text="Giỏ Sách Lưu Hành" styleClass="title-medium" style="-fx-font-size: 14px;"/>
+                                <Label text="Giỏ Sách" styleClass="title-medium" style="-fx-font-size: 14px;"/>
                                 <Label fx:id="lblBasketCount" text="(0/5 cuốn)" styleClass="text-muted" style="-fx-font-size: 12px;"/>
                                 <Region HBox.hgrow="ALWAYS"/>
                                 <Button text="✕ Xóa hết" onAction="#handleClearBasket" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
@@ -124,20 +133,20 @@
 
                         <!-- Bottom Summary Bar -->
                         <HBox alignment="CENTER_LEFT" spacing="14" styleClass="desk-summary-bar">
-                            <VBox spacing="2">
-                                <Label fx:id="lblSummaryTotalBooks" text="Tổng trong giỏ: 0 cuốn" styleClass="desk-summary-title"/>
-                                <Label fx:id="lblSummaryQuotaStatus" text="Chưa chọn sách" styleClass="text-muted" style="-fx-font-size: 11px;"/>
+                            <VBox spacing="2" minWidth="-Infinity">
+                                <Label fx:id="lblSummaryTotalBooks" text="Tổng trong giỏ: 0 cuốn" minWidth="-Infinity" styleClass="desk-summary-title"/>
+                                <Label fx:id="lblSummaryQuotaStatus" text="Chưa chọn sách" minWidth="-Infinity" styleClass="text-muted" style="-fx-font-size: 11px;"/>
                             </VBox>
 
                             <Button fx:id="btnToggleRegulations" text="ⓘ Quy chế &amp; chế tài áp dụng ▾" onAction="#handleToggleDeskRegulations"
-                                    styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 6 12;"/>
+                                    minWidth="-Infinity" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 6 12;"/>
 
                             <Region HBox.hgrow="ALWAYS"/>
 
-                            <TextField fx:id="txtDeskNotes" promptText="Ghi chú phiếu mượn..." prefWidth="260" styleClass="form-control"/>
+                            <TextField fx:id="txtDeskNotes" promptText="Ghi chú phiếu mượn..." minWidth="160" prefWidth="260" HBox.hgrow="ALWAYS" styleClass="form-control"/>
 
                             <Button fx:id="btnCompleteCheckout" text="Hoàn Tất &amp; In Phiếu" onAction="#handleCompleteDeskCheckout"
-                                    styleClass="btn-primary" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8 18;"/>
+                                    minWidth="-Infinity" styleClass="btn-primary" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8 18;"/>
                         </HBox>
                     </VBox>
                 </SplitPane>
@@ -314,7 +323,7 @@
                                             <TextField fx:id="txtWizardBookSearch" promptText="Tìm sách..." prefWidth="180"
                                                        styleClass="search-field" onKeyReleased="#handleWizardBookSearch"/>
                                         </HBox>
-                                        <ListView fx:id="listWizardAvailableBooks" VBox.vgrow="ALWAYS" styleClass="bg-card" minHeight="120"/>
+                                        <ListView fx:id="listWizardAvailableBooks" VBox.vgrow="ALWAYS" styleClass="desk-palette-list" minHeight="120"/>
                                         <HBox alignment="CENTER_RIGHT">
                                             <Button fx:id="btnWizardAddBook" text="+ Chọn sách này" onAction="#handleWizardAddSelectedBook"
                                                     styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-font-weight: bold;"/>
@@ -328,7 +337,7 @@
                                             <Region HBox.hgrow="ALWAYS"/>
                                             <Label fx:id="lblWizardSelectedCount" text="Đã chọn: 0 cuốn" style="-fx-text-fill: #1DB954; -fx-font-weight: bold;"/>
                                         </HBox>
-                                        <ListView fx:id="listWizardSelectedBooks" VBox.vgrow="ALWAYS" styleClass="bg-card" minHeight="120"/>
+                                        <ListView fx:id="listWizardSelectedBooks" VBox.vgrow="ALWAYS" styleClass="desk-palette-list" minHeight="120"/>
                                         <HBox alignment="CENTER_RIGHT" spacing="8">
                                             <Button text="✕ Bỏ chọn" onAction="#handleWizardRemoveSelectedBook" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>
                                             <Button text="Xóa hết" onAction="#handleWizardClearSelectedBooks" styleClass="btn-secondary" style="-fx-font-size: 11px;"/>

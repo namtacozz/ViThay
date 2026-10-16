@@ -104,14 +104,22 @@ Lệnh trên tự động biên dịch và tạo ra 2 tệp thực thi hoàn ch�
 
 ---
 
+## 📚 Tài Liệu Báo Cáo Phân Tích Chuyên Sâu
+Dự án đi kèm bộ 3 tài liệu báo cáo phân tích kiến trúc giao diện người dùng theo chuẩn đặc tả SRS và lý thuyết HCI:
+1. 📄 **[Báo Cáo Phân Tích Cấu Trúc Vật Lý & Thông Tin (7 Interaction Patterns)](docs/bao-cao-cau-truc-vat-ly-thong-tin.md)**
+2. 🧠 **[Báo Cáo Phân Tích Tâm Lý Người Dùng (7 Psychological Principles)](docs/bao-cao-tam-ly-nguoi-dung.md)**
+3. 📐 **[Báo Cáo Phân Tích Bố Cục & Phân Cấp Trực Quan (6 Nguyên Lý B3)](docs/bao-cao-phan-cap-truc-quan-va-bo-cuc.md)**
+
+---
+
 ## 🧪 Kiểm Thử Tự Động (Automated Tests)
 ```bash
 ./mvnw test
 ```
-Toàn bộ **62/62 bài test tự động** đều vượt qua 100% (BUILD SUCCESS), bao gồm:
+Toàn bộ **63/63 bài test tự động** đều vượt qua 100% (BUILD SUCCESS), bao gồm:
 - **Kiến trúc dữ liệu & DAO:** `LibManTest` (10 tests), `DatabaseConfig`, `BookDao`, `ReaderDao`, `BorrowTransactionDao`.
-- **Interaction Design Patterns:** `TwoPanelSelectorTest`, `BorrowWizardTest` (6 tests), `CirculationBasketTest` (4 tests), `CirculationContextualBranchTest` (5 tests), `BookViewSwitchingTest` (3 tests), `BookDrilldownAndBranchesTest` (6 tests), `BookFilterBugFixesTest` (5 tests).
-- **Hành vi tương tác người dùng v1.4.0:**
+- **Interaction Design Patterns:** `TwoPanelSelectorTest`, `BorrowWizardTest` (7 tests), `CirculationBasketTest` (4 tests), `CirculationContextualBranchTest` (5 tests), `BookViewSwitchingTest` (3 tests), `BookDrilldownAndBranchesTest` (6 tests), `BookFilterBugFixesTest` (5 tests).
+- **Hành vi tương tác người dùng v1.5.0:**
   - `BookClickBehaviorTest`: Xác thực single-click xem trước Inspector và double-click mở full view.
   - `BookCoversDistinctTest`: Xác thực 221/221 cuốn sách có ảnh bìa thật xuất bản độ phân giải cao (>= 15KB) và 0% trùng lặp hash MD5.
   - `DashboardAndGreetingTest`: Xác thực lời chào động và giới hạn 15 sách nổi bật loại bỏ lag.

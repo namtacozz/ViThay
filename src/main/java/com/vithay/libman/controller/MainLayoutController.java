@@ -8,6 +8,7 @@ import com.vithay.libman.service.BookService;
 import com.vithay.libman.service.BorrowService;
 import com.vithay.libman.service.ReaderService;
 import com.vithay.libman.service.SettingService;
+import com.vithay.libman.util.UIUtils;
 import javafx.collections.FXCollections;
 import javafx.util.StringConverter;
 import javafx.animation.Interpolator;
@@ -47,6 +48,7 @@ public class MainLayoutController implements Initializable {
     @FXML private BorderPane mainContainer;
     @FXML private StackPane contentArea;
     @FXML private TextField headerSearchField;
+    @FXML private VBox toastContainer;
 
     // Spotify-like floating search dropdown
     @FXML private VBox searchDropdownContainer;
@@ -223,6 +225,30 @@ public class MainLayoutController implements Initializable {
         setupBraveVerticalSidebar();
         showHomeView();
 
+        // Make floating overlay modals draggable by their header bars
+        if (loginViewBox != null && !loginViewBox.getChildren().isEmpty()) {
+            UIUtils.makeDraggable(loginViewBox.getChildren().get(0), authModalBox);
+        }
+        if (registerViewBox != null && !registerViewBox.getChildren().isEmpty()) {
+            UIUtils.makeDraggable(registerViewBox.getChildren().get(0), authModalBox);
+        }
+        if (profileModalBox != null && !profileModalBox.getChildren().isEmpty()) {
+            UIUtils.makeDraggable(profileModalBox.getChildren().get(0), profileModalBox);
+        }
+        if (helpModalBox != null && !helpModalBox.getChildren().isEmpty()) {
+            UIUtils.makeDraggable(helpModalBox.getChildren().get(0), helpModalBox);
+        }
+        if (readerBorrowModalBox != null && !readerBorrowModalBox.getChildren().isEmpty()) {
+            UIUtils.makeDraggable(readerBorrowModalBox.getChildren().get(0), readerBorrowModalBox);
+        }
+        if (appNoticeModalBox != null && !appNoticeModalBox.getChildren().isEmpty()) {
+            UIUtils.makeDraggable(appNoticeModalBox.getChildren().get(0), appNoticeModalBox);
+        }
+
+        // Guarantee overlays are completely hidden and mouseTransparent on startup
+        closeAuthPopup();
+        hideSearchDropdown();
+
         rootStackPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
                 com.vithay.libman.service.ThemeManager tm = com.vithay.libman.service.ThemeManager.getInstance();
@@ -231,8 +257,29 @@ public class MainLayoutController implements Initializable {
                 applyThemeVisuals(tm.getCurrentTheme());
                 // Listen for future theme changes
                 tm.addThemeChangeListener(this::applyThemeVisuals);
+
+                // Register Keyboard Accelerators for Search (Ctrl+K and Ctrl+F)
+                setupKeyboardShortcuts(newScene);
             }
         });
+    }
+
+    private void setupKeyboardShortcuts(javafx.scene.Scene scene) {
+        if (scene == null) return;
+        javafx.scene.input.KeyCombination ctrlK = new javafx.scene.input.KeyCodeCombination(
+                javafx.scene.input.KeyCode.K, javafx.scene.input.KeyCombination.SHORTCUT_DOWN);
+        javafx.scene.input.KeyCombination ctrlF = new javafx.scene.input.KeyCodeCombination(
+                javafx.scene.input.KeyCode.F, javafx.scene.input.KeyCombination.SHORTCUT_DOWN);
+
+        Runnable focusSearch = () -> {
+            if (headerSearchField != null) {
+                headerSearchField.requestFocus();
+                headerSearchField.selectAll();
+            }
+        };
+
+        scene.getAccelerators().put(ctrlK, focusSearch);
+        scene.getAccelerators().put(ctrlF, focusSearch);
     }
 
     private void applyThemeVisuals(com.vithay.libman.service.ThemeManager.Theme theme) {
@@ -310,6 +357,7 @@ public class MainLayoutController implements Initializable {
 
         searchDropdownContainer.setVisible(true);
         searchDropdownContainer.setManaged(true);
+        searchDropdownContainer.setMouseTransparent(false);
     }
 
     private HBox createSearchDropdownRow(Book book) {
@@ -368,8 +416,11 @@ public class MainLayoutController implements Initializable {
     }
 
     private void hideSearchDropdown() {
-        searchDropdownContainer.setVisible(false);
-        searchDropdownContainer.setManaged(false);
+        if (searchDropdownContainer != null) {
+            searchDropdownContainer.setVisible(false);
+            searchDropdownContainer.setManaged(false);
+            searchDropdownContainer.setMouseTransparent(true);
+        }
     }
 
     private void dispatchHeaderSearchToSubViews(String keyword) {
@@ -389,38 +440,70 @@ public class MainLayoutController implements Initializable {
             FXMLLoader homeLoader = new FXMLLoader(getClass().getResource("/com/vithay/libman/view/HomeView.fxml"));
             homeView = homeLoader.load();
             homeController = homeLoader.getController();
-            homeController.setMainController(this);
+            if (homeController != null) {
+                homeController.setMainController(this);
+            }
+        } catch (Exception e) {
+            logger.error("Error pre-loading HomeView", e);
+        }
 
+        try {
             FXMLLoader bookLoader = new FXMLLoader(getClass().getResource("/com/vithay/libman/view/BookManagementView.fxml"));
             bookView = bookLoader.load();
             bookController = bookLoader.getController();
-            bookController.setMainController(this);
+            if (bookController != null) {
+                bookController.setMainController(this);
+            }
+        } catch (Exception e) {
+            logger.error("Error pre-loading BookManagementView", e);
+        }
 
+        try {
             FXMLLoader readerLoader = new FXMLLoader(getClass().getResource("/com/vithay/libman/view/ReaderManagementView.fxml"));
             readerView = readerLoader.load();
             readerController = readerLoader.getController();
+        } catch (Exception e) {
+            logger.error("Error pre-loading ReaderManagementView", e);
+        }
 
+        try {
             FXMLLoader borrowLoader = new FXMLLoader(getClass().getResource("/com/vithay/libman/view/BorrowReturnView.fxml"));
             borrowReturnView = borrowLoader.load();
             borrowReturnController = borrowLoader.getController();
+        } catch (Exception e) {
+            logger.error("Error pre-loading BorrowReturnView", e);
+        }
 
+        try {
             FXMLLoader statsLoader = new FXMLLoader(getClass().getResource("/com/vithay/libman/view/StatisticsView.fxml"));
             statsView = statsLoader.load();
             statsController = statsLoader.getController();
+        } catch (Exception e) {
+            logger.error("Error pre-loading StatisticsView", e);
+        }
 
+        try {
             FXMLLoader catLoader = new FXMLLoader(getClass().getResource("/com/vithay/libman/view/CategoryManagementView.fxml"));
             categoryView = catLoader.load();
             categoryController = catLoader.getController();
+        } catch (Exception e) {
+            logger.error("Error pre-loading CategoryManagementView", e);
+        }
 
+        try {
             FXMLLoader setLoader = new FXMLLoader(getClass().getResource("/com/vithay/libman/view/SettingsView.fxml"));
             settingsView = setLoader.load();
             settingsController = setLoader.getController();
+        } catch (Exception e) {
+            logger.error("Error pre-loading SettingsView", e);
+        }
 
+        try {
             FXMLLoader binLoader = new FXMLLoader(getClass().getResource("/com/vithay/libman/view/RecycleBinView.fxml"));
             recycleBinView = binLoader.load();
             recycleBinController = binLoader.getController();
         } catch (Exception e) {
-            logger.error("Error pre-loading FXML views", e);
+            logger.error("Error pre-loading RecycleBinView", e);
         }
     }
 
@@ -755,9 +838,7 @@ public class MainLayoutController implements Initializable {
             readerBorrowModalBox.setVisible(true);
             readerBorrowModalBox.setManaged(true);
         }
-        authOverlayPane.setVisible(true);
-        authOverlayPane.setManaged(true);
-        mainContainer.setEffect(new GaussianBlur(14));
+        showAuthOverlay();
 
         if (lblReaderBorrowMsg != null) {
             lblReaderBorrowMsg.setText("");
@@ -1032,9 +1113,7 @@ public class MainLayoutController implements Initializable {
             helpModalBox.setManaged(true);
         }
 
-        authOverlayPane.setVisible(true);
-        authOverlayPane.setManaged(true);
-        mainContainer.setEffect(new GaussianBlur(14));
+        showAuthOverlay();
     }
 
     @FXML
@@ -1110,9 +1189,7 @@ public class MainLayoutController implements Initializable {
         txtProfileConfirmPass.clear();
         lblProfileMsg.setText("");
 
-        authOverlayPane.setVisible(true);
-        authOverlayPane.setManaged(true);
-        mainContainer.setEffect(new GaussianBlur(14));
+        showAuthOverlay();
     }
 
     public void openAuthPopup() {
@@ -1130,16 +1207,38 @@ public class MainLayoutController implements Initializable {
         authModalBox.setVisible(true);
         authModalBox.setManaged(true);
         switchToLoginView();
-        authOverlayPane.setVisible(true);
-        authOverlayPane.setManaged(true);
-        mainContainer.setEffect(new GaussianBlur(14));
+        showAuthOverlay();
+    }
+
+    private void showAuthOverlay() {
+        if (authOverlayPane != null) {
+            authOverlayPane.setVisible(true);
+            authOverlayPane.setManaged(true);
+            authOverlayPane.setMouseTransparent(false);
+        }
+        if (mainContainer != null) {
+            mainContainer.setEffect(new GaussianBlur(14));
+        }
     }
 
     @FXML
     public void closeAuthPopup() {
-        authOverlayPane.setVisible(false);
-        authOverlayPane.setManaged(false);
-        mainContainer.setEffect(null);
+        if (authOverlayPane != null) {
+            authOverlayPane.setVisible(false);
+            authOverlayPane.setManaged(false);
+            authOverlayPane.setMouseTransparent(true);
+        }
+        if (mainContainer != null) {
+            mainContainer.setEffect(null);
+        }
+        if (authModalBox != null) {
+            authModalBox.setVisible(false);
+            authModalBox.setManaged(false);
+        }
+        if (profileModalBox != null) {
+            profileModalBox.setVisible(false);
+            profileModalBox.setManaged(false);
+        }
         if (helpModalBox != null) {
             helpModalBox.setVisible(false);
             helpModalBox.setManaged(false);
@@ -1159,12 +1258,17 @@ public class MainLayoutController implements Initializable {
                 btnToggleChangePassword.setText("🔑 Đổi mật khẩu ▾");
             }
         }
-        lblLoginError.setText("");
-        lblRegError.setText("");
-        lblProfileMsg.setText("");
+        if (lblLoginError != null) lblLoginError.setText("");
+        if (lblRegError != null) lblRegError.setText("");
+        if (lblProfileMsg != null) lblProfileMsg.setText("");
         if (lblReaderBorrowMsg != null) {
             lblReaderBorrowMsg.setText("");
         }
+        if (authModalBox != null) UIUtils.resetPosition(authModalBox);
+        if (profileModalBox != null) UIUtils.resetPosition(profileModalBox);
+        if (helpModalBox != null) UIUtils.resetPosition(helpModalBox);
+        if (readerBorrowModalBox != null) UIUtils.resetPosition(readerBorrowModalBox);
+        if (appNoticeModalBox != null) UIUtils.resetPosition(appNoticeModalBox);
     }
 
     public void showInAppNotice(Alert.AlertType type, String title, String message, String details, Runnable onConfirm) {
@@ -1235,9 +1339,7 @@ public class MainLayoutController implements Initializable {
 
             appNoticeModalBox.setVisible(true);
             appNoticeModalBox.setManaged(true);
-            authOverlayPane.setVisible(true);
-            authOverlayPane.setManaged(true);
-            mainContainer.setEffect(new GaussianBlur(14));
+            showAuthOverlay();
         }
     }
 
@@ -1294,9 +1396,7 @@ public class MainLayoutController implements Initializable {
 
             appNoticeModalBox.setVisible(true);
             appNoticeModalBox.setManaged(true);
-            authOverlayPane.setVisible(true);
-            authOverlayPane.setManaged(true);
-            mainContainer.setEffect(new GaussianBlur(14));
+            showAuthOverlay();
         }
     }
 
@@ -1343,9 +1443,7 @@ public class MainLayoutController implements Initializable {
 
             appNoticeModalBox.setVisible(true);
             appNoticeModalBox.setManaged(true);
-            authOverlayPane.setVisible(true);
-            authOverlayPane.setManaged(true);
-            mainContainer.setEffect(new GaussianBlur(14));
+            showAuthOverlay();
         }
     }
 
@@ -1402,6 +1500,88 @@ public class MainLayoutController implements Initializable {
         } else {
             org.slf4j.LoggerFactory.getLogger(MainLayoutController.class).info("[RECEIPT - {}] {}:\n{}", title, heading, receiptText);
         }
+    }
+
+    public static void showToast(String message, String type) {
+        if (instance != null) {
+            javafx.application.Platform.runLater(() -> instance.displayToast(message, type));
+        } else {
+            logger.info("[TOAST - {}] {}", type, message);
+        }
+    }
+
+    public void displayToast(String message, String type) {
+        if (toastContainer == null) return;
+
+        HBox toastCard = new HBox(10);
+        toastCard.setAlignment(Pos.CENTER_LEFT);
+        toastCard.getStyleClass().add("toast-card");
+        toastCard.setMouseTransparent(false);
+
+        String typeUpper = (type != null) ? type.toUpperCase() : "INFO";
+        String iconChar = "ℹ";
+        String cardClass = "toast-info";
+        switch (typeUpper) {
+            case "SUCCESS" -> {
+                iconChar = "✓";
+                cardClass = "toast-success";
+            }
+            case "WARNING" -> {
+                iconChar = "⚠";
+                cardClass = "toast-warning";
+            }
+            case "ERROR" -> {
+                iconChar = "✕";
+                cardClass = "toast-error";
+            }
+            default -> {
+                iconChar = "ℹ";
+                cardClass = "toast-info";
+            }
+        }
+        toastCard.getStyleClass().add(cardClass);
+
+        Label lblIcon = new Label(iconChar);
+        lblIcon.getStyleClass().add("toast-icon");
+
+        Label lblMsg = new Label(message);
+        lblMsg.getStyleClass().add("toast-message");
+        lblMsg.setWrapText(true);
+        HBox.setHgrow(lblMsg, Priority.ALWAYS);
+
+        Button btnClose = new Button("✕");
+        btnClose.getStyleClass().add("toast-close-btn");
+
+        toastCard.getChildren().addAll(lblIcon, lblMsg, btnClose);
+
+        toastCard.setOpacity(0.0);
+        toastCard.setTranslateY(20.0);
+        toastContainer.getChildren().add(toastCard);
+
+        Timeline showAnim = new Timeline(
+                new KeyFrame(Duration.millis(250),
+                        new KeyValue(toastCard.opacityProperty(), 1.0, Interpolator.EASE_OUT),
+                        new KeyValue(toastCard.translateYProperty(), 0.0, Interpolator.EASE_OUT)
+                )
+        );
+        showAnim.play();
+
+        Runnable dismiss = () -> {
+            Timeline hideAnim = new Timeline(
+                    new KeyFrame(Duration.millis(200),
+                            new KeyValue(toastCard.opacityProperty(), 0.0, Interpolator.EASE_IN),
+                            new KeyValue(toastCard.translateYProperty(), 15.0, Interpolator.EASE_IN)
+                    )
+            );
+            hideAnim.setOnFinished(e -> toastContainer.getChildren().remove(toastCard));
+            hideAnim.play();
+        };
+
+        btnClose.setOnAction(e -> dismiss.run());
+
+        PauseTransition autoDismiss = new PauseTransition(Duration.seconds(3.5));
+        autoDismiss.setOnFinished(e -> dismiss.run());
+        autoDismiss.play();
     }
 
     @FXML

@@ -59,6 +59,19 @@ public class BorrowReturnController implements Initializable {
     @FXML private Button btnCompleteCheckout;
     @FXML private Button btnSwitchToWizard;
     @FXML private Button btnSwitchBackToDesk;
+    @FXML private Button btnSwapDeskPanels;
+
+    @FXML
+    public void handleSwapDeskPanels() {
+        if (deskSplitPane == null || deskSplitPane.getItems().size() < 2) return;
+        javafx.scene.Node item0 = deskSplitPane.getItems().get(0);
+        javafx.scene.Node item1 = deskSplitPane.getItems().get(1);
+        double[] pos = deskSplitPane.getDividerPositions();
+        double currentRatio = (pos != null && pos.length > 0) ? pos[0] : 0.32;
+        deskSplitPane.getItems().clear();
+        deskSplitPane.getItems().addAll(item1, item0);
+        deskSplitPane.setDividerPositions(1.0 - currentRatio);
+    }
 
     // Intriguing Branches & Extras on Demand (Task 7)
     @FXML private HBox deskDueAlertBanner;
@@ -280,7 +293,8 @@ public class BorrowReturnController implements Initializable {
                     HBox.setHgrow(textContainer, Priority.ALWAYS);
 
                     btnAdd.getStyleClass().add("btn-secondary");
-                    btnAdd.setStyle("-fx-font-size: 11px; -fx-padding: 3 8; -fx-font-weight: bold;");
+                    btnAdd.setStyle("-fx-font-size: 11px; -fx-padding: 4 10; -fx-font-weight: bold;");
+                    btnAdd.setMinWidth(Region.USE_PREF_SIZE);
 
                     cellBox.getChildren().addAll(textContainer, spacer, btnAdd);
                 }
@@ -293,6 +307,7 @@ public class BorrowReturnController implements Initializable {
                         setText(null);
                     } else {
                         lblTitle.setText(book.getTitle());
+                        lblTitle.setWrapText(true);
                         lblSub.setText(book.getAuthor() + " • Kệ: " + book.getShelfLocation() + " (" + book.getAvailableCopies() + " cuốn)");
                         btnAdd.setOnAction(e -> addToBasket(book));
                         setGraphic(cellBox);
@@ -644,6 +659,7 @@ public class BorrowReturnController implements Initializable {
         basketItems.add(item);
         renderBasketCards();
         updateBasketSummary();
+        MainLayoutController.showToast("Đã thêm '" + book.getTitle() + "' vào bàn lưu hành", "SUCCESS");
     }
 
     public void removeFromBasket(Book book) {
@@ -651,6 +667,7 @@ public class BorrowReturnController implements Initializable {
         basketItems.removeIf(item -> item.getBook().getId().equalsIgnoreCase(book.getId()));
         renderBasketCards();
         updateBasketSummary();
+        MainLayoutController.showToast("Đã bỏ '" + book.getTitle() + "' khỏi bàn", "INFO");
     }
 
     public void removeFromBasket(CirculationBasketItem item) {
@@ -658,13 +675,17 @@ public class BorrowReturnController implements Initializable {
         basketItems.remove(item);
         renderBasketCards();
         updateBasketSummary();
+        MainLayoutController.showToast("Đã bỏ '" + item.getBook().getTitle() + "' khỏi bàn", "INFO");
     }
 
     @FXML
     public void handleClearBasket() {
-        basketItems.clear();
-        renderBasketCards();
-        updateBasketSummary();
+        if (!basketItems.isEmpty()) {
+            basketItems.clear();
+            renderBasketCards();
+            updateBasketSummary();
+            MainLayoutController.showToast("Đã làm sạch bàn lưu hành", "INFO");
+        }
     }
 
     public ObservableList<CirculationBasketItem> getBasketItems() {

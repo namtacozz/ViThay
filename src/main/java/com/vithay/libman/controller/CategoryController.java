@@ -2,6 +2,7 @@ package com.vithay.libman.controller;
 
 import com.vithay.libman.model.Category;
 import com.vithay.libman.service.CategoryService;
+import com.vithay.libman.util.UIUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -12,6 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
+import javafx.scene.shape.SVGPath;
 
 import java.net.URL;
 import java.util.List;
@@ -43,26 +45,52 @@ public class CategoryController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        if (categoryModalBox != null && !categoryModalBox.getChildren().isEmpty()) {
+            UIUtils.makeDraggable(categoryModalBox.getChildren().get(0), categoryModalBox);
+        }
         colCatId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colCatName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colCatDesc.setCellValueFactory(new PropertyValueFactory<>("description"));
 
         colCatActions.setCellFactory(param -> new TableCell<>() {
-            private final Button btnEdit = new Button("Sửa");
-            private final Button btnDelete = new Button("Xóa");
-            private final HBox pane = new HBox(6, btnEdit, btnDelete);
+            private final Button btnEdit = new Button();
+            private final Button btnDelete = new Button();
+            private final HBox pane = new HBox(8, btnEdit, btnDelete);
 
             {
                 pane.setAlignment(Pos.CENTER);
-                btnEdit.getStyleClass().add("btn-secondary");
-                btnEdit.setStyle("-fx-font-size: 11px; -fx-padding: 3 8;");
+
+                // Edit Button (SVG Pencil)
+                btnEdit.getStyleClass().addAll("btn-secondary", "btn-icon-action");
+                btnEdit.setTooltip(new Tooltip("Chỉnh sửa thể loại"));
+                btnEdit.setMinWidth(28);
+                btnEdit.setPrefWidth(28);
+                btnEdit.setMinHeight(28);
+                btnEdit.setPrefHeight(28);
+                SVGPath editSvg = new SVGPath();
+                editSvg.setContent("M 3 17.25 V 21 h 3.75 L 17.81 9.94 l -3.75 -3.75 L 3 17.25 Z M 20.71 7.04 c 0.39 -0.39 0.39 -1.02 0 -1.41 l -2.34 -2.34 c -0.39 -0.39 -1.02 -0.39 -1.41 0 l -1.83 1.83 3.75 3.75 1.83 -1.83 Z");
+                editSvg.setStyle("-fx-fill: #1DB954;");
+                editSvg.setScaleX(0.7);
+                editSvg.setScaleY(0.7);
+                btnEdit.setGraphic(editSvg);
                 btnEdit.setOnAction(e -> {
                     Category cat = getTableView().getItems().get(getIndex());
                     showCategoryModal(cat);
                 });
 
-                btnDelete.getStyleClass().add("btn-danger");
-                btnDelete.setStyle("-fx-font-size: 11px; -fx-padding: 3 8;");
+                // Delete Button (SVG Trash)
+                btnDelete.getStyleClass().addAll("btn-danger", "btn-icon-action");
+                btnDelete.setTooltip(new Tooltip("Xóa thể loại sách"));
+                btnDelete.setMinWidth(28);
+                btnDelete.setPrefWidth(28);
+                btnDelete.setMinHeight(28);
+                btnDelete.setPrefHeight(28);
+                SVGPath deleteSvg = new SVGPath();
+                deleteSvg.setContent("M 6 19 c 0 1.1 0.9 2 2 2 h 8 c 1.1 0 2 -0.9 2 -2 V 7 H 6 v 12 Z M 19 4 h -3.5 l -1 -1 h -5 l -1 1 H 5 v 2 h 14 V 4 Z");
+                deleteSvg.setStyle("-fx-fill: #EF4444;");
+                deleteSvg.setScaleX(0.7);
+                deleteSvg.setScaleY(0.7);
+                btnDelete.setGraphic(deleteSvg);
                 btnDelete.setOnAction(e -> {
                     Category cat = getTableView().getItems().get(getIndex());
                     handleDeleteCategory(cat);
@@ -136,6 +164,9 @@ public class CategoryController implements Initializable {
         categoryMainContainer.setEffect(null);
         categoryModalOverlay.setVisible(false);
         categoryModalOverlay.setManaged(false);
+        if (categoryModalBox != null) {
+            UIUtils.resetPosition(categoryModalBox);
+        }
     }
 
     @FXML

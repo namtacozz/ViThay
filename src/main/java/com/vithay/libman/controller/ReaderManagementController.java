@@ -4,6 +4,7 @@ import com.vithay.libman.model.Reader;
 import com.vithay.libman.service.ExportService;
 import com.vithay.libman.service.ReaderService;
 import com.vithay.libman.service.SettingService;
+import com.vithay.libman.util.UIUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.*;
+import javafx.scene.shape.SVGPath;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +74,9 @@ public class ReaderManagementController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        if (readerModalBox != null && !readerModalBox.getChildren().isEmpty()) {
+            UIUtils.makeDraggable(readerModalBox.getChildren().get(0), readerModalBox);
+        }
         setupFilter();
         setupTable();
         loadReaders();
@@ -137,42 +142,84 @@ public class ReaderManagementController implements Initializable {
             }
         });
 
-        // Action Buttons: Cấp Thẻ (khi Chờ cấp thẻ), Sửa, Khóa/Mở, Xóa tạm
+        // Action Buttons: Cấp Thẻ (khi Chờ cấp thẻ), Sửa (Pencil SVG), Khóa/Mở (Padlock SVG), Xóa (Trash SVG)
         colReaderActions.setCellFactory(param -> new TableCell<>() {
-            private final Button btnIssue = new Button("✓ Cấp Thẻ");
-            private final Button btnEdit = new Button("Sửa");
-            private final Button btnToggle = new Button("Khóa/Mở");
-            private final Button btnDelete = new Button("Xóa");
-            private final HBox pane = new HBox(4);
+            private final Button btnIssue = new Button();
+            private final Button btnEdit = new Button();
+            private final Button btnToggle = new Button();
+            private final Button btnDelete = new Button();
+            private final SVGPath toggleSvg = new SVGPath();
+            private final HBox pane = new HBox(6);
 
             {
                 pane.setAlignment(Pos.CENTER);
 
-                btnIssue.getStyleClass().add("btn-primary");
-                btnIssue.setStyle("-fx-font-size: 11px; -fx-padding: 3 6;");
+                // Issue card button (shown only for Chờ Cấp Thẻ)
+                btnIssue.getStyleClass().addAll("btn-primary", "btn-icon-action");
+                btnIssue.setTooltip(new Tooltip("Kích hoạt & Cấp thẻ độc giả"));
+                btnIssue.setMinWidth(28);
+                btnIssue.setPrefWidth(28);
+                btnIssue.setMinHeight(28);
+                btnIssue.setPrefHeight(28);
+                SVGPath issueSvg = new SVGPath();
+                issueSvg.setContent("M 9 16.17 L 4.83 12 l -1.42 1.41 L 9 19 21 7 l -1.41 -1.41 Z");
+                issueSvg.setStyle("-fx-fill: #000000;");
+                issueSvg.setScaleX(0.7);
+                issueSvg.setScaleY(0.7);
+                btnIssue.setGraphic(issueSvg);
                 btnIssue.setOnAction(e -> {
                     Reader r = getTableView().getItems().get(getIndex());
                     handleIssueCard(r);
                 });
 
-                btnEdit.getStyleClass().add("btn-secondary");
-                btnEdit.setStyle("-fx-font-size: 11px; -fx-padding: 3 6;");
+                // Edit Button (SVG Pencil)
+                btnEdit.getStyleClass().addAll("btn-secondary", "btn-icon-action");
+                btnEdit.setTooltip(new Tooltip("Chỉnh sửa hồ sơ độc giả"));
+                btnEdit.setMinWidth(28);
+                btnEdit.setPrefWidth(28);
+                btnEdit.setMinHeight(28);
+                btnEdit.setPrefHeight(28);
+                SVGPath editSvg = new SVGPath();
+                editSvg.setContent("M 3 17.25 V 21 h 3.75 L 17.81 9.94 l -3.75 -3.75 L 3 17.25 Z M 20.71 7.04 c 0.39 -0.39 0.39 -1.02 0 -1.41 l -2.34 -2.34 c -0.39 -0.39 -1.02 -0.39 -1.41 0 l -1.83 1.83 3.75 3.75 1.83 -1.83 Z");
+                editSvg.setStyle("-fx-fill: #1DB954;");
+                editSvg.setScaleX(0.7);
+                editSvg.setScaleY(0.7);
+                btnEdit.setGraphic(editSvg);
                 btnEdit.setOnAction(e -> {
                     Reader r = getTableView().getItems().get(getIndex());
                     showReaderFormModal(r);
                 });
 
-                btnToggle.getStyleClass().add("btn-secondary");
-                btnToggle.setStyle("-fx-font-size: 11px; -fx-padding: 3 6;");
+                // Lock/Unlock Toggle Button (SVG Padlock)
+                btnToggle.getStyleClass().addAll("btn-secondary", "btn-icon-action");
+                btnToggle.setMinWidth(28);
+                btnToggle.setPrefWidth(28);
+                btnToggle.setMinHeight(28);
+                btnToggle.setPrefHeight(28);
+                toggleSvg.setScaleX(0.7);
+                toggleSvg.setScaleY(0.7);
+                btnToggle.setGraphic(toggleSvg);
                 btnToggle.setOnAction(e -> {
                     Reader r = getTableView().getItems().get(getIndex());
-                    r.setStatus("Active".equalsIgnoreCase(r.getStatus()) ? "Blocked" : "Active");
+                    boolean isBlocked = "Blocked".equalsIgnoreCase(r.getStatus()) || "Bị Khóa".equalsIgnoreCase(r.getStatus());
+                    r.setStatus(isBlocked ? "Active" : "Blocked");
                     readerService.saveReader(r);
                     loadReaders();
                 });
 
-                btnDelete.getStyleClass().add("btn-danger");
-                btnDelete.setStyle("-fx-font-size: 11px; -fx-padding: 3 6;");
+                // Delete Button (SVG Trash)
+                btnDelete.getStyleClass().addAll("btn-danger", "btn-icon-action");
+                btnDelete.setTooltip(new Tooltip("Chuyển độc giả vào Thùng Rác"));
+                btnDelete.setMinWidth(28);
+                btnDelete.setPrefWidth(28);
+                btnDelete.setMinHeight(28);
+                btnDelete.setPrefHeight(28);
+                SVGPath deleteSvg = new SVGPath();
+                deleteSvg.setContent("M 6 19 c 0 1.1 0.9 2 2 2 h 8 c 1.1 0 2 -0.9 2 -2 V 7 H 6 v 12 Z M 19 4 h -3.5 l -1 -1 h -5 l -1 1 H 5 v 2 h 14 V 4 Z");
+                deleteSvg.setStyle("-fx-fill: #EF4444;");
+                deleteSvg.setScaleX(0.7);
+                deleteSvg.setScaleY(0.7);
+                btnDelete.setGraphic(deleteSvg);
                 btnDelete.setOnAction(e -> {
                     Reader r = getTableView().getItems().get(getIndex());
                     handleSoftDeleteReader(r);
@@ -186,6 +233,19 @@ public class ReaderManagementController implements Initializable {
                     setGraphic(null);
                 } else {
                     Reader r = getTableView().getItems().get(getIndex());
+                    boolean isBlocked = "Blocked".equalsIgnoreCase(r.getStatus()) || "Bị Khóa".equalsIgnoreCase(r.getStatus());
+                    if (isBlocked) {
+                        // Thẻ đang bị khóa -> Hiển thị icon Ổ KHÓA MỞ để mở khóa
+                        toggleSvg.setContent("M 18 8 h -1 V 6 c 0 -2.76 -2.24 -5 -5 -5 S 7 3.24 7 6 h 2 c 0 -1.66 1.34 -3 3 -3 s 3 1.34 3 3 v 2 H 6 c -1.1 0 -2 0.9 -2 2 v 10 c 0 1.1 0.9 2 2 2 h 12 c 1.1 0 2 -0.9 2 -2 V 10 c 0 -1.1 -0.9 -2 -2 -2 Z M 12 17 c -1.1 0 -2 -0.9 -2 -2 s 0.9 -2 2 -2 2 0.9 2 2 -0.9 2 -2 2 Z");
+                        toggleSvg.setStyle("-fx-fill: #10B981;");
+                        btnToggle.setTooltip(new Tooltip("Mở khóa thẻ độc giả"));
+                    } else {
+                        // Thẻ bình thường -> Hiển thị icon Ổ KHÓA ĐÓNG để khóa thẻ
+                        toggleSvg.setContent("M 18 8 h -1 V 6 c 0 -2.76 -2.24 -5 -5 -5 S 7 3.24 7 6 v 2 H 6 c -1.1 0 -2 0.9 -2 2 v 10 c 0 1.1 0.9 2 2 2 h 12 c 1.1 0 2 -0.9 2 -2 V 10 c 0 -1.1 -0.9 -2 -2 -2 Z M 12 17 c -1.1 0 -2 -0.9 -2 -2 s 0.9 -2 2 -2 2 0.9 2 2 -0.9 2 -2 2 Z M 9 8 V 6 c 0 -1.66 1.34 -3 3 -3 s 3 1.34 3 3 v 2 H 9 Z");
+                        toggleSvg.setStyle("-fx-fill: #F59E0B;");
+                        btnToggle.setTooltip(new Tooltip("Khóa thẻ độc giả"));
+                    }
+
                     pane.getChildren().clear();
                     if ("Chờ Cấp Thẻ".equalsIgnoreCase(r.getStatus())) {
                         pane.getChildren().add(btnIssue);
@@ -364,6 +424,9 @@ public class ReaderManagementController implements Initializable {
         readerMainContainer.setEffect(null);
         readerModalOverlay.setVisible(false);
         readerModalOverlay.setManaged(false);
+        if (readerModalBox != null) {
+            UIUtils.resetPosition(readerModalBox);
+        }
     }
 
     @FXML
