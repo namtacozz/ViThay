@@ -2,245 +2,423 @@
 
 ## Hệ Thống Quản Lý Thư Viện — LibMan (Phiên bản v1.5.0)
 
-**Ngày cập nhật:** 16/10/2026  
-**Đối chiếu với:** Đặc tả yêu cầu phần mềm Quản Lý Thư Viện (SRS 8 trang) + Tài liệu B3 (6 nguyên lý phân cấp trực quan, dòng thị giác & bố cục tương tác) + Bộ kiểm thử tự động 63/63 PASS
+**Ngày cập nhật:** 17/10/2026  
+**Căn cứ tài liệu:** Giáo trình Thiết kế Giao diện — Chuyên đề *"Cơ Bản Của Bố Cục & Các Mẫu Thiết Kế"* (Tài liệu slide bài giảng B3) + Đặc tả yêu cầu phần mềm Quản Lý Thư Viện (SRS) + Bộ kiểm thử tự động 63/63 PASS
 
 ---
 
-## Tổng Quan
+## MỤC LỤC TỔNG QUAN
 
-Báo cáo này phân tích **6 nguyên lý thiết kế bố cục, dòng trực quan và phân cấp thị giác** (Interaction & Visual Layout Principles theo tài liệu `B3.md`) được áp dụng trong ứng dụng LibMan Desktop. Báo cáo đối chiếu trực tiếp giữa cơ sở lý thuyết thiết kế tương tác người - máy (HCI) và việc hiện thực hóa trong mã nguồn (JavaFX FXML, CSS, và Controllers), mang lại trải nghiệm tối ưu cho cả thủ thư nghiệp vụ lẫn độc giả tra cứu.
-
----
-
-## 1. Phân Cấp Trực Quan (Visual Hierarchy — Ưu Tiên Số 1 Ở Góc Trên Bên Trái)
-
-> **Nguyên lý B3:** Chú ý mức độ ưu tiên số 1 đặt ở góc trên bên trái để thuận theo dòng trực quan tự nhiên của mắt người dùng khi tiếp cận màn hình (nguyên tắc F-Pattern / Z-Pattern và Gutenberg Diagram).
-
-```
-[Điểm rơi #1: Vị trí vàng góc trên bên trái] ──► Quét ngang (Primary Header)
-   │
-   ▼ Đi theo chiều dọc
-[Nhóm điều hướng / Lọc nhanh #2] ──────────────► Quét ngang sang vùng làm việc
-   │
-   ▼
-[Vùng nội dung trọng tâm #3]
-```
-
-### 1.1 Điểm nhận diện không gian làm việc (Workspace Identifier)
-- **Chuẩn hóa Header trên toàn bộ các View:** Toàn bộ các màn hình chính (`HomeView.fxml`, `BookManagementView.fxml`, `BorrowReturnView.fxml`, `ReaderManagementView.fxml`, `CategoryManagementView.fxml`, `StatisticsView.fxml`) đều đặt **Tiêu đề định danh (`.title-large`)** ở góc trên cùng bên trái.
-- Người dùng khi chuyển tab sẽ lập tức xác nhận được mình đang ở phân hệ nào mà không cần đảo mắt tìm kiếm.
-- Bên dưới tiêu đề là dòng mô tả ngữ cảnh hoặc breadcrumb hướng dẫn ngắn gọn, tạo nền tảng định hướng vững chắc.
-
-### 1.2 Bố cục Trang Chủ (`HomeView.fxml`) — Chỉ số KPI hàng đầu
-- **Ưu tiên #1:** Thẻ **"TỔNG ĐẦU SÁCH"** (`cardTotalBooks` / `lblTotalBooks`) được bố trí tại vị trí đầu tiên bên trái trong hàng thẻ thống kê.
-- Đối với hệ thống thư viện, quy mô kho sách là chỉ số quan trọng nhất cần nắm bắt ngay khi khởi động app.
-- Tiếp theo theo chiều từ trái qua phải là các chỉ số thứ cấp: **SẴN SÀNG** (Xanh lá) ➔ **ĐANG MƯỢN** (Vàng cam) ➔ **ĐỘC GIẢ** (Xanh dương).
-
-### 1.3 Kho Sách (`BookManagementView.fxml`) — Thanh tìm kiếm tại điểm rơi thị giác
-- Trong thanh công cụ (`filterToolbar`), **ô tìm kiếm nhanh (`headerSearchField` / `txtSearchBook`)** được neo cố định ở tọa độ ưu tiên số 1 bên trái.
-- Thủ thư hoặc độc giả khi vào kho sách có thể gõ ngay từ khóa (mã sách, tên sách, tác giả) mà không phải rê chuột sang góc phải như các thiết kế truyền thống.
-
-### 1.4 Quản Lý Độc Giả (`ReaderManagementView.fxml`)
-- Ô tìm kiếm độc giả (`txtSearchReader`) được đặt ở góc trên bên trái thanh công cụ. Thủ thư có thể quét mã vạch thẻ hoặc gõ nhanh SĐT / CCCD / Họ tên ngay tức thì.
+- [PHẦN I: CƠ SỞ LÝ THUYẾT VỀ BỐ CỤC & DÒNG TRỰC QUAN](#phần-i-cơ-sở-lý-thuyết-về-bố-cục--dòng-trực-quan)
+  - [1. Bố Cục & Dòng Trực Quan Là Gì?](#1-bố-cục--dòng-trực-quan-là-gì)
+  - [2. Kỹ Thuật Phân Cấp Trực Quan Trên LibMan](#2-kỹ-thuật-phân-cấp-trực-quan-trên-libman)
+  - [3. Bốn Nguyên Tắc Gestalt Trong Phân Nhóm](#3-bốn-nguyên-tắc-gestalt-trong-phân-nhóm)
+- [PHẦN II: 11 MẪU THIẾT KẾ BỐ CỤC CÓ SẴN TRONG ỨNG DỤNG LIBMAN](#phần-ii-11-mẫu-thiết-kế-bố-cục-có-sẵn-trong-ứng-dụng-libman)
+  - [A. Nhóm Phân Cấp Trực Quan](#a-nhóm-phân-cấp-trực-quan)
+    - [1. Visual Framework (Khung Giao Diện Nhất Quán)](#1-visual-framework-khung-giao-diện-nhất-quán)
+    - [2. Center Stage (Sân Khấu Trung Tâm)](#2-center-stage-sân-khấu-trung-tâm)
+  - [B. Nhóm Phân Nhóm (Grouping Patterns)](#b-nhóm-phân-nhóm-grouping-patterns)
+    - [3. Titled Sections (Các Nhóm Có Tiêu Đề)](#3-titled-sections-các-nhóm-có-tiêu-đề)
+    - [4. Card Stack / Tabs (Chồng Thẻ / Ngăn Tab)](#4-card-stack--tabs-chồng-thẻ--ngăn-tab)
+    - [5. Closable Panels (Bảng Điều Khiển Đóng Được)](#5-closable-panels-bảng-điều-khiển-đóng-được)
+    - [6. Movable & Resizable Panels (Bảng Di Chuyển & Co Giãn)](#6-movable--resizable-panels-bảng-di-chuyển--co-giãn)
+  - [C. Nhóm Dòng Trực Quan & Canh Lề](#c-nhóm-dòng-trực-quan--canh-lề)
+    - [7. Diagonal Balance (Cân Bằng Đường Chéo)](#7-diagonal-balance-cân-bằng-đường-chéo)
+    - [8. Property Sheet (Bảng Thuộc Tính 2 Cột)](#8-property-sheet-bảng-thuộc-tính-2-cột)
+    - [9. Right / Left Alignment (Canh Lề Trái / Phải Có Chủ Đích)](#9-right--left-alignment-canh-lề-trái--phải-có-chủ-đích)
+  - [D. Nhóm Bố Cục Động (Dynamic Layout)](#d-nhóm-bố-cục-động-dynamic-layout)
+    - [10. Responsive Disclosure (Tiết Lộ Lũy Tiến / Mở Rộng Ngữ Cảnh)](#10-responsive-disclosure-tiết-lộ-lũy-tiến--mở-rộng-ngữ-cảnh)
+    - [11. Liquid Layout (Bố Cục Co Giãn Linh Hoạt)](#11-liquid-layout-bố-cục-co-giãn-linh-hoạt)
+- [PHẦN III: GIẢI ĐÁP BÀI TẬP BẢNG TỔNG KẾT B3](#phần-iii-giải-đáp-bài-tập-bảng-tổng-kết-b3)
+- [PHẦN IV: KẾT LUẬN](#phần-iv-kết-luận)
 
 ---
 
-## 2. Dòng Trực Quan Người Dùng (Visual Flow: Trái ➔ Phải, Trên ➔ Dưới)
+# PHẦN I: CƠ SỞ LÝ THUYẾT VỀ BỐ CỤC & DÒNG TRỰC QUAN
 
-> **Nguyên lý B3:** Định hướng người dùng tự nhiên theo 2 chiều: từ trên xuống dưới (đọc lướt danh mục) và từ trái sang phải (chọn lựa ➔ thiết lập ➔ chốt hành động). Các thành phần liên quan được xếp liền kề nhau để dẫn dắt hành vi mà không gây nhiễu nhận thức.
+## 1. Bố Cục & Dòng Trực Quan Là Gì?
+
+### 1.1 Bố cục (Layout) là gì?
+- **Định nghĩa:** Bố cục là nghệ thuật và kỹ thuật sắp xếp các phần tử thị giác (chữ, hình ảnh, nút bấm, bảng dữ liệu) nhằm điều khiển sự chú ý của người dùng trên một trang giao diện.
+- **Mục tiêu:** Giảm thiểu chi phí nhận thức (Cognitive Load), giúp người dùng định vị thông tin nhanh chóng và thực hiện thao tác nghiệp vụ một cách chính xác mà không gặp trở ngại.
+
+### 1.2 Dòng trực quan (Visual Flow) là gì?
+- **Định nghĩa:** Trình tự mắt của người dùng di chuyển và tiếp nhận nội dung trên giao diện:
+  - Những điểm nhấn có độ tương phản cao, kích thước lớn sẽ thu hút sự chú ý của người dùng trước.
+  - Người dùng có khuynh hướng quét nội dung theo cụm trong cùng phân nhóm trước khi chuyển sang nhóm khác.
+  - Hướng quét mắt tự nhiên của con người là **từ trên xuống dưới (Top ➔ Bottom)** và **từ trái sang phải (Left ➔ Right)** theo mô hình đọc F-Pattern và Gutenberg Diagram.
+  - Khi dòng trực quan thay đổi, người dùng sẽ hiểu và ghi nhớ nội dung của giao diện theo một ý nghĩa khác.
+
+---
+
+## 2. Kỹ Thuật Phân Cấp Trực Quan Trên LibMan
+
+Theo giáo trình slide B3, phân cấp trực quan là cách thức làm nổi bật nội dung để thu hút sự chú ý của người dùng: nội dung/chức năng quan trọng nhất phải được đặt nổi bật nhất, nội dung ít quan trọng hơn đặt ít nổi bật hơn. Ứng dụng LibMan áp dụng đầy đủ **4 kỹ thuật phân cấp**:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ 1. Chọn nguồn dữ liệu       2. Thiết lập tham số        3. Chốt kết quả     │
-│ (Trái / Palette)            (Giữa / Canvas)             (Phải dưới / Action)│
+│ 1. Tọa độ vàng góc trên bên trái: Tiêu đề định danh & Ô tìm kiếm nhanh      │
+│ 2. Kích thước (Scale): Font số KPI 20px Bold > Tiêu đề 15px > Thân 11px     │
+│ 3. Hiệu ứng 3D (Elevation): Drop Shadow đổ bóng tách lớp bìa sách & modal   │
+│ 4. Hiệu ứng động (Animation): Hover sáng Splitter, chuyển trang mượt mà     │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+1. **Góc trên bên trái được ưu tiên chú ý:**
+   - Điểm rơi thị giác số 1 luôn là Tiêu đề định danh màn hình (`.title-large`), tiếp theo là ô tìm kiếm tức thì `txtSearchBook` hoặc thẻ KPI chủ lực "TỔNG ĐẦU SÁCH".
+2. **Kích thước to hơn bình thường (Scale & Weight Hierarchy):**
+   - Các con số thống kê quan trọng (`stat-value`) được thiết kế cỡ lớn `20px - 22px Bold` với màu nhấn nổi bật (`#1DB954`, `#F59E0B`, `#38BDF8`), lớn gấp đôi nhãn chú thích (`10px - 11px muted`).
+3. **Hiệu ứng 3D & Chiều sâu (Elevation & Dropshadow):**
+   - Các bìa sách trên dải nổi bật và trong bảng chi tiết Inspector đều được áp dụng đổ bóng `dropshadow(three-pass-box, rgba(0,0,0,0.6), 14, 0, 0, 4)`.
+   - Các cửa sổ Popup Modal và Thẻ Toast được nâng cao khỏi mặt phẳng nền bằng lớp phủ kính mờ `GaussianBlur(14)`.
+4. **Hiệu ứng động (Micro-interactions & Animations):**
+   - Thanh chia `SplitPane` sáng rực lên (`#1DB954` hoặc `#FB7185`) khi rê chuột; các nút hành động đổi độ sáng tức thì khi hover (`1.05x scale`).
+
+---
+
+## 3. Bốn Nguyên Tắc Gestalt Trong Phân Nhóm
+
+Theo slide 4 của giáo trình B3, người dùng nhận biết các nhóm nội dung thông qua 4 quy luật tự nhiên của thị giác:
+
+1. **Đặt gần nhau (Proximity):** Các trường nhập liệu liên quan (Mã sách, Tên sách, Tác giả) được xếp sát nhau; các nút điều khiển của cùng một tác vụ (Lưu, Hủy) được đặt cạnh nhau.
+2. **Tương tự nhau (Similarity):** Các thẻ sách trong kho có cùng kích cỡ, cùng kiểu bo góc `8px`, cùng kiểu chữ và vị trí đặt badge trạng thái cố định ở góc dưới.
+3. **Sự liên tục (Continuity):** Quy trình mượn sách wizard dẫn dắt mắt người dùng chạy dọc theo dải thanh tiến trình từ bước 1 sang bước 4 một cách tự nhiên.
+4. **Sự đóng kín (Closure):** Các card `.stat-card`, `.bg-surface`, `.inspector-branch-card` sử dụng viền mờ (`border 1px #2F2F2F`) bao bọc trọn vẹn nội dung, giúp não bộ nhận biết đây là một thực thể thông tin độc lập.
+
+---
+
+# PHẦN II: 11 MẪU THIẾT KẾ BỐ CỤC CÓ SẴN TRONG ỨNG DỤNG LIBMAN
+
+Dưới đây là bảng phân tích chi tiết toàn bộ **11 Mẫu Thiết Kế Bố Cục** (Interaction Layout Patterns) theo đúng phân loại của Slide 8 giáo trình B3 và hiện thực hóa thực tế 100% trong mã nguồn của LibMan.
+
+---
+
+## A. Nhóm Phân Cấp Trực Quan
+
+### 1. Visual Framework (Khung Giao Diện Nhất Quán)
+> **Mô tả giáo trình (Slide 8–10):** Sử dụng cùng một bố cục căn bản cho tất cả các trang. Màu sắc, font chữ và cách bố trí đồng nhất giúp người dùng không tốn chi phí học lại giao diện khi chuyển ngữ cảnh, làm nổi bật phần nội dung quan trọng.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ [LOGO] LIBMAN   │ GLOBAL SEARCH (Ctrl+K)       │ THEME │ ALERTS │ USER PROFILE│ (Top Header 56px)
+├─────────────────┼──────────────────────────────┴───────┴────────┴─────────────┤
+│ ⌂ Trang chủ     │                                                             │
+│ 📖 Kho sách     │                                                             │
+│ 🗂 Thể loại     │                WORKSPACE HIỂN THỊ CHÍNH                     │
+│ 👥 Độc giả      │            (Padding chuẩn hoá: 24px 32px 32px)              │ (Sidebar 64px
+│ ⇄ Lưu hành      │                                                             │  hoặc 250px)
+│ 📊 Thống kê     │                                                             │
+│ 🗑 Thùng rác    │                                                             │
+│ ⚙ Cài đặt       │                                                             │
+└─────────────────┴─────────────────────────────────────────────────────────────┘
+```
+
+- **Hiện thực hóa trong LibMan:**
+  - File FXML cốt lõi: [`MainLayout.fxml`](file:///f:/AppMaking/ViThay/src/main/resources/com/vithay/libman/view/MainLayout.fxml).
+  - Cấu trúc **App Shell 3 vùng cố định** xuất hiện trên mọi phân hệ:
+    1. *Thanh tiêu đề trên cùng (Top Header):* Cố định logo ở góc trên bên trái, thanh tìm kiếm toàn cục ở giữa, nút chuyển giao diện và profile ở bên phải.
+    2. *Thanh điều hướng dọc (Vertical Sidebar):* Đặt cố định bên trái, menu phân tầng rõ rệt với icon SVG đồng nhất.
+    3. *Khu vực làm việc trung tâm (Center Workspace):* Khung hiển thị nội dung luôn duy trì khoảng đệm chuẩn mực `Insets(24, 32, 32, 32)`.
+  - **Hệ thống Design Tokens 2 Theme:** Cấu hình tập trung trong [`style.css`](file:///f:/AppMaking/ViThay/src/main/resources/com/vithay/libman/css/style.css) với quy tắc font chữ (Inter/Segoe UI) và bảng màu đồng bộ (Spotify Dark Mode `#121212` và Pink Light Mode `#FFF5F7`).
+
+---
+
+### 2. Center Stage (Sân Khấu Trung Tâm)
+> **Mô tả giáo trình (Slide 11–13):** Đặt phần nội dung quan trọng nhất vào vùng lớn nhất ở trung tâm của giao diện (kích thước ít nhất gấp đôi phần xung quanh, màu sắc tương phản, tiêu đề làm điểm nhấn). Các chức năng phụ trợ đặt vào các phần nhỏ hơn xung quanh.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Header: Bộ lọc tác giả, thể loại, tìm kiếm nhanh                           │
+├───────────────────────────────────────────────────────┬─────────────────────┤
+│                                                       │                     │
+│               SÂN KHẤU TRUNG TÂM (72%)                │   VÙNG BIÊN (28%)   │
+│         Bảng Danh Sách Kho Sách (Master Table)        │   Bảng Inspector    │
+│                                                       │                     │
+│  Mã   Tên Sách          Tác Giả    Thể Loại   Giá     │  Ảnh bìa xem trước  │
+│  BK01 Doraemon          Fujiko     Truyện     25.000  │  Vị trí trên kệ     │
+│  BK02 Lập Trình Java    James G.   CNTT       120.000 │  Tình trạng tồn     │
+│  BK03 Đồi Gió Hú        Emily B.   Văn Học    95.000  │  [Mượn] [Sửa] [Xóa] │
+│                                                       │                     │
+└───────────────────────────────────────────────────────┴─────────────────────┘
+```
+
+- **Hiện thực hóa trong LibMan:**
+  - **Tại Kho Sách ([`BookManagementView.fxml`](file:///f:/AppMaking/ViThay/src/main/resources/com/vithay/libman/view/BookManagementView.fxml)):** Bảng danh sách sách (`booksTable` / `booksGridPane`) đóng vai trò là "Sân khấu trung tâm" chiếm **72% diện tích màn hình**, được bao quanh bởi thanh công cụ lọc ở trên và thanh Inspector phụ trợ (28%) ở bên phải.
+  - **Tại Trang Chủ ([`HomeView.fxml`](file:///f:/AppMaking/ViThay/src/main/resources/com/vithay/libman/view/HomeView.fxml)):** Bảng danh sách các giao dịch mượn sách gần đây nhất (`transactionsTable`) chiếm toàn bộ nửa dưới trung tâm với tỷ lệ chiều cao áp đảo.
+  - **Tại Giao diện Chi Tiết Toàn Diện (`fullBookDetailOverlay`):** Cuốn sách được chọn được đưa vào giữa màn hình với ảnh bìa khổ lớn 180x250px và khung tóm tắt nội dung hoành tráng, triệt tiêu mọi phân tâm xung quanh.
+
+---
+
+## B. Nhóm Phân Nhóm (Grouping Patterns)
+
+### 3. Titled Sections (Các Nhóm Có Tiêu Đề)
+> **Mô tả giáo trình (Slide 14–15):** Xác định mỗi nhóm nội dung trên giao diện bằng một tiêu đề trực quan. Sử dụng khi có nhiều nội dung trên một trang/cửa sổ để giúp người dùng dễ đọc, dễ hiểu và dễ tìm kiếm thông tin.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ✦ QUY ĐỊNH MƯỢN SÁCH (Titled Section 1)                                     │
+│   Số sách mượn tối đa:   [ 5 ] cuốn          Thời hạn mượn tại chỗ: [ 1 ]   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ ✦ QUY ĐỊNH PHẠT QUÁ HẠN & BỒI THƯỜNG (Titled Section 2)                     │
+│   Tiền phạt trễ hạn:     [ 2,000 ] đ/ngày    Phí bồi hoàn sách mất: [ 200 ]%│
+├─────────────────────────────────────────────────────────────────────────────┤
+│ ✦ QUY ĐỊNH HỘI VIÊN & ĐỘC GIẢ (Titled Section 3)                            │
+│   Thời hạn hiệu lực thẻ: [ 12 ] tháng        Độ tuổi độc giả tối thiểu: [6] │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Hiện thực hóa trong LibMan:**
+  - **Màn hình Cài Đặt Quy Định ([`SettingsView.fxml`](file:///f:/AppMaking/ViThay/src/main/resources/com/vithay/libman/view/SettingsView.fxml)):** Toàn bộ các tham số nghiệp vụ được phân tách rõ ràng bằng các tiêu đề nhóm:
+    1. *QUY ĐỊNH MƯỢN SÁCH:* Số ngày mượn, hạn ngạch số sách.
+    2. *QUY ĐỊNH PHẠT & BỒI THƯỜNG:* Đơn giá phạt trễ, tỷ lệ đền bù sách mất.
+    3. *QUY ĐỊNH HỘI VIÊN:* Hạn thẻ độc giả.
+  - **Thanh Inspector Sách (`detailInspectorPane`):** Được chia thành các mục có đề mục riêng biệt:
+    - `THÔNG TIN CHI TIẾT`
+    - `VỊ TRÍ LƯU TRỮ TRÊN KỆ`
+    - `NHÁNH LIÊN QUAN & GỢI Ý`
+  - **Cửa sổ thêm sách mới (`bookModalBox`):** Phân nhóm tiêu đề thành khối `Ảnh Bìa Sách` và khối `Thông Tin Chi Tiết Sách`.
+
+---
+
+### 4. Card Stack / Tabs (Chồng Thẻ / Ngăn Tab)
+> **Mô tả giáo trình (Slide 16–17):** Đặt các nội dung liên quan với nhau vào trong từng Tab độc lập. Giúp tổ chức nhiều nội dung vào một không gian màn hình giới hạn mà không làm dài trang. Nguyên tắc: không nên làm quá 6 tabs.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  [ [BÀN LƯU HÀNH] ]   [ LỊCH SỬ GIAO DỊCH ]   [ BÁO CÁO MƯỢN TRẢ ]          │ (Card Stack)
+├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│ ┌──────────────────────┐    ┌──────────────────────┐    ┌─────────────────┐ │
-│ │ • Danh sách sách     │ ─► │ • Thẻ sách trên bàn  │ ─► │ [✓ XÁC NHẬN]    │ │
-│ │ • Bộ lọc khả dụng    │    │ • Hạn trả & Quota    │    │ (Contrast cao)  │ │
-│ └──────────────────────┘    └──────────────────────┘    └─────────────────┘ │
+│                    NỘI DUNG CỦA TAB ĐANG ĐƯỢC CHỌN                          │
+│                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.1 Bàn Lưu Hành Mượn Trả (`BorrowReturnView.fxml`) — Chuẩn Canvas Plus Palette
-Luồng thao tác mượn sách được thiết kế chuẩn xác theo dòng trực quan:
-1. **Bước 1 (Bên Trái — Palette Sách Khả Dụng):** Thủ thư tra cứu sách, lọc theo kệ/thể loại và nhấn `[+ Thêm]` hoặc double-click để chuyển sách sang bàn.
-2. **Bước 2 (Góc Trên Bên Phải Canvas):** Chọn hồ sơ độc giả (`comboDeskReader`), hệ thống hiển thị thẻ trạng thái độc giả (Quota, hạn hiệu lực thẻ, số sách đang mượn).
-3. **Bước 3 (Thân Vùng Canvas):** Bàn làm việc hiển thị các thẻ sách đã chọn kèm hình thức mượn ("Mang về nhà" / "Đọc tại chỗ"), số ngày mượn và hạn trả tự động.
-4. **Bước 4 (Góc Dưới Cùng Bên Phải Canvas):** Nút chốt phiên **`[✓ Xác nhận cho mượn]`** (`btnCompleteCheckout`) với màu xanh thương hiệu tương phản cao nhất, nằm đúng điểm dừng mắt cuối cùng của người dùng.
-
-### 2.2 Quy trình Trợ Lý Mượn Nhanh 4 Bước (Borrow Wizard)
-- Hàng chỉ báo bước (Horizontal Stepper):  
-  `[1. Độc Giả]` ➔ `[2. Chọn Sách]` ➔ `[3. Thiết Lập Phiếu]` ➔ `[4. Xác Nhận & In]`
-- Mắt người dùng di chuyển tuần tự từ trái qua phải theo từng bước tiến trình.
-- Cụm nút chuyển bước: Nút phụ `[Quay lại]` ở bên trái và nút chính `[Tiếp tục ➔]` / `[Hoàn tất]` luôn cố định ở góc dưới bên phải.
-
-### 2.3 Carousel Sách Nổi Bật Trên Trang Chủ
-- Thay vì cuộn dọc gây phân mảnh màn hình, dải sách nổi bật được thiết kế dạng cuộn ngang chuyên dụng (`featuredScrollPane`).
-- **Tương tác trực quan tự nhiên:** Tích hợp bộ lắng nghe sự kiện lăn chuột (`setOnScroll`). Khi người dùng di chuột vào vùng sách nổi bật và lăn chuột lên/xuống, hệ thống tự động chuyển đổi thành cuộn ngang mượt mà (trái ➔ phải hoặc phải ➔ trái), không cần phải kéo thanh cuộn.
-- Bìa sách, tên sách và tác giả được neo cố định chiều cao (`imagePane` 150px/225px), giúp mắt quét ngang êm ái mà không bị giật dòng do các bìa sách có kích thước khác nhau.
+- **Hiện thực hóa trong LibMan:**
+  - **Tại Bàn Lưu Hành ([`BorrowReturnView.fxml`](file:///f:/AppMaking/ViThay/src/main/resources/com/vithay/libman/view/BorrowReturnView.fxml)):** Sử dụng component `TabPane fx:id="borrowTabPane"` để xếp chồng các không gian nghiệp vụ:
+    - *Tab 1: Bàn Lưu Hành Tiêu Chuẩn (Desk):* Xử lý quét sách, chọn độc giả và cho mượn trực tiếp.
+    - *Tab 2: Lịch Sử Phiếu Mượn:* Tra cứu danh sách các phiếu mượn phát sinh, phân loại Đang mượn / Đã trả / Quá hạn.
+  - **Tại Cửa sổ Chi Tiết Sách Toàn Diện:** Xếp chồng 2 tab chức năng:
+    - *Tab 1: Tóm Tắt & Mô Tả Chi Tiết Cuốn Sách.*
+    - *Tab 2: Cộng Đồng Thảo Luận & Đánh Giá Của Độc Giả.*
 
 ---
 
-## 3. Phân Nhóm Chức Năng (Functional & Proximity Grouping — Định Luật Gestalt)
+### 5. Closable Panels (Bảng Điều Khiển Đóng Được)
+> **Mô tả giáo trình (Slide 18–20):** Đặt các nội dung liên quan vào các panel riêng biệt có khả năng đóng/ẩn. Cho phép người dùng chuyên gia xem nhiều nhóm nội dung cùng lúc nhưng có thể thu gọn lại khi cần tiết kiệm diện tích.
 
-> **Nguyên lý B3:** Các thành phần có mối quan hệ tương hỗ hoặc cùng một nhóm chức năng phải được gom vào cùng một vùng không gian (Law of Proximity & Common Region). Phân bố rạch ròi giữa nội dung thông tin và phân nhóm theo chức năng, tách biệt giữa hành động chính (Primary CTA) và tiện ích phụ trợ (Secondary Utility).
+```
+[KHI PANEL ĐANG MỞ]                              [KHI NHẤN ĐÓNG [✕]]
+┌───────────────────────┬──────────────┐         ┌───────────────────────────────────────────┐
+│ Bảng Kho Sách (72%)   │ Inspector    │         │ Bảng Kho Sách Chiếm Trọn Màn Hình (100%)  │
+│ Sách 1                │ Chi tiết...  │   ──►   │ Sách 1                                    │
+│ Sách 2                │ [Mượn] [✕]   │         │ Sách 2                                    │
+└───────────────────────┴──────────────┘         └───────────────────────────────────────────┘
+```
+
+- **Hiện thực hóa trong LibMan:**
+  - **Thanh Inspector Kho Sách (`detailInspectorPane`):**
+    - Trang bị nút đóng nhanh **`[✕]`** ngay trên header và nút toggle **`[Chi tiết]`** trên thanh công cụ.
+    - Khi đóng: Hàm `closeInspectorPanel()` rút panel ra khỏi SplitPane, bảng dữ liệu lập tức nở rộng chiếm **100% bề ngang**, hiển thị đầy đủ mọi cột mà không bị cắt chữ.
+    - Khi người dùng click vào bất kỳ cuốn sách nào, hàm `openInspectorPanel()` tự động đưa panel trở lại vị trí cũ một cách mượt mà.
+  - **Ngăn Kéo Bộ Lọc Nâng Cao (Advanced Filter Drawer):**
+    - Khung lọc theo khoảng giá, tồn kho và tác giả có thể thu gọn hoặc mở ra bằng nút `[Bộ lọc nâng cao]`.
+
+---
+
+### 6. Movable & Resizable Panels (Bảng Di Chuyển & Co Giãn)
+> **Mô tả giáo trình (Slide 20–22):** Người dùng có thể di chuyển (Move) và thay đổi kích thước (Resize) panel để tùy biến không gian làm việc theo thói quen và nhu cầu cá nhân.
+
+```
+       ┌───────────────────────────────┐
+       │ [::: HEADER - KÉO ĐỂ DI CHUYỂN :::] [✕] │ ◄── UIUtils.makeDraggable
+       ├───────────────────────────────┤
+       │ Form dữ liệu bên trong        │
+       │ (Chuột click bình thường)     │
+       └───────────────────────────────┘
+```
+
+- **Hiện thực hóa trong LibMan:**
+  - **Thanh chia co giãn kích thước (Resizable Splitter):** Khung `bookSplitPane` và `deskSplitPane` cho phép thủ thư kéo thanh ngăn cách sang trái hoặc phải (`cursor: h-resize`) để tăng/giảm tỷ lệ giữa bảng chính và vùng phụ trợ. Khi rê chuột vào thanh chia, hiệu ứng ánh sáng phát quang (Glow) kích hoạt tức thì.
+  - **Tính năng Đổi Bên (Panel Swap):** Tại Bàn lưu hành, nút **`[Đổi bên]`** (`btnSwapDeskPanels`) cho phép hoán đổi vị trí giữa Palette (Kho sách) và Canvas (Giỏ mượn) từ Trái sang Phải và ngược lại.
+  - **Cửa sổ Popup di chuyển tự do (Draggable Modals):** Sử dụng tiện ích [`UIUtils.makeDraggable`](file:///f:/AppMaking/ViThay/src/main/java/com/vithay/libman/util/UIUtils.java) gắn lên thanh Header của toàn bộ các popup (`authModalBox`, `profileModalBox`, `helpModalBox`, `readerBorrowModalBox`, `appNoticeModalBox`, `bookModalBox`). Người dùng có thể kéo cửa sổ sang góc khác để đối chiếu dữ liệu nền bị che khuất.
+
+---
+
+## C. Nhóm Dòng Trực Quan & Canh Lề
+
+### 7. Diagonal Balance (Cân Bằng Đường Chéo)
+> **Mô tả giáo trình (Slide 23–25):** Cân bằng trang/cửa sổ bằng cách đặt các thành phần định danh chính (Title/Header) vào góc trên bên trái, và các liên kết/nút bấm hành động (Action Buttons/Links) vào góc dưới bên phải. Dẫn dắt mắt người dùng quét dọc theo đường chéo tự nhiên.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ ┌──────────────────────────────────────┐  ┌───────────────────────────────┐ │
-│ │ Nhóm Tiện Ích Phụ Trợ (.utility-box) │  │ Hành Động Chính (Primary CTA) │ │
-│ │ [↺ Làm Mới]  [⤓ Xuất]  [⚠ Quét Lỗi]  │  │ [ + THÊM ĐỐI TƯỢNG MỚI ]      │ │
-│ └──────────────────────────────────────┘  └───────────────────────────────┘ │
+│ [★ Tiêu Đề / Định Danh / Nhận Diện] (Góc trên bên trái)                     │
+│                                                                             │
+│                               ╲                                             │
+│                                ╲  Đường quét thị giác chéo                  │
+│                                 ╲ (Diagonal Visual Flow)                    │
+│                                  ╲                                          │
+│                                                                             │
+│                           [Hủy Bỏ / Đóng]  [★ NÚT HÀNH ĐỘNG CHÍNH / XÁC NHẬN]│
+│                                            (Góc dưới bên phải)              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 3.1 Tách biệt Primary Action và Secondary Utilities
-- **Tại Kho Sách (`BookManagementView.fxml`):**
-  - Cụm tiện ích phụ trợ được bao bọc trong container `.header-utility-group`: nút icon **`[Xuất]`** và nút icon xoay **`[Làm Mới]`** (Refresh SVG) có tooltip rõ ràng.
-  - Tách biệt hoàn toàn với nút kêu gọi hành động chính **`[+ Thêm]`** (`btn-primary` màu xanh lá nổi bật). Người dùng không bị nhầm lẫn giữa thao tác thêm dữ liệu mới và thao tác xuất báo cáo.
-- **Tại Quản Lý Độc Giả (`ReaderManagementView.fxml`):**
-  - Cụm tiện ích gồm `[Quét Hết Hạn]`, `[Xuất]`, `[Làm Mới]` được gom chung một khung viền tinh gọn (`.header-utility-group`), tách biệt với nút chính `[+ Thêm]`.
-
-### 3.2 Phân vùng Bộ Lọc Đa Chiều (Filter Toolbar)
-Thanh công cụ lọc của Kho Sách được phân chia thành 3 khối logic rõ rệt:
-1. **Khối Tra Cứu Nhanh (Trái):** Ô tìm kiếm từ khóa kèm phím tắt `Ctrl + K`.
-2. **Khối Tiêu Chí Phân Loại (Giữa):** ComboBox Thể loại, ComboBox Trạng thái, Bộ lọc nâng cao (Giá, Tồn kho, Tác giả).
-3. **Khối Chuyển Đổi Chế Độ Xem (Phải):** Cụm nút bấm phân đoạn (`.segmented-view-group`) gồm `[Bảng Danh Sách]` và `[Lưới Thẻ Sách]`.
-
-### 3.3 Nhánh Liên Quan & Gợi Ý Trong Inspector (`.inspector-branch-card`)
-- Trong panel thông tin chi tiết sách (`detailInspectorPane`), các gợi ý được đóng gói thành các khối card trực quan riêng biệt:
-  - **Khối Vị Trí Kệ:** Hiển thị vị trí lưu trữ kèm nhãn nổi bật và nút xem toàn bộ sách cùng kệ.
-  - **Khối Nhánh Liên Quan (Intriguing Branches):** 2 card gợi ý riêng biệt gồm sách *Cùng vị trí kệ* và sách *Cùng tác giả*, giúp thủ thư tư vấn nhanh cho bạn đọc mà không cần thực hiện thêm truy vấn tìm kiếm.
+- **Hiện thực hóa trong LibMan:**
+  - **Tại tất cả các Modal Dialog & Form:**
+    - Cửa sổ Đăng nhập: Tiêu đề `"Đăng Nhập LibMan"` ở góc trên bên trái ➔ Nút `"Đóng"` và `"Đăng Nhập Ngay"` ở góc dưới bên phải.
+    - Cửa sổ Lập phiếu mượn độc giả: Tiêu đề `"Đăng Ký Mượn Sách"` ở góc trên bên trái ➔ Nút `"Xác Nhận Lập Phiếu Mượn"` ở góc dưới bên phải.
+    - Hộp thoại Thông báo In-App (`appNoticeModalBox`): Tiêu đề và icon ở góc trên bên trái ➔ Cặp nút `"Hủy Bỏ"` và `"Đồng Ý"` ở góc dưới bên phải.
+  - **Tại Bàn Lưu Hành Mượn Trả:** Thông tin độc giả và kho sách ở phía trên bên trái ➔ Nút chốt phiên `"Xác nhận cho mượn"` đặt ở góc dưới cùng bên phải.
 
 ---
 
-## 4. Khung Giao Diện Thị Giác Nhất Quán (Visual Framework / App Shell)
-
-> **Nguyên lý B3:** Thiết lập bộ khung ứng dụng (App Shell) đồng nhất xuyên suốt, phân tầng không gian làm việc rõ ràng, tỷ lệ khoảng đệm (padding) chuẩn mực và hệ thống Design Tokens nhất quán.
+### 8. Property Sheet (Bảng Thuộc Tính 2 Cột)
+> **Mô tả giáo trình (Slide 25–26):** Sử dụng một bố cục 2 cột để cho phép người dùng xem hoặc chỉnh sửa thuộc tính của một đối tượng có nhiều thông số. Cột 1 là tên thuộc tính (Label), cột 2 là giá trị hoặc điều khiển nhập liệu (Value/Editor).
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ BRAND LOGO       │ GLOBAL SEARCH (Ctrl+K)       │ THEME │ ALERTS │ USER     │ (Header 56px)
-├──────────────────┼──────────────────────────────┴───────┴────────┴──────────┤
-│ ⌂ Trang chủ      │                                                          │
-│ 📖 Kho sách      │                                                          │
-│ 🗂 Thể loại      │                 WORKSPACE HIỂN THỊ CHÍNH                 │
-│ 👥 Độc giả       │                 (Padding: 24px 32px 32px)                │ (Sidebar 64px
-│ ⇄ Lưu hành       │                                                          │  hoặc 250px)
-│ 📊 Thống kê      │                                                          │
-│ 🗑 Thùng rác     │                                                          │
-│ ⚙ Cài đặt        │                                                          │
-└──────────────────┴──────────────────────────────────────────────────────────┘
+│ CỘT 1: TÊN THUỘC TÍNH (Label)         │ CỘT 2: GIÁ TRỊ / ĐIỀU KHIỂN NHẬP    │
+├───────────────────────────────────────┼─────────────────────────────────────┤
+│ Mã Sách:                              │ BK0012                              │
+│ Mã ISBN:                              │ 978-604-0-12345-6                   │
+│ Đơn Giá:                              │ 125,000 đ                           │
+│ Tồn Kho Khả Dụng:                     │ 4 / 5 cuốn                          │
+│ Vị Trí Kệ:                            │ Khu A - Kệ 01                       │
+└───────────────────────────────────────┴─────────────────────────────────────┘
 ```
 
-### 4.1 Bộ ba cấu trúc cố định (Stable Three-Region Layout)
-1. **Top Header Bar (56px):**
-   - Góc trái: Logo LibMan thương hiệu đặt thẳng hàng phía trên Sidebar.
-   - Giữa: Thanh tìm kiếm toàn cục đa đối tượng (Global Search) tích hợp phím tắt `Ctrl + K` / `Ctrl + F`.
-   - Góc phải: Chuyển đổi Theme (Dark/Light), Thông báo hệ thống và Profile người dùng hiện tại (RBAC badge).
-2. **Left Brave Vertical Sidebar (64px - 250px):**
-   - Hỗ trợ 2 chế độ: Thu gọn chỉ hiện icon SVG (khi không pin) hoặc mở rộng đầy đủ chữ (khi pin hoặc rê chuột).
-   - Menu phân nhóm theo nghiệp vụ: Danh Mục Chính ➔ Nghiệp Vụ Lưu Hành ➔ Báo Cáo & Hệ Thống.
-3. **Center Workspace Area:**
-   - Khoảng đệm đồng bộ `Insets(24, 32, 32, 32)` tạo sự thoáng đãng, phân định ranh giới rõ ràng với thanh điều hướng.
-
-### 4.2 Hệ thống Design Tokens 2 Theme Hoàn Chỉnh (`style.css`)
-- **Spotify Dark Theme (Mặc định):**
-  - Nền chính `#121212`, Nền card/surface `#181818`, Nền bảng/modal `#242424`.
-  - Màu điểm nhấn (Accent): Xanh Spotify `#1DB954`, Viền `#2F2F2F`.
-- **Modern Bright Pink Theme (Light Mode):**
-  - Nền chính `#FFF5F7`, Nền card/surface `#FFFFFF`, Nền modal `#FFFFFF`.
-  - Màu điểm nhấn (Accent): Hồng cánh sen `#FB7185` / `#E91E63`, Viền `#FECDD3`.
-
-### 4.3 Thông báo nổi không cản trở (Non-Blocking Floating Toasts)
-- Toàn bộ các thông báo trạng thái tức thời (thêm sách vào giỏ, xóa sách, làm mới) được đưa vào container `toastContainer` ở góc dưới cùng bên phải.
-- Cấu hình `mouseTransparent="true"` và `pickOnBounds="false"` đảm bảo thông báo trôi nổi êm ái mà **không bao giờ chặn chuột** hay làm gián đoạn công việc của thủ thư.
+- **Hiện thực hóa trong LibMan:**
+  - **Trong Inspector Sách (`BookManagementView.fxml`):** Vùng metadata được tổ chức bằng `GridPane` 2 cột chính xác:
+    - *Cột 1 (`minWidth="80"`):* `Mã Sách:`, `Mã ISBN:`, `Đơn Giá:`, `Khả Dụng:`.
+    - *Cột 2 (`hgrow="ALWAYS"`):* Các nhãn giá trị tương ứng (`lblFullDetailId`, `lblFullDetailIsbn`, `lblFullDetailPrice`, `lblFullDetailCopies`).
+  - **Trong Màn hình Cài Đặt Quy Định (`SettingsView.fxml`):** Bố cục 2 cột hoàn chỉnh:
+    - Cột 1: Tên quy định ("Số ngày mượn tối đa", "Tiền phạt trễ hạn mỗi ngày").
+    - Cột 2: Spinner điều chỉnh số lượng hoặc TextField nhập đơn giá.
+  - **Trong Modal Thêm/Sửa Sách:** Bố cục `GridPane` 2 cột (`ColumnConstraints 140px : 240px`) gồm tên thuộc tính bên trái và ô nhập liệu bên phải.
 
 ---
 
-## 5. Bảng Điều Khiển Đóng Được (Closable Panel)
-
-> **Nguyên lý B3:** Cho phép người dùng chuyên ngành (thủ thư, chuyên viên quản trị) đóng hoặc ẩn một phần giao diện phụ trợ khi không cần thiết, giúp giải phóng không gian màn hình và triệt tiêu sự lộn xộn thị giác (visual clutter).
+### 9. Right / Left Alignment (Canh Lề Trái / Phải Có Chủ Đích)
+> **Mô tả giáo trình (Slide 7):** Canh lề có chủ đích tạo ra các đường gióng trực quan (Visual Anchors) giúp giao diện gọn gàng, tăng tốc độ đọc và so sánh dữ liệu.
 
 ```
-[CHẾ ĐỘ MỞ - MASTER & DETAIL]                 [CHẾ ĐỘ ĐÓNG - FULL WORKSPACE]
-┌───────────────────────┬──────────────┐      ┌──────────────────────────────────────────────┐
-│ Bảng Kho Sách (72%)   │ Inspector    │      │ Bảng Kho Sách Nở Rộng Toàn Bộ Màn Hình (100%)│
-│ Mã • Tên • Tác giả    │ (32%)        │ ──►  │ Mã • Tên Sách • Tác Giả • Thể Loại • Đơn Giá │
-│ Sách A                │ Bìa, Kệ, Giá │ [✕]  │ Sách A                                       │
-│ Sách B                │ [Mượn] [Sửa] │      │ Sách B                                       │
-└───────────────────────┴──────────────┘      └──────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ [Canh Trái (Left)]                    │ [Canh Phải (Right)]                 │
+│ Tiêu đề, tên sách, tác giả            │ Đơn giá tiền tệ, số lượng tồn kho   │
+│ ------------------------------------- │ ----------------------------------- │
+│ Lập Trình Java Căn Bản                │                           120.000 đ │
+│ Cấu Trúc Dữ Liệu & Giải Thuật         │                            95.000 đ │
+│ Nhập Môn Trí Tuệ Nhân Tạo             │                           150.000 đ │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 5.1 Thanh Inspector Kho Sách (`detailInspectorPane`)
-- **Nút đóng [✕] trực tiếp trên Header:** Tại thanh tiêu đề `THÔNG TIN CHI TIẾT`, nút `[✕]` cho phép thủ thư đóng ngay thanh xem trước chỉ với 1 click.
-- **Nút Toggle `[Chi tiết]` trên Toolbar:** Người dùng có thể chủ động bấm nút `[Chi tiết]` (`btnToggleInspector`) trên thanh công cụ để ẩn/hiện thanh bên cạnh bất kỳ lúc nào.
-- **Giải phóng 100% diện tích làm việc:**
-  - Khi đóng panel, hàm `closeInspectorPanel()` rút `detailInspectorPane` ra khỏi `bookSplitPane.getItems()`. Bảng `booksTable` hoặc lưới thẻ `booksGridPane` sẽ lập tức chiếm trọn 100% bề ngang màn hình, giúp hiển thị đầy đủ tất cả các cột mà không bị co cụm.
-- **Tự động phục hồi thông minh (Auto-restore):**
-  - Khi người dùng click chọn bất kỳ một cuốn sách nào trong bảng hoặc lưới, hàm `openInspectorPanel()` sẽ tự động đưa panel trở lại SplitPane một cách mượt mà và cập nhật dữ liệu cuốn sách đó tức thì.
-
-### 5.2 Khung Bộ Lọc Nâng Cao (Advanced Filter Drawer)
-- Khung lọc theo khoảng giá, tồn kho, và tác giả được ẩn mặc định.
-- Khi người dùng nhấn nút `[Bộ Lọc Nâng Cao]`, khung lọc mở trượt ra ngay dưới toolbar và có thể thu gọn lại khi không dùng đến, giữ cho giao diện luôn gọn gàng và tinh tế.
+- **Hiện thực hóa trong LibMan:**
+  - **Canh lề bảng dữ liệu (`booksTable`):**
+    - Các cột văn bản (Mã sách, Tên sách, Tác giả, Thể loại) được canh **lề trái (Left)** giúp mắt đọc thuận theo tự nhiên.
+    - Cột đơn giá (`colBookPrice`) được format và canh **lề phải (Right)**, giúp người dùng so sánh độ lớn của các con số một cách nhanh chóng theo hàng đơn vị.
+  - **Canh lề nhãn Form:** Tên các trường nhãn trong form được gióng thẳng hàng từ trên xuống dưới, tạo đường thẳng thị giác mạch lạc.
 
 ---
 
-## 6. Bảng Điều Khiển Di Chuyển & Thay Đổi Kích Thước (Movable & Resizable Panel)
+## D. Nhóm Bố Cục Động (Dynamic Layout)
 
-> **Nguyên lý B3:** Tối ưu hóa tính linh hoạt và cá nhân hóa trải nghiệm người dùng: cho phép co giãn kích thước vùng làm việc theo nhu cầu, đảo vị trí các bảng tương tác và di chuyển các cửa sổ popup/modal để xem thông tin bị che khuất bên dưới.
+### 10. Responsive Disclosure (Tiết Lộ Lũy Tiến / Mở Rộng Ngữ Cảnh)
+> **Mô tả giáo trình (Slide 27–29):** Đầu tiên hiển thị giao diện ở mức độ đơn giản. Chỉ hiển thị thêm các thành phần khác khi người dùng thực hiện một số thao tác nhất định. Giúp người dùng tập trung vào bước đầu tiên, dễ hiểu hơn do không bị chuyển đổi ngữ cảnh đột ngột như trong mô hình Wizard nhiều trang.
 
 ```
-                    ┌───────────────────────────────┐
-                    │  [::: HEADER - KÉO ĐỂ DI CHUYỂN :::] [✕] │ ◄── UIUtils.makeDraggable
-                    ├───────────────────────────────┤
-                    │                               │
-                    │  NỘI DUNG POPUP / FORM        │
-                    │  (Chuột & nút bấm bên trong   │
-                    │   hoạt động hoàn toàn tự do)  │
-                    │                               │
-                    └───────────────────────────────┘
+[BƯỚC 1: GIAO DIỆN HỒ SƠ ĐƠN GIẢN]
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Họ và tên:  [ Nguyễn Văn A                  ]                               │
+│ Email:      [ nguyenvana@gmail.com          ]                               │
+│ [🔑 Đổi Mật Khẩu ▾] (Nút kích hoạt Responsive Disclosure)                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼ Khi người dùng nhấn nút Đổi mật khẩu
+[BƯỚC 2: MỞ RỘNG TRỰC TIẾP TRONG CÙNG CỬA SỔ - KHÔNG ĐỔI TRANG]
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Họ và tên:  [ Nguyễn Văn A                  ]                               │
+│ Email:      [ nguyenvana@gmail.com          ]                               │
+│ [🔑 Đổi Mật Khẩu ▴]                                                         │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ Mật khẩu hiện tại: [ •••••••• ]                                         │ │
+│ │ Mật khẩu mới:      [ •••••••• ]                                         │ │
+│ │ Xác nhận:          [ •••••••• ]                                         │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 6.1 Thanh Phân Chia Co Giãn Trực Quan (Resizable SplitPane)
-- Khung chia đôi màn hình Kho Sách (`bookSplitPane`) và Bàn Lưu Hành (`deskSplitPane`) được trang bị thanh chia (Splitter Divider) chuyên dụng:
-  - **Con trỏ co giãn:** Thiết lập `cursor: h-resize` khi rê chuột qua thanh chia.
-  - **Phản hồi phát sáng (Hover Glow Feedback):** Khi rê chuột vào thanh phân chia, thanh sáng rực lên với màu thương hiệu (`#1DB954` ở Dark Theme, `#FB7185` ở Pink Light Theme), phát tín hiệu thị giác rõ ràng rằng người dùng có thể kéo chuột để thay đổi tỷ lệ phân chia giữa bảng danh sách và bảng chi tiết theo ý muốn.
-
-### 6.2 Nút Đảo Vị Trí Bàn Lưu Hành (Panel Swap Feature)
-- **Nhu cầu thực tế:** Thủ thư có thói quen làm việc khác nhau hoặc bố trí quầy thư viện thực tế theo chiều ngược lại (quầy mượn bên trái, màn hình máy tính bên phải).
-- **Hiện thực hóa:** Nút tròn **`[Đổi bên]`** (`btnSwapDeskPanels`) sử dụng icon hai mũi tên đảo chiều SVG:
-  - Khi click, hệ thống hoán đổi vị trí của 2 panel trong `deskSplitPane`: Palette (Kho sách) chuyển sang phải, Canvas (Giỏ sách & Độc giả) chuyển sang trái và ngược lại.
-  - Tỷ lệ kích thước được tự động tính toán lại đối xứng, giúp thủ thư làm việc hoàn toàn thoải mái.
-
-### 6.3 Hộp Thoại Di Chuyển Linh Hoạt (In-App Movable Modals)
-- **Vấn đề của Modal truyền thống:** Cửa sổ modal cố định ở giữa màn hình thường che mất các dòng dữ liệu nền mà người dùng muốn đối chiếu.
-- **Giải pháp `UIUtils.makeDraggable`:**
-  - Toàn bộ 5 modal in-app của hệ thống (`authModalBox`, `profileModalBox`, `helpModalBox`, `readerBorrowModalBox`, `appNoticeModalBox`) và modal thêm/sửa sách (`bookModalBox`), thể loại (`categoryModalBox`), độc giả (`readerModalBox`) đều được gắn tính năng kéo thả di chuyển.
-  - **Cơ chế an toàn không kẹt sự kiện chuột:** Sự kiện kéo chuột chỉ kích hoạt khi nhấn vào thanh tiêu đề (Header bar) và tự động bỏ qua khi click vào nút đóng `[✕]` hoặc các trường nhập liệu bên trong.
-  - Khi đóng popup, tọa độ được tự động trả về vị trí cân đối ban đầu (`UIUtils.resetPosition`), đảm bảo lần mở sau luôn chuẩn xác.
+- **Hiện thực hóa trong LibMan:**
+  - **Tính năng Đổi Mật Khẩu trong Cửa Sổ Cá Nhân ([`MainLayoutController.java`](file:///f:/AppMaking/ViThay/src/main/java/com/vithay/libman/controller/MainLayoutController.java)):**
+    - Cửa sổ thông tin tài khoản ban đầu chỉ hiển thị các trường cơ bản (Họ tên, Email, SĐT).
+    - Khung đổi mật khẩu (`passwordChangeBox`) mặc định ở trạng thái `visible="false" managed="false"`.
+    - Khi người dùng click nút `[🔑 Đổi mật khẩu ▾]`, hàm `handleToggleChangePassword()` lập tức mở rộng form nhập mật khẩu cũ/mới ngay bên dưới trong cùng một cửa sổ mà không cần chuyển sang màn hình khác.
+  - **Khung Bộ Lọc Nâng Cao tại Kho Sách:**
+    - Mặc định chỉ có ô tìm kiếm và chọn thể loại đơn giản.
+    - Khi click `[Bộ lọc nâng cao]`, khung chọn khoảng giá và tình trạng tồn kho mở trượt ra ngay tại chỗ.
+  - **Thông tin độc giả tại Bàn Lưu Hành:**
+    - Ban đầu vùng thông tin độc giả hiển thị gọn. Ngay khi người dùng chọn một độc giả từ ComboBox, toàn bộ thẻ trạng thái (Hạn thẻ, số sách đang mượn, nợ phạt) được bộc lộ đầy đủ tức thời.
 
 ---
 
-## 7. Bảng Tổng Hợp Ánh Xạ Nguyên Lý B3 Vào Codebase LibMan
+### 11. Liquid Layout (Bố Cục Co Giãn Linh Hoạt)
+> **Mô tả giáo trình (Slide 7):** Bố cục tự động co giãn linh hoạt theo tỷ lệ và kích thước thực tế của cửa sổ/màn hình thiết bị, đảm bảo không gian hiển thị luôn được lấp đầy tối ưu và không bị vỡ bố cục khi thay đổi kích thước cửa sổ.
 
-| Nguyên Lý B3 | Thành Phần Codebase Hiện Thực Hóa | File Mã Nguồn Liên Quan | Giá Trị Mang Lại Cho Người Dùng |
-| :--- | :--- | :--- | :--- |
-| **1. Phân cấp trực quan (Ưu tiên số 1 góc trên bên trái)** | • Tiêu đề định danh `.title-large`<br>• Thẻ KPI "Tổng Đầu Sách" vị trí #1<br>• Thanh tìm kiếm nhanh ở đầu Toolbar | `MainLayout.fxml`<br>`HomeView.fxml`<br>`BookManagementView.fxml`<br>`ReaderManagementView.fxml` | Điểm rơi thị giác tức thì, không cần tìm kiếm tiêu đề hay ô nhập liệu chính. |
-| **2. Dòng trực quan người dùng (Trái ➔ Phải, Trên ➔ Dưới)** | • Chuỗi thao tác Bàn lưu hành Palette ➔ Canvas ➔ Chốt phiếu<br>• Tiến trình Wizard 4 bước tuần tự<br>• Cuộn chuột ngang dải Sách nổi bật | `BorrowReturnView.fxml`<br>`BorrowReturnController.java`<br>`HomeController.java` | Dẫn dắt hành vi mượt mà, giảm tải nhận thức, tránh thao tác nhảy cóc. |
-| **3. Phân nhóm thành phần & chức năng** | • Container tiện ích phụ `.header-utility-group`<br>• Phân vùng Toolbar tìm kiếm - tiêu chí - góc nhìn<br>• Card gợi ý `.inspector-branch-card` | `BookManagementView.fxml`<br>`ReaderManagementView.fxml`<br>`style.css` | Tách biệt rõ ràng giữa hành động chính và tiện ích phụ; thông tin liên quan đặt cạnh nhau. |
-| **4. Khung giao diện thị giác nhất quán** | • Cấu trúc App Shell (Header - Sidebar - Workspace)<br>• Hệ thống Design Tokens Dark & Pink-Light Theme<br>• Toast container không chặn chuột | `MainLayout.fxml`<br>`MainLayoutController.java`<br>`style.css` | Trải nghiệm đồng bộ 100% trên toàn ứng dụng, sang trọng và chuẩn thẩm mỹ hiện đại. |
-| **5. Bảng điều khiển đóng được (Closable Panel)** | • Nút đóng `[✕]` và nút toggle `[Chi tiết]`<br>• Tự động nở rộng bảng 100% diện tích khi đóng<br>• Tự động mở lại khi chọn sách | `BookManagementView.fxml`<br>`BookManagementController.java` | Tối đa hóa không gian đọc dữ liệu bảng; triệt tiêu sự lộn xộn cho người dùng chuyên sâu. |
-| **6. Panel di chuyển & co giãn kích thước** | • SplitPane có phản hồi phát sáng khi hover<br>• Nút `[Đổi bên]` bàn lưu hành<br>• Cửa sổ in-app kéo thả tự do `UIUtils.makeDraggable` | `UIUtils.java`<br>`BorrowReturnView.fxml`<br>`MainLayoutController.java`<br>`style.css` | Tùy biến không gian làm việc theo nhu cầu cá nhân; có thể xem thông tin bị che khuất bên dưới. |
+```
+[MÀN HÌNH LAPTOP COMPACT 1366x768]             [MÀN HÌNH MÁY BÀN FULL HD 1920x1080]
+┌────────────────────────────────┐             ┌──────────────────────────────────────────────┐
+│ [Sidebar 64px] [Table tự co]   │    ──►      │ [Sidebar 250px] [Table nở rộng toàn bộ diện  │
+│                [Inspector 260] │             │                  tích với 8 cột rộng thoáng] │
+└────────────────────────────────┘             └──────────────────────────────────────────────┘
+```
+
+- **Hiện thực hóa trong LibMan:**
+  - **Khả năng tự động co giãn đa độ phân giải ([`LibManApp.java`](file:///f:/AppMaking/ViThay/src/main/java/com/vithay/libman/LibManApp.java)):**
+    - Ứng dụng tự động đo kích thước màn hình hiển thị (`Screen.getPrimary().getVisualBounds()`) và tính toán tỷ lệ cửa sổ khởi tạo (`95% screenW`, `94% screenH`).
+    - Nếu chạy trên màn hình laptop nhỏ (<= 1366x800), ứng dụng tự động tối đa hóa cửa sổ (`primaryStage.setMaximized(true)`).
+  - **Cơ chế JavaFX Liquid Layout:**
+    - Sử dụng triệt để `HBox.hgrow="ALWAYS"`, `VBox.vgrow="ALWAYS"` và `Priority.ALWAYS` trên toàn bộ các container chính.
+    - Bảng dữ liệu thiết lập chính sách `TableView.CONSTRAINED_RESIZE_POLICY`: Khi người dùng phóng to thu nhỏ cửa sổ, các cột trong bảng tự động giãn nở hoặc thu hẹp tỷ lệ mà không bao giờ sinh ra thanh cuộn ngang khó chịu.
 
 ---
 
-## 8. Kết Luận
+# PHẦN III: GIẢI ĐÁP BÀI TẬP BẢNG TỔNG KẾT B3
 
-Việc áp dụng trọn vẹn **6 nguyên lý thiết kế tương tác và phân cấp trực quan theo tài liệu B3** đã nâng tầm hệ thống **LibMan v1.5.0** từ một phần mềm quản lý thư viện truyền thống thành một ứng dụng desktop đẳng cấp, hiện đại và chuẩn mực công thái học (Ergonomics). 
+Đối chiếu trực tiếp với 4 câu hỏi bài tập tại **Slide 30 của giáo trình B3**:
 
-Hệ thống kết hợp hài hòa giữa:
-1. **Tính cấu trúc và kỷ luật:** Dòng thị giác Trái ➔ Phải, Trên ➔ Dưới rõ ràng, định vị ưu tiên vàng ở góc trên bên trái.
-2. **Tính thẩm mỹ và công nghệ:** Khung giao diện chuẩn mực, 2 Theme màu sắc đối lập thời thượng, hiệu ứng phát sáng phản hồi trực quan.
-3. **Tính linh hoạt cao cấp:** Các panel có thể đóng/mở giải phóng không gian, đảo bên bàn làm việc và kéo thả cửa sổ tự do mà không bao giờ gây xung đột hay kẹt tương tác chuột.
+### 1. Chỉ ra các phân cấp trực quan được áp dụng, tại sao?
+- **Vị trí góc trên bên trái:** Áp dụng cho Tiêu đề màn hình và Ô tìm kiếm nhanh vì đây là điểm rơi thị giác đầu tiên theo bản năng đọc F-pattern.
+- **Kích thước & Trọng lượng chữ:** Số liệu KPI dùng cỡ `20px Bold` để đập vào mắt người dùng đầu tiên; nhãn phụ dùng `11px muted`.
+- **Hiệu ứng 3D & Chiều sâu:** Ảnh bìa sách dùng dropshadow đổ bóng; popup dùng nền mờ Gaussian Blur để tách biệt tầng nội dung thao tác với tầng dữ liệu nền.
+- **Hiệu ứng phát quang hover:** Thanh phân chia SplitPane sáng rực khi rê chuột để báo hiệu khả năng tương tác.
+
+### 2. Chỉ ra các phân nhóm được áp dụng, tại sao?
+- **Theo nguyên lý Proximity & Gestalt:** Gom nhóm các nút công cụ phụ trợ (`[Xuất]`, `[Làm Mới]`) vào `.header-utility-group` để phân biệt với nút tạo mới chính `[+ Thêm]`.
+- **Theo Titled Sections:** Nhóm các thông số cài đặt thành 3 cụm có tiêu đề rõ ràng giúp thủ thư tìm kiếm quy định trong vài giây.
+- **Theo Card Stack (Tabs):** Phân chia Bàn lưu hành và Lịch sử giao dịch thành 2 tab để tránh quá tải thông tin trên một màn hình.
+
+### 3. Xác định dòng trực quan phổ biến nhất trên phần mềm này
+- **Dòng trực quan kết hợp Top-to-Bottom và Left-to-Right (Diagonal Balance):**
+  - Mắt người dùng tiếp cận từ **Tiêu đề góc trên bên trái** ➔ di chuyển xuống **vùng dữ liệu trung tâm** (chọn sách/nhập form) ➔ kết thúc tại **nút hành động chốt phiên ở góc dưới bên phải**.
+  - Đây là luồng thị giác phổ biến và ổn định nhất trên toàn bộ các cửa sổ của LibMan.
+
+### 4. Chỉ ra các mẫu thiết kế được áp dụng (từ 7 trở lên)
+Hệ thống LibMan đã hiện thực hóa trọn vẹn **11 mẫu thiết kế** (vượt xa yêu cầu tối thiểu 7 mẫu):
+1. **Visual Framework**
+2. **Center Stage**
+3. **Titled Sections**
+4. **Card Stack (Tabs)**
+5. **Closable Panels**
+6. **Movable Panels**
+7. **Diagonal Balance**
+8. **Property Sheet**
+9. **Right/Left Alignment**
+10. **Responsive Disclosure**
+11. **Liquid Layout**
+
+---
+
+# PHẦN IV: KẾT LUẬN
+
+Báo cáo đã chứng minh việc tổ chức bố cục và phân cấp trực quan trên hệ thống **LibMan v1.5.0** hoàn toàn tuân thủ các nguyên lý khoa học về tương tác người - máy (HCI) được trình bày trong giáo trình B3. 
+
+Toàn bộ 11 mẫu thiết kế đều được xây dựng dựa trên mã nguồn thực tế đang hoạt động ổn định trong ứng dụng, mang lại trải nghiệm làm việc năng suất cao cho thủ thư và cảm giác thân thiện, dễ sử dụng cho bạn đọc.
